@@ -129,13 +129,13 @@ async function createLeaveRequestDemo() {
             fontSize: 12,
             fontStyle: 'bold'
         })
-        .addSpace(10)
+        .addSpace(6)
         
         .addText('Tôi tên là: Nguyễn Văn Nam', null, null, { fontSize: 12 })
         .addText('Chức vụ: Nhân viên Phát triển Phần mềm', null, null, { fontSize: 12 })
         .addText('Phòng ban: Phòng Công nghệ Thông tin', null, null, { fontSize: 12 })
         .addText('Mã số nhân viên: NV001234', null, null, { fontSize: 12 })
-        .addSpace(15)
+        .addSpace(8)
         
         // Nội dung đơn
         .addSubTitle('NỘI DUNG ĐƠN XIN NGHỈ PHÉP')
