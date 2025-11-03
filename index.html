@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <header>
+      <!-- place navbar here -->
+    </header>
+    <main>
+      <div class="container mt-4">
+        <h1>PDF Generator với Chữ Ký</h1>
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h3>Demo các loại PDF:</h3>
+            <div class="btn-group-vertical gap-2 w-100" role="group">
+              <button class="btn btn-primary" onclick="generateLeaveRequestPDF()">
+                📄 Đơn xin nghỉ phép (có chữ ký)
+              </button>
+              <button class="btn btn-success" onclick="generateDualSignaturePDF()">
+                📝 Biên bản giao nhận (chữ ký đôi)
+              </button>
+              <button class="btn btn-info" onclick="generateSignatureComparisonPDF()">
+                🖋️ So sánh các loại chữ ký
+              </button>
+              <button class="btn btn-warning" onclick="createPDFWithCustomSignature()">
+                📤 Upload chữ ký của bạn
+              </button>
+              <button class="btn btn-secondary" onclick="generateAllPDFs()">
+                🚀 Tạo tất cả PDF
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h4>Hướng dẫn:</h4>
+            <ul>
+              <li><strong>Đơn nghỉ phép:</strong> PDF 2 trang với 4 chữ ký có hình ảnh</li>
+              <li><strong>Biên bản giao nhận:</strong> Chữ ký đôi trong cùng một dòng</li>
+              <li><strong>So sánh chữ ký:</strong> Xem các kiểu chữ ký khác nhau</li>
+              <li><strong>Upload chữ ký:</strong> Sử dụng hình chữ ký của bạn</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="alert alert-info mt-3" role="alert">
+          <strong>Lưu ý:</strong> Nếu không load được hình từ thư mục, hệ thống sẽ tự động tạo chữ ký mẫu bằng canvas.
+        </div>
+      </div>
+    </main>
+    <footer>
+      <!-- place footer here -->
+    </footer>
+    <!-- Bootstrap JavaScript Libraries -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+      crossorigin="anonymous"
+    ></script>
+    <!-- jspdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+    <!-- Giúp hoạt động ổ định hơn ở các trình duyệt cũ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/polyfills.umd.js"></script>
+      <script src="fonts/Roboto-Bold-normal.js"></script>
+      <script src="fonts/Roboto-BoldItalic-normal.js"></script>
+      <script src="fonts/Roboto-Italic-normal.js"></script>
+      <script src="fonts/Roboto-Regular-normal.js"></script>
+    <script src="jspdf-service.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
