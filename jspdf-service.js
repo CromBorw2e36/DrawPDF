@@ -1826,6 +1826,360 @@ class JsPdfService{
         return this.addMixedParagraph(textParts, options);
     }
 
+    // Thêm text có đánh số tự động với thụt lề
+    addNumberedText(text, options = {}) {
+        const numberOptions = {
+            fontSize: 11,
+            fontStyle: 'normal',
+            color: [0, 0, 0],
+            numberStyle: 'decimal', // 'decimal', 'roman', 'alpha', 'bullet'
+            numberFormat: '{number}.', // Format của số: '{number}.', '{number})', '({number})', etc.
+            startNumber: 1, // Số bắt đầu
+            indent: 20, // Khoảng cách thụt lề cho text
+            numberWidth: 15, // Độ rộng vùng số
+            lineHeight: null, // Sẽ tính toán động
+            maxWidth: null, // Tự tính toán nếu null
+            align: 'left',
+            showIndex: true, // Hiển thị số hay không
+            lineSpacing: 1.3, // Hệ số cho khoảng cách dòng
+            ...options
+        };
+
+        // Tính toán lineHeight nếu không được cung cấp
+        if (numberOptions.lineHeight === null) {
+            // Tính lineHeight dựa trên fontSize
+            numberOptions.lineHeight = Math.max(pdf.lineHeight, Math.ceil(numberOptions.fontSize * numberOptions.lineSpacing));
+        }
+        
+        // Tính toán maxWidth nếu không được cung cấp
+        if (!numberOptions.maxWidth) {
+            numberOptions.maxWidth = this.pageWidth - this.margins.left - this.margins.right - numberOptions.indent;
+        }
+
+        // Lấy số hiện tại (lưu trong instance để duy trì qua các lần gọi)
+        if (!this.currentNumberByStyle) {
+            this.currentNumberByStyle = {};
+        }
+        if (!this.currentNumberByStyle[numberOptions.numberStyle]) {
+            this.currentNumberByStyle[numberOptions.numberStyle] = numberOptions.startNumber;
+        }
+
+        const currentNumber = this.currentNumberByStyle[numberOptions.numberStyle];
+        
+        // Tạo text số theo style
+        let numberText = '';
+        switch (numberOptions.numberStyle) {
+            case 'decimal':
+                numberText = currentNumber.toString();
+                break;
+            case 'roman':
+                numberText = this.toRomanNumeral(currentNumber);
+                break;
+            case 'alpha':
+                numberText = this.toAlphaNumeral(currentNumber);
+                break;
+            case 'bullet':
+                numberText = '•';
+                break;
+            default:
+                numberText = currentNumber.toString();
+        }
+
+        // Áp dụng format
+        const formattedNumber = numberOptions.numberFormat.replace('{number}', numberText);
+
+        // Thiết lập font
+        this.doc.setFontSize(numberOptions.fontSize);
+        try {
+            this.doc.setFont('Roboto', numberOptions.fontStyle);
+        } catch {
+            this.doc.setFont('helvetica', numberOptions.fontStyle);
+        }
+        const textColor = Array.isArray(numberOptions.color) ? 
+            numberOptions.color : [0, 0, 0];
+        this.doc.setTextColor(...textColor);
+
+        // Kiểm tra page break
+        this.checkPageBreak(numberOptions.lineHeight + 5);
+
+        // Vẽ số
+        if(numberOptions.showIndex)
+            this.doc.text(formattedNumber, this.margins.left, this.currentY);
+
+        // Vẽ text với thụt lề
+        const textX = this.margins.left + numberOptions.indent;
+        
+        // Chia text thành các dòng với độ rộng tối đa (trừ đi phần indent)
+        const lines = this.doc.splitTextToSize(text, numberOptions.maxWidth);
+        
+        // Vẽ từng dòng
+        let currentLineY = this.currentY;
+        lines.forEach((line, index) => {
+            // Dòng đầu tiên đã có số, các dòng tiếp theo thụt lề như nhau
+            this.doc.text(line, textX, currentLineY);
+            currentLineY += 3 + numberOptions.lineHeight;
+        });
+
+        // Cập nhật vị trí Y và số
+        this.currentY = currentLineY ;
+        this.currentNumberByStyle[numberOptions.numberStyle]++;
+
+        return this;
+    }
+
+    // Reset số đếm
+    resetNumbering(style = 'decimal', startNumber = 1) {
+        if (!this.currentNumberByStyle) {
+            this.currentNumberByStyle = {};
+        }
+        this.currentNumberByStyle[style] = startNumber;
+        return this;
+    }
+
+    // Thêm danh sách có đánh số
+    addNumberedList(items, options = {}) {
+        const listOptions = {
+            title: null,
+            titleOptions: {
+                fontSize: 14,
+                fontStyle: 'bold',
+                color: [0, 0, 0]
+            },
+            itemOptions: {
+                fontSize: 11,
+                fontStyle: 'normal',
+                color: [0, 0, 0],
+                numberStyle: 'decimal',
+                indent: 20
+            },
+            spacing: 0.5, // Khoảng cách giữa các item
+            resetNumbers: true, // Reset số đếm khi bắt đầu list mới
+            ...options
+        };
+
+        // Thêm tiêu đề nếu có
+        if (listOptions.title) {
+            this.addText(listOptions.title, null, null, listOptions.titleOptions);
+            this.addSpace(5);
+        }
+
+        // Reset số đếm nếu cần
+        if (listOptions.resetNumbers) {
+            this.resetNumbering(listOptions.itemOptions.numberStyle, 1);
+        }
+
+        // Thêm từng item
+        items.forEach((item, index) => {
+            const itemText = typeof item === 'string' ? item : item.text;
+            const itemOpts = typeof item === 'object' ? 
+                { ...listOptions.itemOptions, ...item.options } : 
+                listOptions.itemOptions;
+            this.addNumberedText(itemText, itemOpts);
+            
+            if (index < items.length - 1) {
+                this.addSpace(listOptions.spacing);
+            }
+        });
+
+        return this;
+    }
+
+    // Thêm danh sách có nhiều cấp độ (nested list)
+    addMultiLevelList(items, options = {}) {
+        const mlOptions = {
+            level1: {
+                numberStyle: 'decimal',
+                numberFormat: '{number}.',
+                indent: 20,
+                fontSize: 11
+            },
+            level2: {
+                numberStyle: 'alpha',
+                numberFormat: '{number})',
+                indent: 35,
+                fontSize: 10
+            },
+            level3: {
+                numberStyle: 'roman',
+                numberFormat: '({number})',
+                indent: 50,
+                fontSize: 10
+            },
+            level4: {
+                numberStyle: 'bullet',
+                numberFormat: '{number}',
+                indent: 65,
+                fontSize: 9
+            },
+            spacing: 2,
+            ...options
+        };
+
+        // Reset tất cả numbering styles
+        this.resetNumbering('decimal', 1);
+        this.resetNumbering('alpha', 1);
+        this.resetNumbering('roman', 1);
+
+        const processItems = (itemList, currentLevel = 1) => {
+            const levelKey = `level${Math.min(currentLevel, 4)}`;
+            const levelOptions = mlOptions[levelKey];
+
+            itemList.forEach((item, index) => {
+                if (typeof item === 'string') {
+                    // Simple text item
+                    this.addNumberedText(item, levelOptions);
+                } else if (item.text) {
+                    // Item với text và có thể có sub-items
+                    const itemOptions = { ...levelOptions, ...item.options };
+                    this.addNumberedText(item.text, itemOptions);
+
+                    // Xử lý sub-items nếu có
+                    if (item.subItems && Array.isArray(item.subItems)) {
+                        this.addSpace(mlOptions.spacing);
+                        processItems(item.subItems, currentLevel + 1);
+                    }
+                }
+
+                if (index < itemList.length - 1) {
+                    this.addSpace(mlOptions.spacing);
+                }
+            });
+        };
+
+        processItems(items);
+        return this;
+    }
+
+    // Convert số thành Roman numeral
+    toRomanNumeral(num) {
+        const romanNumerals = [
+            ['M', 1000], ['CM', 900], ['D', 500], ['CD', 400],
+            ['C', 100], ['XC', 90], ['L', 50], ['XL', 40],
+            ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+        ];
+        
+        let result = '';
+        for (let [letter, value] of romanNumerals) {
+            const count = Math.floor(num / value);
+            result += letter.repeat(count);
+            num -= value * count;
+        }
+        return result.toLowerCase();
+    }
+
+    // Convert số thành chữ cái
+    toAlphaNumeral(num) {
+        let result = '';
+        while (num > 0) {
+            num--; // Adjust for 0-based indexing
+            result = String.fromCharCode(97 + (num % 26)) + result;
+            num = Math.floor(num / 26);
+        }
+        return result;
+    }
+
+    // Thêm outline/table of contents với auto-numbering
+    addOutline(items, options = {}) {
+        const outlineOptions = {
+            title: 'OUTLINE',
+            titleOptions: {
+                fontSize: 16,
+                fontStyle: 'bold',
+                align: 'center'
+            },
+            h1Options: {
+                numberStyle: 'decimal',
+                numberFormat: '{number}.',
+                fontSize: 12,
+                fontStyle: 'bold',
+                indent: 15
+            },
+            h2Options: {
+                numberStyle: 'decimal',
+                numberFormat: '{number}.{parent}.',
+                fontSize: 11,
+                fontStyle: 'normal',
+                indent: 25
+            },
+            h3Options: {
+                numberStyle: 'decimal', 
+                numberFormat: '{number}.{parent}.{grandparent}.',
+                fontSize: 10,
+                fontStyle: 'normal',
+                indent: 35
+            },
+            showPageNumbers: true,
+            ...options
+        };
+
+        // Thêm tiêu đề
+        if (outlineOptions.title) {
+            this.addText(outlineOptions.title, null, null, outlineOptions.titleOptions);
+            this.addSpace(10);
+        }
+
+        // Reset numbering
+        this.resetNumbering('h1', 1);
+        this.resetNumbering('h2', 1);
+        this.resetNumbering('h3', 1);
+
+        const processOutlineItems = (itemList, level = 1, parentNumbers = []) => {
+            itemList.forEach(item => {
+                const text = typeof item === 'string' ? item : item.title;
+                const page = typeof item === 'object' ? item.page : '';
+                const subItems = typeof item === 'object' ? item.subItems : null;
+
+                let levelKey = `h${Math.min(level, 3)}`;
+                let options = outlineOptions[`${levelKey}Options`];
+                
+                // Tạo số thứ tự cho level hiện tại
+                let currentNum = this.currentNumberByStyle[levelKey] || 1;
+                let numberText = currentNum.toString();
+                
+                // Xử lý format phức tạp cho multi-level
+                if (options.numberFormat.includes('{parent}') && parentNumbers.length > 0) {
+                    numberText = numberText + '.' + parentNumbers[parentNumbers.length - 1];
+                }
+                if (options.numberFormat.includes('{grandparent}') && parentNumbers.length > 1) {
+                    numberText = numberText + '.' + parentNumbers[parentNumbers.length - 2];
+                }
+
+                const formattedNumber = options.numberFormat
+                    .replace('{number}', currentNum)
+                    .replace('{parent}', parentNumbers[parentNumbers.length - 1] || '')
+                    .replace('{grandparent}', parentNumbers[parentNumbers.length - 2] || '');
+
+                // Vẽ outline item
+                if (outlineOptions.showPageNumbers && page) {
+                    this.addLeaderDots(formattedNumber + ' ' + text, page.toString(), {
+                        fontSize: options.fontSize,
+                        fontStyle: options.fontStyle,
+                        leftPadding: options.indent
+                    });
+                } else {
+                    this.addText(formattedNumber + ' ' + text, this.margins.left + options.indent, null, {
+                        fontSize: options.fontSize,
+                        fontStyle: options.fontStyle
+                    });
+                }
+
+                // Cập nhật số đếm
+                if (!this.currentNumberByStyle) this.currentNumberByStyle = {};
+                this.currentNumberByStyle[levelKey] = currentNum + 1;
+
+                // Xử lý sub-items
+                if (subItems && Array.isArray(subItems)) {
+                    const newParentNumbers = [...parentNumbers, currentNum];
+                    this.resetNumbering(`h${level + 1}`, 1); // Reset sub-level numbering
+                    processOutlineItems(subItems, level + 1, newParentNumbers);
+                }
+            });
+        };
+
+        processOutlineItems(items);
+        return this;
+    }
+
     // Lấy thông tin trang
     getPageInfo() {
         return {
