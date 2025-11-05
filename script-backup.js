@@ -83,7 +83,7 @@ async function createPDFWithCustomSignature() {
             .addSpace(30);
             
         await pdf.addSignatureWithImage('Tên của bạn', 'CHỨC VỤ', customSignature, new Date().toLocaleDateString('vi-VN'));
-        pdf.savePDF();
+        pdf.previewPDF();
     } else {
         console.log('Không có hình được chọn');
     }
@@ -344,135 +344,12 @@ async function createSignatureMethodsDemo() {
     return pdf;
 }
 
-// Demo các tính năng ảnh của jsPDF
-async function createImageFeaturesDemo() {
-    const pdf = new JsPdfService();
-    
-    pdf.addTitle('DEMO TÍNH NĂNG ẢNH JSPDF')
-        .addSpace(15)
-        
-        .addSubTitle('1. Ảnh cơ bản với caption')
-        .addParagraph('Thêm ảnh với caption và căn chỉnh:');
-    
-    // Test ảnh có sẵn
-    try {
-        await pdf.addImageFromPath('image/chu-ki-mau.jpg', null, null, 100, 60, {
-            align: 'center',
-            caption: 'Hình 1: Chữ ký mẫu',
-            border: true
-        });
-    } catch (error) {
-        console.log('Sẽ tạo ảnh demo');
-    }
-    
-    pdf.addSpace(15)
-        .addSubTitle('2. Ảnh với border và alignment')
-        .addParagraph('Căn giữa, có viền, caption tùy chỉnh:');
-    
-    // Tạo ảnh demo bằng canvas
-    const demoImage = createDemoImage('DEMO IMAGE', 'green');
-    pdf.addImage(demoImage, null, null, 120, 80, {
-        align: 'center',
-        border: true,
-        borderOptions: {
-            width: 2,
-            color: [0, 100, 0]
-        },
-        caption: 'Hình 2: Ảnh demo với border xanh',
-        captionOptions: {
-            fontSize: 10,
-            fontStyle: 'bold',
-            color: [0, 100, 0]
-        }
-    });
-    
-    pdf.addSpace(15)
-        .addSubTitle('3. Ảnh auto-fit kích thước')
-        .addParagraph('Tự động resize để vừa khung:');
-    
-    // Test auto-fit
-    const largeImage = createDemoImage('LARGE IMAGE\n200x200', 'red', 200, 200);
-    await pdf.addImageFit(largeImage, null, null, 100, 60, {
-        align: 'left',
-        caption: 'Hình 3: Ảnh lớn được resize tự động'
-    });
-    
-    pdf.addSpace(15)
-        .addSubTitle('4. Multiple images in row')
-        .addParagraph('Nhiều ảnh trên cùng một dòng:');
-    
-    const currentY = pdf.getCurrentY();
-    
-    // Ảnh 1
-    const img1 = createDemoImage('IMG 1', 'blue', 80, 50);
-    pdf.addImage(img1, 20, currentY, 70, 45, {
-        caption: 'Ảnh 1'
-    });
-    
-    // Reset Y để vẽ ảnh 2 cùng dòng
-    pdf.currentY = currentY;
-    const img2 = createDemoImage('IMG 2', 'orange', 80, 50);
-    pdf.addImage(img2, 110, currentY, 70, 45, {
-        caption: 'Ảnh 2'
-    });
-    
-    pdf.addSpace(15)
-        .addSubTitle('5. Supported formats')
-        .addParagraph('jsPDF hỗ trợ: JPEG, PNG, GIF, WEBP');
-    
-    // Test PNG
-    const pngImage = createDemoImage('PNG FORMAT', 'purple', 100, 60, 'png');
-    pdf.addImage(pngImage, null, null, 100, 60, {
-        align: 'right',
-        caption: 'Hình 4: PNG format'
-    });
-    
-    return pdf;
-}
-
-// Tạo ảnh demo bằng canvas
-function createDemoImage(text, color = 'blue', width = 120, height = 80, format = 'jpeg') {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-    
-    // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, 'white');
-    gradient.addColorStop(1, color);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    
-    // Border
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(0, 0, width, height);
-    
-    // Text
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    const lines = text.split('\n');
-    const lineHeight = 20;
-    const startY = (height - (lines.length - 1) * lineHeight) / 2;
-    
-    lines.forEach((line, index) => {
-        ctx.fillText(line, width / 2, startY + (index * lineHeight));
-    });
-    
-    // Return appropriate format
-    return canvas.toDataURL(`image/${format}`);
-}
-
 // Functions để handle button clicks
 async function generateLeaveRequestPDF() {
     try {
         console.log('Đang tạo PDF đơn nghỉ phép...');
         const pdf = await createLeaveRequestDemo();
-        pdf.savePDF();
+        pdf.previewPDF();
     } catch (error) {
         console.error('Lỗi khi tạo PDF:', error);
         alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
@@ -483,7 +360,7 @@ async function generateDualSignaturePDF() {
     try {
         console.log('Đang tạo PDF biên bản giao nhận...');
         const pdf = createDualSignatureDemo();
-        pdf.savePDF();
+        pdf.previewPDF();
     } catch (error) {
         console.error('Lỗi khi tạo PDF:', error);
         alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
@@ -494,7 +371,7 @@ async function generateSignatureComparisonPDF() {
     try {
         console.log('Đang tạo PDF so sánh chữ ký...');
         const pdf = await createSignatureComparisonDemo();
-        pdf.savePDF();
+        pdf.previewPDF();
     } catch (error) {
         console.error('Lỗi khi tạo PDF:', error);
         alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
@@ -505,18 +382,7 @@ async function generateSignatureMethodsPDF() {
     try {
         console.log('Đang tạo PDF demo phương thức chữ ký...');
         const pdf = await createSignatureMethodsDemo();
-        pdf.savePDF();
-    } catch (error) {
-        console.error('Lỗi khi tạo PDF:', error);
-        alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
-    }
-}
-
-async function generateImageFeaturesPDF() {
-    try {
-        console.log('Đang tạo PDF demo tính năng ảnh...');
-        const pdf = await createImageFeaturesDemo();
-        pdf.savePDF();
+        pdf.previewPDF();
     } catch (error) {
         console.error('Lỗi khi tạo PDF:', error);
         alert('Có lỗi xảy ra khi tạo PDF: ' + error.message);
@@ -546,7 +412,7 @@ async function generateAllPDFs() {
         console.log('Thông tin PDF methods:', methodsPDF.getPageInfo());
         
         // Preview PDF chính (đơn nghỉ phép)
-        leaveRequestPDF.savePDF();
+        leaveRequestPDF.previewPDF();
         
         console.log('Đã tạo xong tất cả PDF!');
         
@@ -557,12 +423,8 @@ async function generateAllPDFs() {
 }
 
 // Auto-run khi tải trang (chỉ chạy console log)
-console.log('📄 PDF Service đã sẵn sàng! Nhấn các button để test.');
-console.log('✍️ Các phương thức chữ ký mới:');
+console.log('PDF Service đã sẵn sàng! Nhấn các button để test.');
+console.log('Các phương thức chữ ký mới:');
 console.log('- addSignatureFromFile(name, title, imagePath, date, options)');
 console.log('- addSmartSignature(name, title, imageOptions, date, options)');
 console.log('- createTextSignature(text, width, height)');
-console.log('🖼️ Các phương thức ảnh mới:');
-console.log('- addImageFromPath(path, x, y, w, h, options)');
-console.log('- addImageFit(imageData, x, y, maxW, maxH, options)');
-console.log('- addImage() với options: align, caption, border, format');

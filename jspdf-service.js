@@ -164,36 +164,151 @@ class JsPdfService{
         return this;
     }
 
-    // Insert image to PDF
+    // Insert image to PDF với nhiều tính năng
     addImage(imageData, x = null, y = null, width = 100, height = 100, options = {}) {
-        const xPos = x !== null ? x : this.margins.left;
+        const defaultOptions = {
+            format: 'JPEG',
+            align: 'left',
+            caption: null,
+            captionOptions: {
+                fontSize: 9,
+                fontStyle: 'italic',
+                color: [100, 100, 100]
+            },
+            border: false,
+            borderOptions: {
+                width: 1,
+                color: [0, 0, 0]
+            },
+            compression: 'MEDIUM',
+            rotation: 0,
+            ...options
+        };
+        
+        let xPos = x !== null ? x : this.margins.left;
         const yPos = y !== null ? y : this.currentY;
         
+        // Căn chỉnh hình ảnh
+        if (defaultOptions.align === 'center') {
+            xPos = (this.pageWidth - width) / 2;
+        } else if (defaultOptions.align === 'right') {
+            xPos = this.pageWidth - this.margins.right - width;
+        }
+        
         // Kiểm tra có đủ chỗ không
-        this.checkPageBreak(height + 10);
+        this.checkPageBreak(height + 15);
         
         try {
-            const format = options.format || 'JPEG';
-            this.doc.addImage(imageData, format, xPos, this.currentY, width, height);
+            // Auto-detect format từ data URL
+            let format = defaultOptions.format;
+            if (typeof imageData === 'string' && imageData.startsWith('data:')) {
+                if (imageData.includes('data:image/png')) format = 'PNG';
+                else if (imageData.includes('data:image/jpeg') || imageData.includes('data:image/jpg')) format = 'JPEG';
+                else if (imageData.includes('data:image/gif')) format = 'GIF';
+                else if (imageData.includes('data:image/webp')) format = 'WEBP';
+            }
+            
+            // Thêm hình ảnh với jsPDF addImage
+            this.doc.addImage(
+                imageData, 
+                format, 
+                xPos, 
+                this.currentY, 
+                width, 
+                height,
+                '', // alias (để trống)
+                defaultOptions.compression,
+                defaultOptions.rotation
+            );
+            
+            // Thêm border nếu cần
+            if (defaultOptions.border) {
+                this.doc.setLineWidth(defaultOptions.borderOptions.width);
+                this.doc.setDrawColor(...defaultOptions.borderOptions.color);
+                this.doc.rect(xPos, this.currentY, width, height);
+            }
+            
+            // Cập nhật vị trí Y
+            this.currentY += height + 5;
             
             // Thêm caption nếu có
-            if (options.caption) {
-                this.currentY += height + 5;
-                this.addText(options.caption, null, null, {
-                    fontSize: 9,
-                    fontStyle: 'italic',
-                    align: 'center',
-                    color: [100, 100, 100]
+            if (defaultOptions.caption) {
+                this.addText(defaultOptions.caption, null, null, {
+                    ...defaultOptions.captionOptions,
+                    align: defaultOptions.align
                 });
             } else {
-                this.currentY += height + 10;
+                this.currentY += 5;
             }
             
         } catch (error) {
             console.error('Lỗi khi thêm ảnh:', error);
+            // Thêm placeholder nếu lỗi
+            this.addText(`[Lỗi hiển thị ảnh: ${error.message}]`, xPos, null, {
+                fontSize: 10,
+                color: [255, 0, 0],
+                align: defaultOptions.align
+            });
         }
         
         return this;
+    }
+
+    // Thêm ảnh từ file path
+    async addImageFromPath(imagePath, x = null, y = null, width = 100, height = 100, options = {}) {
+        try {
+            const imageData = await this.loadImageFromPath(imagePath);
+            if (imageData) {
+                return this.addImage(imageData, x, y, width, height, options);
+            } else {
+                throw new Error(`Không thể load ảnh từ ${imagePath}`);
+            }
+        } catch (error) {
+            console.error('Lỗi khi thêm ảnh từ path:', error);
+            // Thêm placeholder
+            this.addText(`[Không thể load ảnh: ${imagePath}]`, x, y, {
+                fontSize: 10,
+                color: [255, 0, 0]
+            });
+        }
+        return this;
+    }
+
+    // Thêm ảnh với auto-resize để fit trong khung
+    addImageFit(imageData, x = null, y = null, maxWidth = 150, maxHeight = 150, options = {}) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                // Tính toán kích thước fit
+                let { width, height } = this.calculateFitSize(
+                    img.naturalWidth, 
+                    img.naturalHeight, 
+                    maxWidth, 
+                    maxHeight
+                );
+                
+                this.addImage(imageData, x, y, width, height, options);
+                resolve(this);
+            };
+            img.onerror = () => {
+                console.error('Không thể load ảnh để tính kích thước');
+                this.addImage(imageData, x, y, maxWidth, maxHeight, options);
+                resolve(this);
+            };
+            img.src = imageData;
+        });
+    }
+
+    // Tính toán kích thước fit
+    calculateFitSize(originalWidth, originalHeight, maxWidth, maxHeight) {
+        const widthRatio = maxWidth / originalWidth;
+        const heightRatio = maxHeight / originalHeight;
+        const ratio = Math.min(widthRatio, heightRatio);
+        
+        return {
+            width: originalWidth * ratio,
+            height: originalHeight * ratio
+        };
     }
 
     // Thêm đường kẻ ngang
@@ -362,110 +477,216 @@ class JsPdfService{
         }
     }
 
-    // Thêm chữ ký đẹp mắt
+    // Thêm chữ ký đẹp mắt với nội dung căn giữa theo khối
     addSignature(name, title, date = null, options = {}) {
         const signatureOptions = {
             align: 'right',
             fontSize: 11,
             titleFontSize: 10,
             nameFontSize: 12,
-            spacing: 8, // Giảm spacing từ 15 xuống 8
-            signatureHeight: 20, // Giảm chiều cao vùng chữ ký từ 30 xuống 20
+            spacing: 8,
+            signatureHeight: 20,
+            blockWidth: 100, // Độ rộng khối chữ ký
             ...options
         };
         
         const currentDate = date || new Date().toLocaleDateString('vi-VN');
         
-        // Ngày tháng
-        this.addText(currentDate, null, null, {
-            align: signatureOptions.align,
-            fontSize: signatureOptions.fontSize
-        });
+        // Tính vị trí X của khối chữ ký
+        let blockX;
+        if (signatureOptions.align === 'right') {
+            blockX = this.pageWidth - this.margins.right - signatureOptions.blockWidth;
+        } else if (signatureOptions.align === 'center') {
+            blockX = (this.pageWidth - signatureOptions.blockWidth) / 2;
+        } else {
+            blockX = this.margins.left;
+        }
         
-        this.addSpace(signatureOptions.spacing);
+        // Tính X căn giữa trong khối
+        const centerX = blockX + (signatureOptions.blockWidth / 2);
         
-        // Tiêu đề chức vụ
-        this.addText(title, null, null, {
-            align: signatureOptions.align,
-            fontSize: signatureOptions.titleFontSize,
-            fontStyle: 'bold'
-        });
+        // Ngày tháng - căn giữa trong khối
+        this.doc.setFontSize(signatureOptions.fontSize);
+        try {
+            this.doc.setFont('Roboto', 'normal');
+        } catch {
+            this.doc.setFont('helvetica', 'normal');
+        }
+        this.doc.setTextColor(0, 0, 0);
         
-        // Ghi chú ký tên
-        this.addText('(Ký và ghi rõ họ tên)', null, null, {
-            align: signatureOptions.align,
-            fontSize: 9,
-            fontStyle: 'italic',
-            color: [100, 100, 100]
-        });
+        const dateWidth = this.doc.getTextWidth(currentDate);
+        const dateX = centerX - (dateWidth / 2);
+        this.doc.text(currentDate, dateX, this.currentY);
+        this.currentY += signatureOptions.spacing;
+        
+        // Tiêu đề chức vụ - căn giữa trong khối
+        this.doc.setFontSize(signatureOptions.titleFontSize);
+        try {
+            this.doc.setFont('Roboto', 'bold');
+        } catch {
+            this.doc.setFont('helvetica', 'bold');
+        }
+        
+        const titleWidth = this.doc.getTextWidth(title);
+        const titleX = centerX - (titleWidth / 2);
+        this.doc.text(title, titleX, this.currentY);
+        this.currentY += 5;
+        
+        // Ghi chú ký tên - căn giữa trong khối
+        const noteText = '(Ký và ghi rõ họ tên)';
+        this.doc.setFontSize(9);
+        try {
+            this.doc.setFont('Roboto', 'italic');
+        } catch {
+            this.doc.setFont('helvetica', 'italic');
+        }
+        this.doc.setTextColor(100, 100, 100);
+        
+        const noteWidth = this.doc.getTextWidth(noteText);
+        const noteX = centerX - (noteWidth / 2);
+        this.doc.text(noteText, noteX, this.currentY);
+        this.currentY += signatureOptions.spacing;
         
         // Vùng trống cho chữ ký
         this.addSpace(signatureOptions.signatureHeight);
         
-        // Tên người ký
-        this.addText(name, null, null, {
-            align: signatureOptions.align,
-            fontSize: signatureOptions.nameFontSize,
-            fontStyle: 'bold'
-        });
+        // Tên người ký - căn giữa trong khối
+        this.doc.setFontSize(signatureOptions.nameFontSize);
+        try {
+            this.doc.setFont('Roboto', 'bold');
+        } catch {
+            this.doc.setFont('helvetica', 'bold');
+        }
+        this.doc.setTextColor(0, 0, 0);
         
-        this.addSpace(10);
+        const nameWidth = this.doc.getTextWidth(name);
+        const nameX = centerX - (nameWidth / 2);
+        this.doc.text(name, nameX, this.currentY);
+        this.currentY += 15;
         
         return this;
     }
 
-    // Thêm chữ ký có hình ảnh
-    addSignatureWithImage(name, title, imageData, date = null, options = {}) {
+    // Load hình từ file path
+    async loadImageFromPath(imagePath) {
+        try {
+            const response = await fetch(imagePath);
+            if (!response.ok) throw new Error(`Không thể load hình từ ${imagePath}`);
+            
+            const blob = await response.blob();
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    resolve(e.target.result);
+                };
+                reader.onerror = function(e) {
+                    reject(new Error('Lỗi khi đọc file'));
+                };
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.warn(`Không thể load hình từ ${imagePath}:`, error.message);
+            return null;
+        }
+    }
+
+    // Thêm chữ ký có hình ảnh với nội dung căn giữa theo khối
+    async addSignatureWithImage(name, title, imageSource, date = null, options = {}) {
         const signatureOptions = {
             align: 'right',
             fontSize: 11,
             titleFontSize: 10,
             nameFontSize: 12,
-            spacing: 8, // Giảm spacing từ 15 xuống 8
+            spacing: 8,
             imageWidth: 60,
-            imageHeight: 20, // Giảm chiều cao hình từ 25 xuống 20
+            imageHeight: 20,
+            blockWidth: 100, // Độ rộng khối chữ ký
             ...options
         };
         
         const currentDate = date || new Date().toLocaleDateString('vi-VN');
         
-        // Ngày tháng
-        this.addText(currentDate, null, null, {
-            align: signatureOptions.align,
-            fontSize: signatureOptions.fontSize
-        });
+        // Tính vị trí X của khối chữ ký
+        let blockX;
+        if (signatureOptions.align === 'right') {
+            blockX = this.pageWidth - this.margins.right - signatureOptions.blockWidth;
+        } else if (signatureOptions.align === 'center') {
+            blockX = (this.pageWidth - signatureOptions.blockWidth) / 2;
+        } else {
+            blockX = this.margins.left;
+        }
         
-        this.addSpace(signatureOptions.spacing);
+        // Tính X căn giữa trong khối
+        const centerX = blockX + (signatureOptions.blockWidth / 2);
         
-        // Tiêu đề chức vụ
-        this.addText(title, null, null, {
-            align: signatureOptions.align,
-            fontSize: signatureOptions.titleFontSize,
-            fontStyle: 'bold'
-        });
+        // Ngày tháng - căn giữa trong khối
+        this.doc.setFontSize(signatureOptions.fontSize);
+        try {
+            this.doc.setFont('Roboto', 'normal');
+        } catch {
+            this.doc.setFont('helvetica', 'normal');
+        }
+        this.doc.setTextColor(0, 0, 0);
         
-        // Ghi chú
-        this.addText('(Ký và ghi rõ họ tên)', null, null, {
-            align: signatureOptions.align,
-            fontSize: 9,
-            fontStyle: 'italic',
-            color: [100, 100, 100]
-        });
+        const dateWidth = this.doc.getTextWidth(currentDate);
+        const dateX = centerX - (dateWidth / 2);
+        this.doc.text(currentDate, dateX, this.currentY);
+        this.currentY += signatureOptions.spacing;
+        
+        // Tiêu đề chức vụ - căn giữa trong khối
+        this.doc.setFontSize(signatureOptions.titleFontSize);
+        try {
+            this.doc.setFont('Roboto', 'bold');
+        } catch {
+            this.doc.setFont('helvetica', 'bold');
+        }
+        
+        const titleWidth = this.doc.getTextWidth(title);
+        const titleX = centerX - (titleWidth / 2);
+        this.doc.text(title, titleX, this.currentY);
+        this.currentY += 5;
+        
+        // Ghi chú ký tên - căn giữa trong khối
+        const noteText = '(Ký và ghi rõ họ tên)';
+        this.doc.setFontSize(9);
+        try {
+            this.doc.setFont('Roboto', 'italic');
+        } catch {
+            this.doc.setFont('helvetica', 'italic');
+        }
+        this.doc.setTextColor(100, 100, 100);
+        
+        const noteWidth = this.doc.getTextWidth(noteText);
+        const noteX = centerX - (noteWidth / 2);
+        this.doc.text(noteText, noteX, this.currentY);
+        this.currentY += signatureOptions.spacing;
         
         this.addSpace(5);
         
-        // Thêm hình chữ ký
-        if (imageData) {
-            let xPos;
-            if (signatureOptions.align === 'right') {
-                xPos = this.pageWidth - this.margins.right - signatureOptions.imageWidth;
-            } else if (signatureOptions.align === 'center') {
-                xPos = (this.pageWidth - signatureOptions.imageWidth) / 2;
+        // Xử lý imageSource (có thể là path hoặc data)
+        let imageData = null;
+        
+        if (imageSource) {
+            if (typeof imageSource === 'string') {
+                // Nếu là string, kiểm tra xem là path hay data URL
+                if (imageSource.startsWith('data:')) {
+                    // Là data URL
+                    imageData = imageSource;
+                } else {
+                    // Là file path, load từ path
+                    imageData = await this.loadImageFromPath(imageSource);
+                }
             } else {
-                xPos = this.margins.left;
+                // Đã là imageData
+                imageData = imageSource;
             }
+        }
+        
+        // Thêm hình chữ ký - căn giữa trong khối
+        if (imageData) {
+            const imageX = centerX - (signatureOptions.imageWidth / 2);
             
-            this.addImage(imageData, xPos, this.currentY, 
+            this.addImage(imageData, imageX, this.currentY, 
                 signatureOptions.imageWidth, signatureOptions.imageHeight, {
                 format: 'JPEG'
             });
@@ -474,16 +695,88 @@ class JsPdfService{
             this.addSpace(signatureOptions.imageHeight + 10);
         }
         
-        // Tên người ký
-        this.addText(name, null, null, {
-            align: signatureOptions.align,
-            fontSize: signatureOptions.nameFontSize,
-            fontStyle: 'bold'
-        });
+        // Tên người ký - căn giữa trong khối
+        this.doc.setFontSize(signatureOptions.nameFontSize);
+        try {
+            this.doc.setFont('Roboto', 'bold');
+        } catch {
+            this.doc.setFont('helvetica', 'bold');
+        }
+        this.doc.setTextColor(0, 0, 0);
         
-        this.addSpace(10);
+        const nameWidth = this.doc.getTextWidth(name);
+        const nameX = centerX - (nameWidth / 2);
+        this.doc.text(name, nameX, this.currentY);
+        this.currentY += 15;
         
         return this;
+    }
+
+    // Thêm chữ ký từ file path (phương thức tiện lợi)
+    async addSignatureFromFile(name, title, imagePath, date = null, options = {}) {
+        return await this.addSignatureWithImage(name, title, imagePath, date, options);
+    }
+
+    // Thêm chữ ký với nhiều tùy chọn hình ảnh
+    async addSmartSignature(name, title, imageOptions = {}, date = null, options = {}) {
+        const { 
+            imagePath = null, 
+            imageData = null, 
+            fallbackText = null,
+            createFallback = true 
+        } = imageOptions;
+        
+        let finalImageData = null;
+        
+        // Thử load từ path trước
+        if (imagePath) {
+            finalImageData = await this.loadImageFromPath(imagePath);
+        }
+        
+        // Nếu không được, dùng imageData
+        if (!finalImageData && imageData) {
+            finalImageData = imageData;
+        }
+        
+        // Nếu vẫn không có và cho phép tạo fallback
+        if (!finalImageData && createFallback) {
+            finalImageData = this.createTextSignature(fallbackText || name);
+        }
+        
+        return await this.addSignatureWithImage(name, title, finalImageData, date, options);
+    }
+
+    // Tạo chữ ký text đơn giản
+    createTextSignature(text, width = 120, height = 40) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Nền trắng
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Viết chữ ký
+        ctx.fillStyle = '#1a5490';
+        ctx.font = 'italic bold 14px cursive, "Times New Roman", serif';
+        
+        // Căn giữa text
+        const textWidth = ctx.measureText(text).width;
+        const x = (width - textWidth) / 2;
+        const y = height / 2 + 5;
+        
+        ctx.fillText(text, x, y);
+        
+        // Thêm đường gạch dưới
+        ctx.strokeStyle = '#1a5490';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x - 5, y + 8);
+        ctx.lineTo(x + textWidth + 5, y + 8);
+        ctx.stroke();
+        
+        return canvas.toDataURL('image/png');
     }
 
     // Thêm chữ ký đơn giản với đường gạch
@@ -521,58 +814,88 @@ class JsPdfService{
         return this;
     }
 
-    // Tạo bố cục chữ ký hai cột
+    // Tạo bố cục chữ ký hai cột với nội dung căn giữa theo khối
     addDualSignature(leftSig, rightSig) {
-        const leftX = this.margins.left;
-        const rightX = this.pageWidth / 2 + 10;
-        const startY = this.currentY;
+        const blockWidth = 90;
+        const leftBlockX = this.margins.left;
+        const rightBlockX = this.pageWidth / 2 + 10;
+        const leftCenterX = leftBlockX + (blockWidth / 2);
+        const rightCenterX = rightBlockX + (blockWidth / 2);
         
         // Lưu vị trí Y ban đầu
         const originalY = this.currentY;
         
-        // Chữ ký bên trái
+        // Chữ ký bên trái - căn giữa trong khối
         this.currentY = originalY;
-        this.addText(leftSig.date || new Date().toLocaleDateString('vi-VN'), leftX, null, {
-            fontSize: 11
-        });
-        this.addSpace(10);
-        this.addText(leftSig.title, leftX, null, {
-            fontSize: 10,
-            fontStyle: 'bold'
-        });
-        this.addText('(Ký và ghi rõ họ tên)', leftX, null, {
-            fontSize: 9,
-            fontStyle: 'italic',
-            color: [100, 100, 100]
-        });
-        this.addSpace(25);
-        this.addText(leftSig.name, leftX, null, {
-            fontSize: 11,
-            fontStyle: 'bold'
-        });
+        
+        // Date trái
+        const leftDate = leftSig.date || new Date().toLocaleDateString('vi-VN');
+        this.doc.setFontSize(11);
+        try { this.doc.setFont('Roboto', 'normal'); } catch { this.doc.setFont('helvetica', 'normal'); }
+        this.doc.setTextColor(0, 0, 0);
+        const leftDateWidth = this.doc.getTextWidth(leftDate);
+        this.doc.text(leftDate, leftCenterX - (leftDateWidth / 2), this.currentY);
+        this.currentY += 8;
+        
+        // Title trái
+        this.doc.setFontSize(10);
+        try { this.doc.setFont('Roboto', 'bold'); } catch { this.doc.setFont('helvetica', 'bold'); }
+        const leftTitleWidth = this.doc.getTextWidth(leftSig.title);
+        this.doc.text(leftSig.title, leftCenterX - (leftTitleWidth / 2), this.currentY);
+        this.currentY += 5;
+        
+        // Note trái
+        const leftNote = '(Ký và ghi rõ họ tên)';
+        this.doc.setFontSize(9);
+        try { this.doc.setFont('Roboto', 'italic'); } catch { this.doc.setFont('helvetica', 'italic'); }
+        this.doc.setTextColor(100, 100, 100);
+        const leftNoteWidth = this.doc.getTextWidth(leftNote);
+        this.doc.text(leftNote, leftCenterX - (leftNoteWidth / 2), this.currentY);
+        this.currentY += 25;
+        
+        // Name trái
+        this.doc.setFontSize(11);
+        try { this.doc.setFont('Roboto', 'bold'); } catch { this.doc.setFont('helvetica', 'bold'); }
+        this.doc.setTextColor(0, 0, 0);
+        const leftNameWidth = this.doc.getTextWidth(leftSig.name);
+        this.doc.text(leftSig.name, leftCenterX - (leftNameWidth / 2), this.currentY);
         
         const leftEndY = this.currentY;
         
-        // Chữ ký bên phải
+        // Chữ ký bên phải - căn giữa trong khối
         this.currentY = originalY;
-        this.addText(rightSig.date || new Date().toLocaleDateString('vi-VN'), rightX, null, {
-            fontSize: 11
-        });
-        this.addSpace(10);
-        this.addText(rightSig.title, rightX, null, {
-            fontSize: 10,
-            fontStyle: 'bold'
-        });
-        this.addText('(Ký và ghi rõ họ tên)', rightX, null, {
-            fontSize: 9,
-            fontStyle: 'italic',
-            color: [100, 100, 100]
-        });
-        this.addSpace(25);
-        this.addText(rightSig.name, rightX, null, {
-            fontSize: 11,
-            fontStyle: 'bold'
-        });
+        
+        // Date phải
+        const rightDate = rightSig.date || new Date().toLocaleDateString('vi-VN');
+        this.doc.setFontSize(11);
+        try { this.doc.setFont('Roboto', 'normal'); } catch { this.doc.setFont('helvetica', 'normal'); }
+        this.doc.setTextColor(0, 0, 0);
+        const rightDateWidth = this.doc.getTextWidth(rightDate);
+        this.doc.text(rightDate, rightCenterX - (rightDateWidth / 2), this.currentY);
+        this.currentY += 8;
+        
+        // Title phải
+        this.doc.setFontSize(10);
+        try { this.doc.setFont('Roboto', 'bold'); } catch { this.doc.setFont('helvetica', 'bold'); }
+        const rightTitleWidth = this.doc.getTextWidth(rightSig.title);
+        this.doc.text(rightSig.title, rightCenterX - (rightTitleWidth / 2), this.currentY);
+        this.currentY += 5;
+        
+        // Note phải
+        const rightNote = '(Ký và ghi rõ họ tên)';
+        this.doc.setFontSize(9);
+        try { this.doc.setFont('Roboto', 'italic'); } catch { this.doc.setFont('helvetica', 'italic'); }
+        this.doc.setTextColor(100, 100, 100);
+        const rightNoteWidth = this.doc.getTextWidth(rightNote);
+        this.doc.text(rightNote, rightCenterX - (rightNoteWidth / 2), this.currentY);
+        this.currentY += 25;
+        
+        // Name phải
+        this.doc.setFontSize(11);
+        try { this.doc.setFont('Roboto', 'bold'); } catch { this.doc.setFont('helvetica', 'bold'); }
+        this.doc.setTextColor(0, 0, 0);
+        const rightNameWidth = this.doc.getTextWidth(rightSig.name);
+        this.doc.text(rightSig.name, rightCenterX - (rightNameWidth / 2), this.currentY);
         
         // Điều chỉnh Y về vị trí thấp nhất
         this.currentY = Math.max(leftEndY, this.currentY) + 10;

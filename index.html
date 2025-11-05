@@ -41,6 +41,12 @@
               <button class="btn btn-warning" onclick="createPDFWithCustomSignature()">
                 📤 Upload chữ ký của bạn
               </button>
+              <button class="btn btn-outline-primary" onclick="generateSignatureMethodsPDF()">
+                🔧 Demo phương thức chữ ký
+              </button>
+              <button class="btn btn-outline-success" onclick="generateImageFeaturesPDF()">
+                🖼️ Demo tính năng ảnh jsPDF
+              </button>
               <button class="btn btn-secondary" onclick="generateAllPDFs()">
                 🚀 Tạo tất cả PDF
               </button>
@@ -52,11 +58,30 @@
           <div class="col-md-12">
             <h4>Hướng dẫn:</h4>
             <ul>
-              <li><strong>Đơn nghỉ phép:</strong> PDF 2 trang với 4 chữ ký có hình ảnh</li>
+              <li><strong>Đơn nghỉ phép:</strong> PDF 2 trang với 4 chữ ký, sử dụng file path</li>
               <li><strong>Biên bản giao nhận:</strong> Chữ ký đôi trong cùng một dòng</li>
               <li><strong>So sánh chữ ký:</strong> Xem các kiểu chữ ký khác nhau</li>
+              <li><strong>Demo phương thức:</strong> 4 cách thêm chữ ký khác nhau</li>
+              <li><strong>Demo ảnh jsPDF:</strong> Tính năng ảnh nâng cao</li>
               <li><strong>Upload chữ ký:</strong> Sử dụng hình chữ ký của bạn</li>
             </ul>
+            
+            <h5 class="mt-3">Tính năng ảnh mới:</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <strong>1. Ảnh từ file path:</strong><br>
+                <code>addImageFromPath('image.jpg', x, y, w, h, options)</code><br>
+                <strong>2. Auto-fit kích thước:</strong><br>
+                <code>addImageFit(imageData, x, y, maxW, maxH)</code>
+              </div>
+              <div class="col-md-6">
+                <strong>3. Ảnh với tùy chọn:</strong><br>
+                <code>addImage(data, x, y, w, h, {align, caption, border})</code><br>
+                <strong>4. Formats hỗ trợ:</strong><br>
+                <span class="badge bg-info">JPEG</span> <span class="badge bg-info">PNG</span> 
+                <span class="badge bg-info">GIF</span> <span class="badge bg-info">WEBP</span>
+              </div>
+            </div>
           </div>
         </div>
         
