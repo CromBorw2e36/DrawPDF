@@ -8,25 +8,35 @@ async function init() {
     ChucDanh: "Nhân viên Kinh doanh",
     PhongBan: "Phòng Kinh doanh",
     NgayHieuLuc: "01/07/2024",
+    TenNguoiDaiDien: "LÊ THỊ B",
   }; // Placeholder to avoid empty file error
 
   const pdf = new JsPdfService();
   pdf
-  .addDualSignature(
-            {
-                name: 'Công ty ' + obj.TenCongTy,
-                title: '--------------',
-                date: 'Số: ' + obj.SoPhieu
-            },
-            {
-                name: 'Cộng hòa xã hội chủ nghĩa Việt Nam'.toUpperCase(), 
-                title: 'Độc lập - Tự do - Hạnh phúc',
-                date: [
-                    { text: "Tây Ninh, ngày ", style: 'italic' },
-                    { text: obj.NgayKy, style: 'italic' }
-                ]
-            }
-        )
+    // .addTable(
+    //   [
+    //     [
+    //       [
+    //         { text: "Công ty ", style: "normal" },
+    //         { text: obj.TenCongTy, style: "bold" },
+    //         { text: "\n..............." , style: "normal"},
+    //         { text: "\nSố: " + obj.SoPhieu, style: "italic" },
+    //       ],
+    //       [
+    //         { text: "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", style: "bold" },
+    //         { text: "\nĐộc lập - Tự do - Hạnh phúc", style: "italic" },
+    //         { text: "\nTây Ninh, ngày ", style: "italic" },
+    //         { text: obj.NgayKy, style: "bold" },
+    //       ],
+    //     ],
+    //   ],
+    //   {
+    //     columnWidths: "equal",
+    //     borderWidth: 0,
+    //     columnAligns: ["left", "right"],
+    //   }
+    // )
+    .addSpace(10)
     .addTitle("QUYẾT ĐỊNH", { lineHeight: pdf.lineHeight, fontSize: 14 })
     .addSubTitle("Về việc chấm dứt Hợp đồng lao động", { align: "center", fontSize: 10 })
     .addSpace(3)
@@ -81,17 +91,27 @@ async function init() {
     .addSpace(3);
   // Signature
   await pdf.addSignatureFromFile(
-    "Nguyễn Văn A",
-    "NHÂN VIÊN",
+    obj.TenNguoiDaiDien,
+    "NGƯỜI ĐƯỢC ỦY QUYỀN]",
     "../image/chu-ki-mau.jpg",
-    "Ngày 10/11/2025"
+    "[CHỨC DANH CỦA NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT/",
+    {
+      noteText: "(Ký và ghi rõ họ tên)",
+      spacing: pdf.lineHeight * 5,
+      dateFontSize: 10,
+      titleFontSize: 10,
+    }
   );
 
   pdf
-    .addSubTitle("Nơi nhận", { align: "left", fontSize: 10, lineHeight: pdf.lineHeight})
+    .addSubTitle("Nơi nhận", { align: "left", fontSize: 10, lineHeight: pdf.lineHeight })
     .addParagraph(`- Như điều 4 “để thực hiện”;`, { align: "left", fontSize: 8 })
     .addParagraph(`- Lưu: Bộ phận Nhân sự. `, { align: "left", fontSize: 8 })
-    .addFooter("HDG-HRA-SOP02.F03 (02-01/04/2025)", { align: "left", fontSize: 8, color: [128, 128, 128] });
+    .addFooter("HDG-HRA-SOP02.F03 (02-01/04/2025)", {
+      align: "left",
+      fontSize: 8,
+      color: [128, 128, 128],
+    });
 
   // Generate PDF and display in iframe
   const pdfDataUrl = pdf.generateDataURL();
