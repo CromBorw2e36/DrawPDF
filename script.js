@@ -1366,3 +1366,120 @@ console.log('- addDottedFillIn(label, options) - Dễ dùng cho dots');
 console.log('- addDottedForm(fields, options) - Form với dots');
 console.log('- addDottedSignature(signers, options) - Chữ ký dots');
 console.log('- addCustomDottedLine(label, pattern, spacing, length, options)');
+console.log('🎨 Các phương thức Mixed Text mới:');
+console.log('- addMixedText(textParts, options) - Text với định dạng hỗn hợp');
+console.log('- addMixedParagraph(textParts, options) - Paragraph với định dạng hỗn hợp');
+
+// Test function cho Mixed Text
+function createMixedTextDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('Demo Mixed Text & Paragraph', {
+        fontSize: 18,
+        color: [0, 0, 139]
+    });
+    
+    pdfService.addSpace(10);
+    
+    // Demo 1: Mixed text với helper functions
+    pdfService.addSubTitle('Demo 1: Sử dụng Helper Functions');
+    
+    const textParts1 = [
+        pdfService.normal('Đây là text '),
+        pdfService.bold('bold', [255, 0, 0]),
+        pdfService.normal(' và '),
+        pdfService.italic('italic', [0, 128, 0]),
+        pdfService.normal(' và '),
+        pdfService.boldItalic('bold italic', [0, 0, 255]),
+        pdfService.normal(' trong cùng một dòng.')
+    ];
+    
+    pdfService.addStyledParagraph(textParts1);
+    
+    // Demo 2: Mixed text với object format
+    pdfService.addSubTitle('Demo 2: Định dạng Object');
+    
+    const textParts2 = [
+        { text: 'Công ty: ', style: 'bold', fontSize: 12 },
+        { text: 'ABC Corporation', style: 'normal', color: [0, 100, 200], fontSize: 14 },
+        { text: ' - Địa chỉ: ', style: 'bold' },
+        { text: '123 Nguyễn Văn Linh, TP.HCM', style: 'italic', color: [100, 100, 100] }
+    ];
+    
+    pdfService.addMixedParagraph(textParts2);
+    
+    // Demo 3: Text dài với word wrapping
+    pdfService.addSubTitle('Demo 3: Text Dài với Word Wrapping');
+    
+    const longTextParts = [
+        pdfService.bold('Lorem ipsum dolor sit amet, '),
+        pdfService.normal('consectetur adipiscing elit, sed do eiusmod tempor incididunt ut '),
+        pdfService.italic('labore et dolore magna aliqua. ', [200, 0, 0]),
+        pdfService.normal('Ut enim ad minim veniam, quis nostrud exercitation '),
+        pdfService.boldItalic('ullamco laboris nisi ut aliquip ex ea commodo consequat. ', [0, 150, 0]),
+        pdfService.normal('Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.')
+    ];
+    
+    pdfService.addMixedParagraph(longTextParts, {
+        align: 'justify',
+        lineHeight: 6
+    });
+    
+    // Demo 4: Căn chỉnh center và right
+    pdfService.addSubTitle('Demo 4: Các Kiểu Căn Chỉnh');
+    
+    const centerText = [
+        pdfService.bold('Text căn giữa với '),
+        pdfService.colored('màu đỏ', [255, 0, 0], 'italic'),
+        pdfService.normal(' và '),
+        pdfService.colored('màu xanh', [0, 0, 255], 'bold')
+    ];
+    
+    pdfService.addMixedParagraph(centerText, { align: 'center' });
+    
+    const rightText = [
+        pdfService.normal('Text căn phải: '),
+        pdfService.bold('Tổng cộng: '),
+        pdfService.colored('1,000,000 VNĐ', [255, 0, 0], 'bold', 14)
+    ];
+    
+    pdfService.addMixedParagraph(rightText, { align: 'right' });
+    
+    // Demo 5: Sử dụng trong hóa đơn/báo cáo
+    pdfService.addSpace(10);
+    pdfService.addSubTitle('Demo 5: Ứng Dụng Thực Tế - Hóa Đơn');
+    
+    const invoiceHeader = [
+        pdfService.bold('HÓA ĐƠN BÁN HÀNG', null, 16)
+    ];
+    pdfService.addMixedParagraph(invoiceHeader, { align: 'center' });
+    
+    const invoiceInfo = [
+        pdfService.bold('Số HĐ: '),
+        pdfService.colored('HD-2024-001', [255, 0, 0], 'normal', 12),
+        pdfService.normal(' | '),
+        pdfService.bold('Ngày: '),
+        pdfService.normal(new Date().toLocaleDateString('vi-VN'))
+    ];
+    pdfService.addMixedParagraph(invoiceInfo);
+    
+    const customerInfo = [
+        pdfService.bold('Khách hàng: '),
+        pdfService.normal('Nguyễn Văn A'),
+        pdfService.normal(' - '),
+        pdfService.italic('Điện thoại: '),
+        pdfService.colored('0123456789', [0, 100, 0], 'normal')
+    ];
+    pdfService.addMixedParagraph(customerInfo);
+    
+    const total = [
+        pdfService.bold('TỔNG TIỀN: '),
+        pdfService.colored('2,500,000 VNĐ', [255, 0, 0], 'bold', 16)
+    ];
+    pdfService.addMixedParagraph(total, { align: 'right' });
+    
+    // Save PDF
+    pdfService.savePDF('mixed-text-demo.pdf');
+    
+    console.log('✅ Mixed Text Demo PDF đã được tạo!');
+}

@@ -2,7 +2,7 @@ class JsPdfService{
     constructor(){
         this.doc = new jspdf.jsPDF();
         this.currentY = 20; // Vị trí Y hiện tại để tự động xuống dòng
-        this.lineHeight = 4.5; // Khoảng cách giữa các dòng (giảm từ 7 xuống 4.5)
+        this.lineHeight =1; // Khoảng cách giữa các dòng (giảm từ 7 xuống 4.5)
         this.pageHeight = this.doc.internal.pageSize.height;
         this.pageWidth = this.doc.internal.pageSize.width;
         this.margins = { left: 15, right: 15, top: 20, bottom: 20 };
@@ -125,7 +125,7 @@ class JsPdfService{
     // Thêm đoạn văn với các option linh hoạt
     addParagraph(paragraph, options = {}) {
         const paragraphOptions = {
-            fontSize: 11,
+            fontSize: 10,
             fontStyle: 'normal',
             color: [0, 0, 0],
             lineHeight: 4, // Giảm từ 6 xuống 4
@@ -1646,6 +1646,184 @@ class JsPdfService{
             lineLength: length,
             ...options
         });
+    }
+
+    // Thêm text với định dạng hỗn hợp (bold, italic trong cùng dòng)
+    addMixedText(textParts, options = {}) {
+        const defaultOptions = {
+            fontSize: 12,
+            color: [0, 0, 0],
+            maxWidth: this.pageWidth - this.margins.left - this.margins.right,
+            align: 'left',
+            lineHeight: this.lineHeight
+        };
+        
+        const config = { ...defaultOptions, ...options };
+        let currentX = this.margins.left;
+        let currentLineY = this.currentY;
+        let wordsOnLine = [];
+        let currentLineWidth = 0;
+        
+        // Đảm bảo có đủ không gian
+        this.checkPageBreak(config.lineHeight + 10);
+        
+        // Xử lý từng phần text
+        textParts.forEach((part, partIndex) => {
+            const text = typeof part === 'string' ? part : part.text;
+            const style = typeof part === 'object' ? part.style || 'normal' : 'normal';
+            const partColor = typeof part === 'object' && part.color ? part.color : config.color;
+            const fontSize = typeof part === 'object' && part.fontSize ? part.fontSize : config.fontSize;
+            
+            // Thiết lập font để tính toán kích thước
+            this.doc.setFontSize(fontSize);
+            try {
+                this.doc.setFont('Roboto', style);
+            } catch {
+                this.doc.setFont('helvetica', style);
+            }
+            
+            // Tách text thành từng từ
+            const words = text.split(' ');
+            
+            words.forEach((word, wordIndex) => {
+                const wordWithSpace = wordIndex < words.length - 1 ? word + ' ' : word;
+                const wordWidth = this.doc.getTextWidth(wordWithSpace);
+                
+                // Kiểm tra xem từ có vừa trong dòng hiện tại không
+                if (currentLineWidth + wordWidth > config.maxWidth && wordsOnLine.length > 0) {
+                    // Render dòng hiện tại
+                    this.renderMixedLine(wordsOnLine, currentX, currentLineY, config);
+                    
+                    // Chuyển sang dòng mới
+                    currentLineY += config.lineHeight;
+                    this.checkPageBreak(config.lineHeight + 5);
+                    currentX = this.margins.left;
+                    wordsOnLine = [];
+                    currentLineWidth = 0;
+                }
+                
+                // Thêm từ vào dòng hiện tại
+                wordsOnLine.push({
+                    text: wordWithSpace,
+                    style: style,
+                    color: Array.isArray(partColor) ? partColor : [0, 0, 0],
+                    fontSize: fontSize,
+                    width: wordWidth
+                });
+                currentLineWidth += wordWidth;
+            });
+        });
+        
+        // Render dòng cuối cùng nếu có
+        if (wordsOnLine.length > 0) {
+            this.renderMixedLine(wordsOnLine, currentX, currentLineY, config);
+            currentLineY += config.lineHeight;
+        }
+        
+        this.currentY = currentLineY + 3;
+        return this;
+    }
+
+    // Helper function để render một dòng mixed text
+    renderMixedLine(words, startX, y, config) {
+        let xPos = startX;
+        
+        // Điều chỉnh vị trí X theo alignment
+        if (config.align === 'center') {
+            const totalWidth = words.reduce((sum, word) => sum + word.width, 0);
+            xPos = (this.pageWidth - totalWidth) / 2;
+        } else if (config.align === 'right') {
+            const totalWidth = words.reduce((sum, word) => sum + word.width, 0);
+            xPos = this.pageWidth - this.margins.right - totalWidth;
+        }
+        
+        // Vẽ từng từ
+        words.forEach(word => {
+            // Thiết lập font và màu cho từng từ
+            this.doc.setFontSize(word.fontSize);
+            try {
+                this.doc.setFont('Roboto', word.style);
+            } catch {
+                this.doc.setFont('helvetica', word.style);
+            }
+            this.doc.setTextColor(word.color[0], word.color[1], word.color[2]);
+            
+            // Vẽ text
+            this.doc.text(word.text, xPos, y);
+            
+            // Cập nhật vị trí x
+            xPos += word.width;
+        });
+    }
+
+    // Thêm paragraph với định dạng hỗn hợp
+    addMixedParagraph(textParts, options = {}) {
+        const paragraphOptions = {
+            fontSize: 10,
+            color: [0, 0, 0],
+            lineHeight: 5,
+            align: 'left',
+            maxWidth: this.pageWidth - this.margins.left - this.margins.right,
+            spacing: 3, // Khoảng cách sau paragraph
+            ...options
+        };
+        
+        // Kiểm tra input
+        if (!Array.isArray(textParts) || textParts.length === 0) {
+            console.warn('addMixedParagraph: textParts phải là array không rỗng');
+            return this;
+        }
+        
+        // Thêm mixed text
+        this.addMixedText(textParts, paragraphOptions);
+        
+        // Thêm khoảng cách sau paragraph
+        this.currentY += paragraphOptions.spacing;
+        
+        return this;
+    }
+
+    // Helper functions cho mixed text
+    createTextPart(text, style = 'normal', color = null, fontSize = null) {
+        const part = { text, style };
+        if (color) part.color = Array.isArray(color) ? color : [0, 0, 0];
+        if (fontSize) part.fontSize = fontSize;
+        return part;
+    }
+
+    // Tạo bold text part
+    bold(text, color = null, fontSize = null) {
+        return this.createTextPart(text, 'bold', color, fontSize);
+    }
+
+    // Tạo italic text part  
+    italic(text, color = null, fontSize = null) {
+        return this.createTextPart(text, 'italic', color, fontSize);
+    }
+
+    // Tạo bold italic text part
+    boldItalic(text, color = null, fontSize = null) {
+        return this.createTextPart(text, 'bolditalic', color, fontSize);
+    }
+
+    // Tạo normal text part
+    normal(text, color = null, fontSize = null) {
+        return this.createTextPart(text, 'normal', color, fontSize);
+    }
+
+    // Tạo colored text part
+    colored(text, color, style = 'normal', fontSize = null) {
+        return this.createTextPart(text, style, color, fontSize);
+    }
+
+    // Thêm paragraph với helper functions
+    addStyledParagraph(textParts, options = {}) {
+        // Nếu textParts không phải array, convert thành array
+        if (!Array.isArray(textParts)) {
+            textParts = [textParts];
+        }
+        
+        return this.addMixedParagraph(textParts, options);
     }
 
     // Lấy thông tin trang
