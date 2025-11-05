@@ -224,7 +224,9 @@ class JsPdfService{
             // Thêm border nếu cần
             if (defaultOptions.border) {
                 this.doc.setLineWidth(defaultOptions.borderOptions.width);
-                this.doc.setDrawColor(...defaultOptions.borderOptions.color);
+                const borderColor = Array.isArray(defaultOptions.borderOptions.color) ? 
+                    defaultOptions.borderOptions.color : [0, 0, 0];
+                this.doc.setDrawColor(...borderColor);
                 this.doc.rect(xPos, this.currentY, width, height);
             }
             
@@ -925,7 +927,9 @@ class JsPdfService{
         } catch {
             this.doc.setFont('helvetica', leaderOptions.fontStyle);
         }
-        this.doc.setTextColor(...leaderOptions.color);
+        const leaderColor = Array.isArray(leaderOptions.color) ? 
+            leaderOptions.color : [0, 0, 0];
+        this.doc.setTextColor(...leaderColor);
         
         // Tính toán vị trí
         const leftTextWidth = this.doc.getTextWidth(leftText);
@@ -1198,6 +1202,450 @@ class JsPdfService{
             return price.toLocaleString('vi-VN') + ' ' + currency;
         }
         return price.toString() + ' ' + currency;
+    }
+
+    // Thêm Fill-in line (đường kẻ để điền thông tin)
+    addFillInLine(label = '', options = {}) {
+        const defaultFillOptions = {
+            lineCount: 1, // Số dòng kẻ
+            lineLength: 100, // Độ dài mỗi dòng
+            lineSpacing: 8, // Khoảng cách giữa các dòng
+            lineStyle: 'dots', // 'solid', 'dashed', 'dotted', 'dots'
+            lineWidth: 0.5, // Độ dày đường kẻ
+            lineColor: [0, 0, 0], // Màu đường kẻ
+            dotSpacing: 1, // Khoảng cách giữa các dấu chấm (cho style 'dots')
+            dotChar: '.', // Ký tự dùng cho dots
+            labelPosition: 'left', // 'left', 'right', 'above', 'below', 'none'
+            labelOptions: {
+                fontSize: 11,
+                fontStyle: 'normal',
+                color: [0, 0, 0],
+                spacing: 5 // Khoảng cách từ label đến line
+            },
+            align: 'left', // 'left', 'center', 'right'
+            showPlaceholder: false, // Hiển thị placeholder text
+            placeholderText: '(điền thông tin)',
+            placeholderOptions: {
+                fontSize: 9,
+                fontStyle: 'italic',
+                color: [150, 150, 150]
+            }
+        };
+
+        // Merge options safely
+        const fillOptions = {
+            ...defaultFillOptions,
+            ...options,
+            labelOptions: {
+                ...defaultFillOptions.labelOptions,
+                ...(options.labelOptions || {})
+            },
+            placeholderOptions: {
+                ...defaultFillOptions.placeholderOptions,
+                ...(options.placeholderOptions || {})
+            }
+        };
+
+        let startX, startY;
+        const yPos = this.currentY;
+
+        // Tính toán vị trí X dựa trên align
+        if (fillOptions.align === 'center') {
+            startX = (this.pageWidth - fillOptions.lineLength) / 2;
+        } else if (fillOptions.align === 'right') {
+            startX = this.pageWidth - this.margins.right - fillOptions.lineLength;
+        } else {
+            startX = this.margins.left;
+        }
+
+        // Xử lý label
+        if (label && fillOptions.labelPosition !== 'none') {
+            this.doc.setFontSize(fillOptions.labelOptions.fontSize);
+            try {
+                this.doc.setFont('Roboto', fillOptions.labelOptions.fontStyle);
+            } catch {
+                this.doc.setFont('helvetica', fillOptions.labelOptions.fontStyle);
+            }
+            const labelColor = Array.isArray(fillOptions.labelOptions.color) ? 
+                fillOptions.labelOptions.color : [0, 0, 0];
+            this.doc.setTextColor(...labelColor);
+
+            const labelWidth = this.doc.getTextWidth(label);
+
+            if (fillOptions.labelPosition === 'above') {
+                // Label ở trên
+                const labelX = fillOptions.align === 'center' ? 
+                    (this.pageWidth - labelWidth) / 2 : 
+                    (fillOptions.align === 'right' ? 
+                        this.pageWidth - this.margins.right - labelWidth : 
+                        this.margins.left);
+                this.doc.text(label, labelX, this.currentY);
+                this.currentY += fillOptions.labelOptions.spacing;
+            } else if (fillOptions.labelPosition === 'left') {
+                // Label ở bên trái
+                this.doc.text(label, this.margins.left, this.currentY);
+                startX = this.margins.left + labelWidth + fillOptions.labelOptions.spacing;
+                fillOptions.lineLength = Math.min(fillOptions.lineLength, 
+                    this.pageWidth - this.margins.right - startX);
+            } else if (fillOptions.labelPosition === 'right') {
+                // Label ở bên phải (vẽ line trước)
+                // Sẽ vẽ sau khi vẽ line
+            }
+        }
+
+        // Kiểm tra page break
+        const totalHeight = (fillOptions.lineCount - 1) * fillOptions.lineSpacing + 10;
+        this.checkPageBreak(totalHeight);
+
+        // Thiết lập style đường kẻ
+        this.doc.setLineWidth(fillOptions.lineWidth);
+        const drawColor = Array.isArray(fillOptions.lineColor) ? 
+            fillOptions.lineColor : [0, 0, 0];
+        this.doc.setDrawColor(...drawColor);
+
+        // Vẽ các đường kẻ hoặc dots
+        for (let i = 0; i < fillOptions.lineCount; i++) {
+            const lineY = this.currentY + (i * fillOptions.lineSpacing);
+            
+            if (fillOptions.lineStyle === 'dots') {
+                // Vẽ bằng dấu chấm
+                this.doc.setFontSize(fillOptions.labelOptions.fontSize);
+                try {
+                    this.doc.setFont('Roboto', 'normal');
+                } catch {
+                    this.doc.setFont('helvetica', 'normal');
+                }
+                const lineColor = Array.isArray(fillOptions.lineColor) ? 
+                    fillOptions.lineColor : [0, 0, 0];
+                this.doc.setTextColor(...lineColor);
+                
+                const dotWidth = this.doc.getTextWidth(fillOptions.dotChar);
+                const totalDots = Math.floor(fillOptions.lineLength / (dotWidth + fillOptions.dotSpacing));
+                
+                for (let j = 0; j < totalDots; j++) {
+                    const dotX = startX + (j * (dotWidth + fillOptions.dotSpacing));
+                    if (dotX + dotWidth <= startX + fillOptions.lineLength) {
+                        this.doc.text(fillOptions.dotChar, dotX, lineY);
+                    }
+                }
+            } else {
+                // Vẽ bằng đường kẻ thông thường
+                if (fillOptions.lineStyle === 'dashed') {
+                    this.doc.setLineDashPattern([3, 2], 0);
+                } else if (fillOptions.lineStyle === 'dotted') {
+                    this.doc.setLineDashPattern([1, 2], 0);
+                } else {
+                    this.doc.setLineDashPattern([], 0); // solid
+                }
+                
+                this.doc.line(startX, lineY, startX + fillOptions.lineLength, lineY);
+            }
+
+            // Thêm placeholder text nếu có
+            if (fillOptions.showPlaceholder && fillOptions.placeholderText) {
+                this.doc.setFontSize(fillOptions.placeholderOptions.fontSize);
+                try {
+                    this.doc.setFont('Roboto', fillOptions.placeholderOptions.fontStyle);
+                } catch {
+                    this.doc.setFont('helvetica', fillOptions.placeholderOptions.fontStyle);
+                }
+                const placeholderColor = Array.isArray(fillOptions.placeholderOptions.color) ? 
+                    fillOptions.placeholderOptions.color : [150, 150, 150];
+                this.doc.setTextColor(...placeholderColor);
+                
+                const placeholderY = lineY - 2; // Hơi trên đường kẻ một chút
+                this.doc.text(fillOptions.placeholderText, startX + 5, placeholderY);
+            }
+        }
+
+        // Reset line dash
+        this.doc.setLineDashPattern([], 0);
+
+        // Xử lý label bên phải (sau khi vẽ line)
+        if (label && fillOptions.labelPosition === 'right') {
+            this.doc.setFontSize(fillOptions.labelOptions.fontSize);
+            try {
+                this.doc.setFont('Roboto', fillOptions.labelOptions.fontStyle);
+            } catch {
+                this.doc.setFont('helvetica', fillOptions.labelOptions.fontStyle);
+            }
+            const rightLabelColor = Array.isArray(fillOptions.labelOptions.color) ? 
+                fillOptions.labelOptions.color : [0, 0, 0];
+            this.doc.setTextColor(...rightLabelColor);
+
+            const labelX = startX + fillOptions.lineLength + fillOptions.labelOptions.spacing;
+            this.doc.text(label, labelX, this.currentY);
+        }
+
+        // Xử lý label bên dưới
+        if (label && fillOptions.labelPosition === 'below') {
+            const finalLineY = this.currentY + ((fillOptions.lineCount - 1) * fillOptions.lineSpacing);
+            this.currentY = finalLineY + fillOptions.labelOptions.spacing;
+
+            const labelWidth = this.doc.getTextWidth(label);
+            const labelX = fillOptions.align === 'center' ? 
+                (this.pageWidth - labelWidth) / 2 : 
+                (fillOptions.align === 'right' ? 
+                    this.pageWidth - this.margins.right - labelWidth : 
+                    this.margins.left);
+            this.doc.text(label, labelX, this.currentY);
+        }
+
+        // Cập nhật currentY
+        this.currentY += ((fillOptions.lineCount - 1) * fillOptions.lineSpacing) + 10;
+
+        return this;
+    }
+
+    // Tạo form fill-in nhanh
+    addFillInForm(fields, options = {}) {
+        const formOptions = {
+            title: null,
+            titleOptions: {
+                fontSize: 14,
+                fontStyle: 'bold',
+                color: [0, 0, 0]
+            },
+            fieldSpacing: 12,
+            columns: 1, // Số cột
+            ...options
+        };
+
+        // Thêm tiêu đề form nếu có
+        if (formOptions.title) {
+            this.addText(formOptions.title, null, null, formOptions.titleOptions);
+            this.addSpace(8);
+        }
+
+        if (formOptions.columns === 1) {
+            // Single column
+            fields.forEach(field => {
+                const fieldOptions = {
+                    lineLength: 150,
+                    labelPosition: 'left',
+                    ...field.options
+                };
+                
+                this.addFillInLine(field.label || '', fieldOptions);
+                this.addSpace(formOptions.fieldSpacing - 10);
+            });
+        } else {
+            // Multi-column
+            const fieldsPerColumn = Math.ceil(fields.length / formOptions.columns);
+            const columnWidth = (this.pageWidth - this.margins.left - this.margins.right) / formOptions.columns;
+
+            for (let i = 0; i < fields.length; i += fieldsPerColumn) {
+                const columnFields = fields.slice(i, i + fieldsPerColumn);
+                const colIndex = Math.floor(i / fieldsPerColumn);
+                const originalY = this.currentY;
+
+                columnFields.forEach((field, fieldIndex) => {
+                    if (colIndex > 0) {
+                        this.currentY = originalY + (fieldIndex * formOptions.fieldSpacing);
+                    }
+
+                    const fieldOptions = {
+                        lineLength: columnWidth - 20,
+                        labelPosition: 'above',
+                        align: 'left',
+                        ...field.options
+                    };
+
+                    const startX = this.margins.left + (colIndex * columnWidth);
+                    
+                    // Override startX calculation
+                    const originalMarginLeft = this.margins.left;
+                    this.margins.left = startX;
+                    
+                    this.addFillInLine(field.label || '', fieldOptions);
+                    
+                    // Restore margins
+                    this.margins.left = originalMarginLeft;
+
+                    if (colIndex === 0) {
+                        // Chỉ increment Y cho cột đầu tiên
+                        this.addSpace(formOptions.fieldSpacing - 10);
+                    }
+                });
+            }
+        }
+
+        return this;
+    }
+
+    // Tạo signature line với fill-in
+    addSignatureFillIn(signers = [], options = {}) {
+        const sigOptions = {
+            layout: 'horizontal', // 'horizontal', 'vertical'
+            signatureWidth: 120,
+            dateWidth: 80,
+            spacing: 20,
+            showDate: true,
+            dateLabel: 'Ngày:',
+            signatureLabel: 'Chữ ký:',
+            nameLabel: 'Họ tên:',
+            titleLabel: 'Chức vụ:',
+            ...options
+        };
+
+        if (sigOptions.layout === 'horizontal') {
+            // Horizontal layout
+            const totalWidth = signers.length * (sigOptions.signatureWidth + sigOptions.spacing) - sigOptions.spacing;
+            let startX = (this.pageWidth - totalWidth) / 2;
+
+            signers.forEach((signer, index) => {
+                const signerX = startX + (index * (sigOptions.signatureWidth + sigOptions.spacing));
+                const originalMarginLeft = this.margins.left;
+                
+                // Tạm thời thay đổi margin
+                this.margins.left = signerX;
+
+                // Ngày
+                if (sigOptions.showDate) {
+                    this.addFillInLine(sigOptions.dateLabel, {
+                        lineLength: sigOptions.dateWidth,
+                        labelPosition: 'left',
+                        align: 'left'
+                    });
+                }
+
+                // Chức vụ/Title
+                if (signer.title) {
+                    this.addText(signer.title, signerX + (sigOptions.signatureWidth - this.doc.getTextWidth(signer.title)) / 2, null, {
+                        fontSize: 10,
+                        fontStyle: 'bold'
+                    });
+                }
+
+                // Chữ ký
+                this.addFillInLine(sigOptions.signatureLabel, {
+                    lineLength: sigOptions.signatureWidth,
+                    labelPosition: 'above',
+                    align: 'left'
+                });
+
+                // Họ tên
+                this.addFillInLine(sigOptions.nameLabel, {
+                    lineLength: sigOptions.signatureWidth,
+                    labelPosition: 'left',
+                    align: 'left'
+                });
+
+                // Restore margin
+                this.margins.left = originalMarginLeft;
+            });
+        } else {
+            // Vertical layout
+            signers.forEach(signer => {
+                if (signer.title) {
+                    this.addText(signer.title, null, null, {
+                        fontSize: 12,
+                        fontStyle: 'bold',
+                        align: 'center'
+                    });
+                }
+
+                if (sigOptions.showDate) {
+                    this.addFillInLine(sigOptions.dateLabel, {
+                        lineLength: sigOptions.dateWidth,
+                        labelPosition: 'left',
+                        align: 'center'
+                    });
+                }
+
+                this.addFillInLine(sigOptions.signatureLabel, {
+                    lineLength: sigOptions.signatureWidth,
+                    labelPosition: 'above',
+                    align: 'center'
+                });
+
+                this.addFillInLine(sigOptions.nameLabel, {
+                    lineLength: sigOptions.signatureWidth,
+                    labelPosition: 'left',
+                    align: 'center'
+                });
+
+                this.addSpace(sigOptions.spacing);
+            });
+        }
+
+        return this;
+    }
+
+    // Thêm dotted fill-in line (dấu chấm thay vì đường kẻ)
+    addDottedFillIn(label = '', options = {}) {
+        const dottedOptions = {
+            lineStyle: 'dots',
+            dotChar: '.',
+            dotSpacing: 2,
+            lineLength: 100,
+            labelPosition: 'left',
+            ...options
+        };
+        
+        return this.addFillInLine(label, dottedOptions);
+    }
+
+    // Thêm form với dotted lines
+    addDottedForm(fields, options = {}) {
+        const dottedFormOptions = {
+            fieldDefaults: {
+                lineStyle: 'dots',
+                dotChar: '.',
+                dotSpacing: 2
+            },
+            ...options
+        };
+
+        // Áp dụng dotted style cho tất cả fields
+        const processedFields = fields.map(field => ({
+            ...field,
+            options: {
+                ...dottedFormOptions.fieldDefaults,
+                ...field.options
+            }
+        }));
+
+        return this.addFillInForm(processedFields, dottedFormOptions);
+    }
+
+    // Thêm signature với dotted lines
+    addDottedSignature(signers = [], options = {}) {
+        const dottedSigOptions = {
+            lineStyle: 'dots',
+            dotChar: '.',
+            dotSpacing: 2,
+            ...options
+        };
+
+        // Override các fill-in methods tạm thời
+        const originalAddFillInLine = this.addFillInLine.bind(this);
+        this.addFillInLine = (label, opts = {}) => {
+            return originalAddFillInLine(label, {
+                lineStyle: 'dots',
+                dotChar: '.',
+                dotSpacing: 2,
+                ...opts
+            });
+        };
+
+        const result = this.addSignatureFillIn(signers, dottedSigOptions);
+
+        // Restore original method
+        this.addFillInLine = originalAddFillInLine;
+
+        return result;
+    }
+
+    // Thêm custom dotted pattern
+    addCustomDottedLine(label = '', pattern = '.', spacing = 2, length = 100, options = {}) {
+        return this.addFillInLine(label, {
+            lineStyle: 'dots',
+            dotChar: pattern,
+            dotSpacing: spacing,
+            lineLength: length,
+            ...options
+        });
     }
 
     // Lấy thông tin trang

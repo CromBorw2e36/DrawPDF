@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Debug</title>
+</head>
+<body>
+    <h1>Test Debug Fill-in Lines</h1>
+    <button onclick="testFillIn()">Test Fill-in</button>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+    <script src="jspdf-service.js"></script>
+    
+    <script>
+        function testFillIn() {
+            try {
+                const pdf = new JsPdfService();
+                
+                console.log('Testing basic fill-in...');
+                pdf.addFillInLine('Test:', {
+                    lineLength: 100,
+                    labelPosition: 'left'
+                });
+                
+                console.log('Testing custom dotted...');
+                pdf.addCustomDottedLine('Custom:', '.', 2, 100);
+                
+                console.log('Success! Generating PDF...');
+                pdf.savePDF('test-debug.pdf');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                console.error('Stack:', error.stack);
+            }
+        }
+    </script>
+</body>
+</html>

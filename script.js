@@ -800,6 +800,548 @@ function createRestaurantMenuDemo() {
     pdfService.savePDF('restaurant-menu-demo.pdf');
 }
 
+// Demo Fill-in Lines
+function createFillInLinesDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('Demo Fill-in Lines (Đường kẻ điền thông tin)')
+        .addSpace(20);
+    
+    // 1. Fill-in line cơ bản
+    pdfService.addSubTitle('1. Fill-in Lines Cơ Bản')
+        .addSpace(10);
+    
+    pdfService.addFillInLine('Họ và tên:', {
+        lineLength: 150,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addFillInLine('Số điện thoại:', {
+        lineLength: 100,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addFillInLine('', {
+        lineCount: 3,
+        lineLength: 180,
+        labelPosition: 'above',
+        align: 'center'
+    });
+    pdfService.addText('(Địa chỉ chi tiết)', null, null, {
+        fontSize: 9,
+        fontStyle: 'italic',
+        align: 'center',
+        color: [100, 100, 100]
+    });
+    
+    pdfService.addSpace(20);
+    
+    // 2. Các style khác nhau
+    pdfService.addSubTitle('2. Các Style Đường Kẻ')
+        .addSpace(10);
+    
+    pdfService.addFillInLine('Solid line:', {
+        lineStyle: 'dots',
+        lineWidth: 0.8,
+        lineLength: 120
+    });
+    
+    pdfService.addFillInLine('Dashed line:', {
+        lineStyle: 'dashed',
+        lineWidth: 0.8,
+        lineLength: 120
+    });
+    
+    pdfService.addFillInLine('Dotted line:', {
+        lineStyle: 'dotted',
+        lineWidth: 1,
+        lineLength: 120
+    });
+    
+    pdfService.addFillInLine('Dots pattern:', {
+        lineStyle: 'dots',
+        dotChar: '.',
+        dotSpacing: 2,
+        lineLength: 120
+    });
+    
+    pdfService.addFillInLine('Custom dots:', {
+        lineStyle: 'dots',
+        dotChar: '_',
+        dotSpacing: 1,
+        lineLength: 120
+    });
+    
+    pdfService.addSpace(20);
+    
+    // 3. Căn chỉnh khác nhau
+    pdfService.addSubTitle('3. Căn Chỉnh Khác Nhau')
+        .addSpace(10);
+    
+    pdfService.addFillInLine('Left align:', {
+        align: 'left',
+        lineLength: 100
+    });
+    
+    pdfService.addFillInLine('Center align:', {
+        align: 'center',
+        lineLength: 100
+    });
+    
+    pdfService.addFillInLine('Right align:', {
+        align: 'right',
+        lineLength: 100
+    });
+    
+    pdfService.addSpace(20);
+    
+    // 4. Label positions
+    pdfService.addSubTitle('4. Vị Trí Label Khác Nhau')
+        .addSpace(10);
+    
+    pdfService.addFillInLine('Label Above', {
+        labelPosition: 'above',
+        align: 'center',
+        lineLength: 120
+    });
+    
+    pdfService.addFillInLine('Label Left:', {
+        labelPosition: 'left',
+        lineLength: 100
+    });
+    
+    pdfService.addFillInLine('', {
+        labelPosition: 'right',
+        lineLength: 100
+    });
+    pdfService.addText(': Label Right', this.pageWidth - this.margins.right - 80, this.currentY - 15);
+    
+    pdfService.addFillInLine('Label Below', {
+        labelPosition: 'below',
+        align: 'center',
+        lineLength: 120
+    });
+    
+    pdfService.addSpace(20);
+    
+    // 5. Dotted Fill-in tiện ích
+    pdfService.addSubTitle('5. Dotted Fill-in Tiện Ích')
+        .addSpace(10);
+    
+    pdfService.addDottedFillIn('Sử dụng addDottedFillIn():', {
+        lineLength: 140
+    });
+    
+    pdfService.addCustomDottedLine('Custom pattern:', '_', 1, 120, {
+        labelPosition: 'left'
+    });
+    
+    pdfService.addCustomDottedLine('Dots xa nhau:', '.', 5, 120, {
+        labelPosition: 'left'
+    });
+    
+    pdfService.addNewPage();
+    
+    // 6. Form hoàn chỉnh với Line
+    pdfService.addSubTitle('6. Form Điền Thông Tin (Lines)')
+        .addSpace(15);
+    
+    const formFields = [
+        { label: 'Họ và tên đầy đủ:' },
+        { label: 'Ngày sinh:' },
+        { label: 'CMND/CCCD:' },
+        { label: 'Số điện thoại:' },
+        { label: 'Email:' },
+        { 
+            label: 'Địa chỉ thường trú:', 
+            options: { 
+                lineCount: 2,
+                lineLength: 160 
+            } 
+        },
+        { label: 'Nghề nghiệp:' },
+        { label: 'Nơi làm việc:' }
+    ];
+    
+    pdfService.addFillInForm(formFields, {
+        title: 'THÔNG TIN CÁ NHÂN (LINES)',
+        fieldSpacing: 15
+    });
+    
+    pdfService.addSpace(25);
+    
+    // 7. Form với Dotted style
+    pdfService.addSubTitle('7. Form Với Dotted Style')
+        .addSpace(15);
+    
+    const dottedFields = [
+        { label: 'Tên sản phẩm:' },
+        { label: 'Số lượng:' },
+        { label: 'Đơn giá:' },
+        { label: 'Ghi chú:', options: { lineCount: 2 } }
+    ];
+    
+    pdfService.addDottedForm(dottedFields, {
+        title: 'THÔNG TIN SẢN PHẨM (DOTS)',
+        fieldSpacing: 12
+    });
+    
+    pdfService.addSpace(30);
+    
+    // 8. Signature lines - Lines vs Dots
+    pdfService.addSubTitle('8. Chữ Ký Fill-in - So Sánh')
+        .addSpace(15);
+    
+    pdfService.addText('Chữ ký với Lines (truyền thống):', null, null, {
+        fontSize: 11,
+        fontStyle: 'bold'
+    });
+    
+    const signers = [
+        { title: 'NGƯỜI KÝ (LINES)' },
+        { title: 'NGƯỜI XÁC NHẬN' }
+    ];
+    
+    pdfService.addSignatureFillIn(signers, {
+        layout: 'horizontal',
+        showDate: true
+    });
+    
+    pdfService.addSpace(20);
+    
+    pdfService.addText('Chữ ký với Dots (phong cách mới):', null, null, {
+        fontSize: 11,
+        fontStyle: 'bold'
+    });
+    
+    const dottedSigners = [
+        { title: 'NGƯỜI KÝ (DOTS)' },
+        { title: 'NGƯỜI XÁC NHẬN' }
+    ];
+    
+    pdfService.addDottedSignature(dottedSigners, {
+        layout: 'horizontal',
+        showDate: true
+    });
+    
+    pdfService.savePDF('fill-in-lines-demo.pdf');
+}
+
+// Demo Form đăng ký
+function createRegistrationFormDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('PHIẾU ĐĂNG KÝ THAM GIA KHÓA HỌC')
+        .addSpace(20);
+    
+    // Thông tin cá nhân
+    const personalFields = [
+        { label: 'Họ và tên:' },
+        { label: 'Ngày sinh:' },
+        { label: 'Giới tính:' },
+        { label: 'CMND/CCCD:' },
+        { label: 'Số điện thoại:' },
+        { label: 'Email:' },
+        { 
+            label: 'Địa chỉ:', 
+            options: { 
+                lineCount: 2,
+                lineLength: 160 
+            } 
+        }
+    ];
+    
+    pdfService.addFillInForm(personalFields, {
+        title: 'I. THÔNG TIN CÁ NHÂN',
+        fieldSpacing: 12
+    });
+    
+    pdfService.addSpace(20);
+    
+    // Thông tin khóa học
+    pdfService.addSubTitle('II. THÔNG TIN KHÓA HỌC')
+        .addSpace(10);
+    
+    pdfService.addText('Khóa học đăng ký: □ Lập trình Web  □ Mobile App  □ Data Science  □ AI/ML', null, null, {
+        fontSize: 11
+    });
+    
+    pdfService.addSpace(10);
+    
+    pdfService.addFillInLine('Thời gian học mong muốn:', {
+        lineLength: 120,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addFillInLine('Ghi chú thêm:', {
+        lineCount: 3,
+        lineLength: 160,
+        labelPosition: 'above'
+    });
+    
+    pdfService.addSpace(30);
+    
+    // Cam kết
+    pdfService.addSubTitle('III. CAM KẾT')
+        .addSpace(10);
+    
+    pdfService.addText('Tôi cam kết:', null, null, { fontSize: 11 })
+        .addText('□ Tham gia đầy đủ các buổi học', null, null, { fontSize: 10 })
+        .addText('□ Hoàn thành đúng hạn các bài tập', null, null, { fontSize: 10 })
+        .addText('□ Tuân thủ nội quy của trung tâm', null, null, { fontSize: 10 });
+    
+    pdfService.addSpace(30);
+    
+    // Chữ ký
+    const registrationSigners = [
+        { title: 'HỌC VIÊN' },
+        { title: 'PHÒNG ĐÀO TẠO' }
+    ];
+    
+    pdfService.addSignatureFillIn(registrationSigners, {
+        layout: 'horizontal',
+        showDate: true,
+        signatureWidth: 100
+    });
+    
+    pdfService.savePDF('registration-form-demo.pdf');
+}
+
+// Demo Contract Template
+function createContractTemplateDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('HỢP ĐỒNG DỊCH VỤ')
+        .addSpace(15);
+    
+    // Bên A
+    pdfService.addSubTitle('BÊN A (Bên cung cấp dịch vụ):')
+        .addSpace(8);
+    
+    const partyAFields = [
+        { label: 'Tên công ty/tổ chức:' },
+        { label: 'Người đại diện:' },
+        { label: 'Chức vụ:' },
+        { label: 'Địa chỉ:', options: { lineCount: 2 } },
+        { label: 'Điện thoại:' },
+        { label: 'Email:' }
+    ];
+    
+    pdfService.addFillInForm(partyAFields, { fieldSpacing: 10 });
+    
+    pdfService.addSpace(15);
+    
+    // Bên B
+    pdfService.addSubTitle('BÊN B (Bên sử dụng dịch vụ):')
+        .addSpace(8);
+    
+    const partyBFields = [
+        { label: 'Tên khách hàng:' },
+        { label: 'CMND/CCCD/MST:' },
+        { label: 'Địa chỉ:', options: { lineCount: 2 } },
+        { label: 'Điện thoại:' },
+        { label: 'Email:' }
+    ];
+    
+    pdfService.addFillInForm(partyBFields, { fieldSpacing: 10 });
+    
+    pdfService.addSpace(20);
+    
+    // Nội dung hợp đồng
+    pdfService.addSubTitle('NỘI DUNG HỢP ĐỒNG:')
+        .addSpace(10);
+    
+    pdfService.addFillInLine('1. Dịch vụ cung cấp:', {
+        lineCount: 3,
+        lineLength: 160,
+        labelPosition: 'above'
+    });
+    
+    pdfService.addSpace(10);
+    
+    pdfService.addFillInLine('2. Thời gian thực hiện: Từ ngày', {
+        lineLength: 60,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addFillInLine('đến ngày', {
+        lineLength: 60,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addSpace(10);
+    
+    pdfService.addFillInLine('3. Tổng giá trị hợp đồng:', {
+        lineLength: 100,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addFillInLine('Bằng chữ:', {
+        lineCount: 2,
+        lineLength: 160,
+        labelPosition: 'left'
+    });
+    
+    pdfService.addSpace(30);
+    
+    // Chữ ký hợp đồng
+    const contractSigners = [
+        { title: 'ĐẠI DIỆN BÊN A' },
+        { title: 'ĐẠI DIỆN BÊN B' }
+    ];
+    
+    pdfService.addSignatureFillIn(contractSigners, {
+        layout: 'horizontal',
+        showDate: true
+    });
+    
+    pdfService.savePDF('contract-template-demo.pdf');
+}
+
+// Demo chuyên về Dotted Patterns
+function createDottedPatternsDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('DEMO DOTTED FILL-IN PATTERNS')
+        .addSpace(20);
+    
+    // 1. Các loại dots pattern
+    pdfService.addSubTitle('1. Các Loại Dots Pattern')
+        .addSpace(10);
+    
+    pdfService.addCustomDottedLine('Classic dots:', '.', 2, 150);
+    pdfService.addCustomDottedLine('Underscore:', '_', 1, 150);
+    pdfService.addCustomDottedLine('Dash pattern:', '-', 1, 150);
+    pdfService.addCustomDottedLine('Mixed pattern:', '.-', 1, 150);
+    pdfService.addCustomDottedLine('Space out:', '.', 8, 150);
+    
+    pdfService.addSpace(20);
+    
+    // 2. Different spacing
+    pdfService.addSubTitle('2. Khoảng Cách Khác Nhau')
+        .addSpace(10);
+    
+    for (let spacing = 1; spacing <= 6; spacing++) {
+        pdfService.addCustomDottedLine(`Spacing ${spacing}:`, '.', spacing, 120);
+    }
+    
+    pdfService.addSpace(20);
+    
+    // 3. Ứng dụng thực tế
+    pdfService.addSubTitle('3. Ứng Dụng Thực Tế - Phiếu Khám Bệnh')
+        .addSpace(10);
+    
+    const medicalFields = [
+        { label: 'Họ và tên bệnh nhân:' },
+        { label: 'Năm sinh:' },
+        { label: 'Địa chỉ:', options: { lineCount: 2 } },
+        { label: 'Triệu chứng:', options: { lineCount: 3 } },
+        { label: 'Chuẩn đoán:' },
+        { label: 'Đơn thuốc:', options: { lineCount: 4 } }
+    ];
+    
+    pdfService.addDottedForm(medicalFields, {
+        title: 'PHIẾU KHÁM BỆNH',
+        fieldSpacing: 12,
+        fieldDefaults: {
+            dotChar: '.',
+            dotSpacing: 2,
+            lineLength: 160
+        }
+    });
+    
+    pdfService.addSpace(25);
+    
+    // Chữ ký bác sĩ
+    pdfService.addDottedSignature([
+        { title: 'BÁC SĨ KHÁM' }
+    ], {
+        layout: 'vertical',
+        showDate: true
+    });
+    
+    pdfService.addNewPage();
+    
+    // 4. Invoice với dots
+    pdfService.addSubTitle('4. Hóa Đơn Với Dotted Lines')
+        .addSpace(15);
+    
+    pdfService.addText('CÔNG TY TNHH ABC', null, null, {
+        fontSize: 14,
+        fontStyle: 'bold',
+        align: 'center'
+    });
+    
+    pdfService.addText('HÓA ĐơN BÁN HÀNG', null, null, {
+        fontSize: 16,
+        fontStyle: 'bold',
+        align: 'center',
+        color: [200, 0, 0]
+    });
+    
+    pdfService.addSpace(15);
+    
+    const invoiceFields = [
+        { label: 'Khách hàng:' },
+        { label: 'Địa chỉ:' },
+        { label: 'Số điện thoại:' },
+        { label: 'Ngày mua:' }
+    ];
+    
+    pdfService.addDottedForm(invoiceFields, {
+        fieldSpacing: 10,
+        fieldDefaults: {
+            dotChar: '.',
+            dotSpacing: 3,
+            lineLength: 140
+        }
+    });
+    
+    pdfService.addSpace(20);
+    
+    // Bảng sản phẩm đơn giản
+    pdfService.addText('CHI TIẾT SẢN PHẨM:', null, null, {
+        fontSize: 12,
+        fontStyle: 'bold'
+    });
+    
+    for (let i = 1; i <= 5; i++) {
+        pdfService.addCustomDottedLine(`${i}. Sản phẩm:`, '.', 2, 100, {
+            labelPosition: 'left'
+        });
+        pdfService.addCustomDottedLine('SL:', '.', 2, 30, {
+            labelPosition: 'left'
+        });
+        pdfService.addCustomDottedLine('Giá:', '.', 2, 60, {
+            labelPosition: 'left'
+        });
+        pdfService.addSpace(5);
+    }
+    
+    pdfService.addSpace(15);
+    
+    pdfService.addCustomDottedLine('TỔNG CỘNG:', '.', 3, 100, {
+        labelPosition: 'left',
+        labelOptions: {
+            fontSize: 12,
+            fontStyle: 'bold'
+        }
+    });
+    
+    pdfService.addSpace(25);
+    
+    // Chữ ký hóa đơn
+    pdfService.addDottedSignature([
+        { title: 'NGƯỜI BÁN' },
+        { title: 'NGƯỜI MUA' }
+    ], {
+        layout: 'horizontal',
+        showDate: true
+    });
+    
+    pdfService.savePDF('dotted-patterns-demo.pdf');
+}
+
 console.log('📄 PDF Service đã sẵn sàng! Nhấn các button để test.');
 console.log('✍️ Các phương thức chữ ký mới:');
 console.log('- addSignatureFromFile(name, title, imagePath, date, options)');
@@ -815,3 +1357,12 @@ console.log('- addTableOfContents(items, options)');
 console.log('- addPriceList(items, options)');
 console.log('- addMenu(sections, options)');
 console.log('- addIndex(entries, options)');
+console.log('📝 Các phương thức Fill-in Lines mới:');
+console.log('- addFillInLine(label, options) - lineStyle: "solid"|"dashed"|"dotted"|"dots"');
+console.log('- addFillInForm(fields, options)');
+console.log('- addSignatureFillIn(signers, options)');
+console.log('🔹 Các phương thức Dotted mới:');
+console.log('- addDottedFillIn(label, options) - Dễ dùng cho dots');
+console.log('- addDottedForm(fields, options) - Form với dots');
+console.log('- addDottedSignature(signers, options) - Chữ ký dots');
+console.log('- addCustomDottedLine(label, pattern, spacing, length, options)');
