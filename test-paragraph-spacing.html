@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Paragraph Spacing Fix</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="jspdf-service.js"></script>
+</head>
+<body>
+    <h1>Test Khoảng Cách Paragraph</h1>
+    
+    <button onclick="testParagraphSpacing()">Test Paragraph Spacing</button>
+    <button onclick="testMixedParagraphSpacing()">Test Mixed Paragraph Spacing</button>
+    <button onclick="testBothTypes()">Test Both Types</button>
+    
+    <div id="result"></div>
+
+    <script>
+        function testParagraphSpacing() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Khoảng Cách Paragraph Thường");
+            
+            pdf.addParagraph("Đoạn văn số 1: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+            
+            pdf.addParagraph("Đoạn văn số 2: Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.");
+            
+            pdf.addParagraph("Đoạn văn số 3: Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.");
+            
+            pdf.addParagraph("Đoạn văn số 4 với spacing tùy chỉnh", { spacing: 5 });
+            
+            pdf.addParagraph("Đoạn văn số 5: Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+            
+            pdf.previewPDF();
+        }
+
+        function testMixedParagraphSpacing() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Khoảng Cách Mixed Paragraph");
+            
+            // Mixed paragraph 1
+            pdf.addMixedParagraph([
+                pdf.normal("Đoạn văn mixed số 1: "),
+                pdf.bold("Text in đậm "),
+                pdf.italic("text in nghiêng "),
+                pdf.normal("và text bình thường.")
+            ]);
+            
+            // Mixed paragraph 2  
+            pdf.addMixedParagraph([
+                pdf.normal("Đoạn văn mixed số 2: "),
+                pdf.colored("text có màu đỏ", [255, 0, 0]),
+                pdf.normal(" và "),
+                pdf.boldItalic("text vừa đậm vừa nghiêng.")
+            ]);
+            
+            // Mixed paragraph 3
+            pdf.addMixedParagraph([
+                pdf.normal("Đoạn văn mixed số 3: Với nội dung dài hơn để test xuống dòng tự động khi text vượt quá độ rộng tối đa của trang.")
+            ]);
+            
+            // Mixed paragraph với spacing tùy chỉnh
+            pdf.addMixedParagraph([
+                pdf.normal("Đoạn văn mixed số 4: "),
+                pdf.bold("Với spacing tùy chỉnh lớn hơn.")
+            ], { spacing: 8 });
+            
+            // Mixed paragraph 5
+            pdf.addMixedParagraph([
+                pdf.normal("Đoạn văn mixed số 5: "),
+                pdf.normal("Trở lại spacing bình thường.")
+            ]);
+            
+            pdf.previewPDF();
+        }
+
+        function testBothTypes() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Kết Hợp Cả Hai Loại Paragraph");
+            
+            pdf.addParagraph("Đoạn văn thường số 1: Đây là paragraph bình thường.");
+            
+            pdf.addMixedParagraph([
+                pdf.normal("Mixed paragraph số 1: "),
+                pdf.bold("Text in đậm"),
+                pdf.normal(" trong cùng dòng.")
+            ]);
+            
+            pdf.addParagraph("Đoạn văn thường số 2: Sau mixed paragraph.");
+            
+            pdf.addMixedParagraph([
+                pdf.italic("Mixed paragraph số 2: "),
+                pdf.normal("Với text nghiêng ở đầu.")
+            ]);
+            
+            pdf.addParagraph("Đoạn văn thường số 3: Kết thúc với paragraph bình thường.");
+            
+            // Test với spacing 0
+            pdf.addSubTitle("Test với spacing = 0:");
+            
+            pdf.addParagraph("Paragraph với spacing = 0", { spacing: 0 });
+            pdf.addMixedParagraph([
+                pdf.normal("Mixed paragraph với spacing = 0")
+            ], { spacing: 0 });
+            pdf.addParagraph("Paragraph tiếp theo sẽ sát nhau hơn", { spacing: 0 });
+            
+            pdf.previewPDF();
+        }
+    </script>
+</body>
+</html>

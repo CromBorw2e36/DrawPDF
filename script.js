@@ -1369,6 +1369,14 @@ console.log('- addCustomDottedLine(label, pattern, spacing, length, options)');
 console.log('🎨 Các phương thức Mixed Text mới:');
 console.log('- addMixedText(textParts, options) - Text với định dạng hỗn hợp');
 console.log('- addMixedParagraph(textParts, options) - Paragraph với định dạng hỗn hợp');
+console.log('📝 Các phương thức Auto-Numbering & Indentation mới:');
+console.log('- addNumberedText(text, options) - Text có số thứ tự với auto-indent');
+console.log('- addNumberedList(items, options) - Danh sách đánh số');
+console.log('- addMultiLevelList(items, options) - Danh sách nhiều cấp độ');
+console.log('- addOutline(items, options) - Mục lục tự động');
+console.log('- resetNumbering(style, startNumber) - Reset số đếm');
+console.log('- Hỗ trợ: decimal, roman, alpha, bullet numbering');
+console.log('- Tự động thụt lề và word wrapping cho text dài');
 
 // Test function cho Mixed Text
 function createMixedTextDemo() {
@@ -1482,4 +1490,375 @@ function createMixedTextDemo() {
     pdfService.savePDF('mixed-text-demo.pdf');
     
     console.log('✅ Mixed Text Demo PDF đã được tạo!');
+}
+
+// Demo Auto-Numbering và Indentation
+function createAutoNumberingDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('Demo Auto-Numbering & Indentation', {
+        fontSize: 18,
+        color: [0, 0, 139]
+    });
+    
+    pdfService.addSpace(10);
+    
+    // Demo 1: Simple numbered list
+    pdfService.addSubTitle('Demo 1: Danh Sách Đánh Số Đơn Giản');
+    
+    const items1 = [
+        'Đây là mục đầu tiên với text dài có thể xuống nhiều dòng để test tính năng auto-wrap và indent đúng cách',
+        'Mục thứ hai ngắn hơn',
+        'Mục thứ ba với nội dung trung bình để kiểm tra spacing và alignment',
+        'Mục cuối cùng trong danh sách này'
+    ];
+    
+    pdfService.addNumberedList(items1, {
+        title: 'Danh sách công việc:',
+        itemOptions: {
+            numberStyle: 'decimal',
+            fontSize: 11,
+            indent: 25
+        }
+    });
+    
+    pdfService.addSpace(15);
+    
+    // Demo 2: Different numbering styles
+    pdfService.addSubTitle('Demo 2: Các Kiểu Đánh Số Khác Nhau');
+    
+    // Roman numerals
+    pdfService.addText('Đánh số La Mã:', null, null, { fontSize: 12, fontStyle: 'bold' });
+    const romanItems = [
+        'Chương giới thiệu',
+        'Chương phát triển', 
+        'Chương kết luận'
+    ];
+    
+    pdfService.addNumberedList(romanItems, {
+        itemOptions: {
+            numberStyle: 'roman',
+            numberFormat: '{number})',
+            indent: 30
+        },
+        resetNumbers: true
+    });
+    
+    pdfService.addSpace(10);
+    
+    // Alpha numbering
+    pdfService.addText('Đánh số chữ cái:', null, null, { fontSize: 12, fontStyle: 'bold' });
+    const alphaItems = [
+        'Phương án A: Sử dụng công nghệ mới',
+        'Phương án B: Nâng cấp hệ thống hiện tại',
+        'Phương án C: Thuê ngoài dịch vụ'
+    ];
+    
+    pdfService.addNumberedList(alphaItems, {
+        itemOptions: {
+            numberStyle: 'alpha',
+            numberFormat: '{number}.',
+            indent: 25
+        },
+        resetNumbers: true
+    });
+    
+    pdfService.addSpace(10);
+    
+    // Bullet points
+    pdfService.addText('Bullet Points:', null, null, { fontSize: 12, fontStyle: 'bold' });
+    const bulletItems = [
+        'Điểm quan trọng số một',
+        'Điểm quan trọng số hai với text dài hơn để test word wrapping',
+        'Điểm cuối cùng'
+    ];
+    
+    pdfService.addNumberedList(bulletItems, {
+        itemOptions: {
+            numberStyle: 'bullet',
+            indent: 20
+        },
+        resetNumbers: true
+    });
+    
+    pdfService.addNewPage();
+    
+    // Demo 3: Multi-level lists
+    pdfService.addSubTitle('Demo 3: Danh Sách Nhiều Cấp Độ');
+    
+    const multiLevelItems = [
+        {
+            text: 'Mục chính thứ nhất',
+            subItems: [
+                'Mục con 1.1',
+                'Mục con 1.2 với text dài hơn để test indentation',
+                {
+                    text: 'Mục con 1.3 có sub-sub items',
+                    subItems: [
+                        'Mục con cấp 3 đầu tiên',
+                        'Mục con cấp 3 thứ hai',
+                        {
+                            text: 'Mục con cấp 3 có cấp 4',
+                            subItems: [
+                                'Bullet point cấp 4',
+                                'Bullet point cấp 4 thứ hai'
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            text: 'Mục chính thứ hai',
+            subItems: [
+                'Mục con 2.1',
+                'Mục con 2.2'
+            ]
+        },
+        'Mục chính thứ ba không có sub-items'
+    ];
+    
+    pdfService.addMultiLevelList(multiLevelItems);
+    
+    pdfService.addSpace(15);
+    
+    // Demo 4: Outline/Table of Contents
+    pdfService.addSubTitle('Demo 4: Outline/Mục Lục Tự Động');
+    
+    const outlineItems = [
+        {
+            title: 'Giới thiệu',
+            page: 1,
+            subItems: [
+                { title: 'Mục đích', page: 1 },
+                { title: 'Phạm vi', page: 2 }
+            ]
+        },
+        {
+            title: 'Nội dung chính',
+            page: 3,
+            subItems: [
+                { 
+                    title: 'Phần lý thuyết', 
+                    page: 3,
+                    subItems: [
+                        { title: 'Khái niệm cơ bản', page: 3 },
+                        { title: 'Phương pháp', page: 5 }
+                    ]
+                },
+                { title: 'Phần thực hành', page: 8 }
+            ]
+        },
+        { title: 'Kết luận', page: 12 },
+        { title: 'Tài liệu tham khảo', page: 15 }
+    ];
+    
+    pdfService.addOutline(outlineItems, {
+        title: 'MỤC LỤC CHI TIẾT',
+        showPageNumbers: true
+    });
+    
+    pdfService.addSpace(15);
+    
+    // Demo 5: Custom formatting
+    pdfService.addSubTitle('Demo 5: Định Dạng Tùy Chỉnh');
+    
+    const customItems = [
+        {
+            text: 'Mục với font size lớn hơn',
+            options: {
+                fontSize: 13,
+                fontStyle: 'bold',
+                color: [255, 0, 0],
+                numberFormat: '[{number}]',
+                indent: 30
+            }
+        },
+        {
+            text: 'Mục với màu xanh và italic',
+            options: {
+                fontSize: 11,
+                fontStyle: 'italic',
+                color: [0, 128, 0],
+                numberFormat: '({number})',
+                indent: 25
+            }
+        }
+    ];
+    
+    pdfService.addNumberedList(customItems, {
+        title: 'Danh sách tùy chỉnh:',
+        resetNumbers: true
+    });
+    
+    // Save PDF
+    pdfService.savePDF('auto-numbering-demo.pdf');
+    
+    console.log('✅ Auto-Numbering Demo PDF đã được tạo!');
+}
+
+// Demo cho các ứng dụng thực tế
+function createRealWorldNumberingDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('Ứng Dụng Thực Tế - Tài Liệu Kỹ Thuật', {
+        fontSize: 16,
+        color: [0, 0, 139]
+    });
+    
+    pdfService.addSpace(10);
+    
+    // Outline document structure
+    const docStructure = [
+        {
+            title: 'Tổng quan hệ thống',
+            page: 1,
+            subItems: [
+                { title: 'Kiến trúc tổng thể', page: 1 },
+                { title: 'Các thành phần chính', page: 2 }
+            ]
+        },
+        {
+            title: 'Hướng dẫn cài đặt',
+            page: 3,
+            subItems: [
+                { title: 'Yêu cầu hệ thống', page: 3 },
+                { title: 'Các bước cài đặt', page: 4 },
+                { title: 'Cấu hình ban đầu', page: 6 }
+            ]
+        },
+        {
+            title: 'Hướng dẫn sử dụng',
+            page: 8,
+            subItems: [
+                {
+                    title: 'Chức năng cơ bản',
+                    page: 8,
+                    subItems: [
+                        { title: 'Đăng nhập', page: 8 },
+                        { title: 'Quản lý dữ liệu', page: 9 }
+                    ]
+                },
+                { title: 'Chức năng nâng cao', page: 12 }
+            ]
+        }
+    ];
+    
+    pdfService.addOutline(docStructure, {
+        title: 'MỤC LỤC',
+        titleOptions: {
+            fontSize: 14,
+            fontStyle: 'bold',
+            align: 'center',
+            color: [0, 0, 139]
+        }
+    });
+    
+    pdfService.addNewPage();
+    
+    // Technical requirements
+    pdfService.addTitle('1. Yêu Cầu Hệ Thống', { fontSize: 14, fontStyle: 'bold' });
+    
+    const requirements = [
+        {
+            text: 'Yêu cầu phần cứng:',
+            subItems: [
+                'CPU: Intel Core i5 hoặc tương đương',
+                'RAM: Tối thiểu 8GB, khuyến nghị 16GB',
+                'Ổ cứng: 100GB dung lượng trống',
+                'Kết nối mạng: Băng thông tối thiểu 10Mbps'
+            ]
+        },
+        {
+            text: 'Yêu cầu phần mềm:',
+            subItems: [
+                'Hệ điều hành: Windows 10/11, macOS 10.15+, Ubuntu 20.04+',
+                'Trình duyệt: Chrome 90+, Firefox 88+, Safari 14+',
+                'Runtime: Node.js 16+, Python 3.8+',
+                {
+                    text: 'Cơ sở dữ liệu:',
+                    subItems: [
+                        'PostgreSQL 12+ (Production)',
+                        'MySQL 8.0+ (Development)',
+                        'SQLite 3.35+ (Testing)'
+                    ]
+                }
+            ]
+        }
+    ];
+    
+    pdfService.addMultiLevelList(requirements);
+    
+    pdfService.addSpace(15);
+    
+    // Installation steps
+    pdfService.addTitle('2. Các Bước Cài Đặt', { fontSize: 14, fontStyle: 'bold' });
+    
+    const installSteps = [
+        'Tải xuống package cài đặt từ trang web chính thức tại https://example.com/download',
+        'Giải nén file vào thư mục mong muốn (khuyến nghị: C:\\Program Files\\AppName)',
+        'Mở Command Prompt với quyền Administrator',
+        'Chạy lệnh cài đặt: setup.exe /S /D=C:\\Program Files\\AppName',
+        'Đợi quá trình cài đặt hoàn tất (khoảng 5-10 phút)',
+        'Khởi động lại máy tính để hoàn tất cài đặt',
+        'Chạy ứng dụng lần đầu và làm theo hướng dẫn setup wizard'
+    ];
+    
+    pdfService.addNumberedList(installSteps, {
+        title: 'Quy trình cài đặt chi tiết:',
+        itemOptions: {
+            fontSize: 11,
+            indent: 25,
+            numberFormat: 'Bước {number}:'
+        }
+    });
+    
+    pdfService.addSpace(10);
+    
+    // Troubleshooting section
+    pdfService.addTitle('3. Xử Lý Sự Cố', { fontSize: 14, fontStyle: 'bold' });
+    
+    const troubleshooting = [
+        {
+            text: 'Lỗi cài đặt không thành công:',
+            subItems: [
+                'Kiểm tra quyền Administrator',
+                'Tắt antivirus tạm thời',
+                'Đảm bảo đủ dung lượng ổ cứng',
+                'Xem log file tại: %TEMP%\\AppName_Install.log'
+            ]
+        },
+        {
+            text: 'Ứng dụng không khởi động:',
+            subItems: [
+                'Kiểm tra file cấu hình: config/app.json',
+                'Xác minh kết nối database',
+                'Kiểm tra port 8080 có bị chiếm không',
+                'Chạy ở chế độ debug: app.exe --debug'
+            ]
+        },
+        {
+            text: 'Lỗi kết nối mạng:',
+            subItems: [
+                'Kiểm tra firewall settings',
+                'Xác minh proxy configuration',
+                'Test kết nối: ping api.example.com',
+                'Kiểm tra SSL certificate'
+            ]
+        }
+    ];
+    
+    pdfService.addMultiLevelList(troubleshooting, {
+        level1: {
+            numberStyle: 'alpha',
+            numberFormat: '{number})',
+            fontSize: 11,
+            fontStyle: 'bold',
+            indent: 20
+        }
+    });
+    
+    pdfService.savePDF('technical-document-demo.pdf');
+    
+    console.log('✅ Technical Document Demo PDF đã được tạo!');
 }

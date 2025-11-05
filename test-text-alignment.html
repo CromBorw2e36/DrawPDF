@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Text Alignment - Canh Đều</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="jspdf-service.js"></script>
+</head>
+<body>
+    <h1>Test Text Alignment - Canh Đều</h1>
+    
+    <button onclick="testAllAlignments()">Test Tất Cả Kiểu Canh</button>
+    <button onclick="testJustifyOnly()">Test Chỉ Canh Đều</button>
+    <button onclick="testMixedJustify()">Test Mixed Text Canh Đều</button>
+    
+    <script>
+        function testAllAlignments() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Demo Các Kiểu Canh Text");
+            
+            const sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.";
+            
+            // Left align (mặc định)
+            pdf.addSubTitle("1. Canh Trái (Left):");
+            pdf.addParagraph(sampleText, { align: 'left' });
+            
+            // Center align
+            pdf.addSubTitle("2. Canh Giữa (Center):");
+            pdf.addParagraph(sampleText, { align: 'center' });
+            
+            // Right align
+            pdf.addSubTitle("3. Canh Phải (Right):");
+            pdf.addParagraph(sampleText, { align: 'right' });
+            
+            // Justify align
+            pdf.addSubTitle("4. Canh Đều (Justify):");
+            pdf.addParagraph(sampleText, { align: 'justify' });
+            
+            pdf.previewPDF();
+        }
+
+        function testJustifyOnly() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Demo Canh Đều Chi Tiết");
+            
+            pdf.addSubTitle("Văn bản dài - Canh Đều:");
+            const longText = "Đây là một đoạn văn bản dài để test tính năng canh đều. Khi sử dụng canh đều, khoảng cách giữa các từ sẽ được điều chỉnh để text đầy đều từ lề trái đến lề phải. Dòng cuối cùng của mỗi đoạn sẽ được canh trái bình thường để tránh khoảng cách quá lớn giữa các từ.";
+            
+            pdf.addParagraph(longText, { align: 'justify' });
+            
+            pdf.addSubTitle("Văn bản ngắn - So sánh:");
+            pdf.addText("Canh trái: Văn bản ngắn", null, null, { align: 'left' });
+            pdf.addText("Canh đều: Văn bản ngắn", null, null, { align: 'justify' });
+            
+            pdf.addSubTitle("Nhiều đoạn văn - Canh Đều:");
+            
+            pdf.addParagraph("Đoạn 1: Canh đều giúp văn bản trông chuyên nghiệp và dễ đọc hơn. Đặc biệt hữu ích cho các văn bản chính thức như báo cáo, sách, tài liệu.", { align: 'justify' });
+            
+            pdf.addParagraph("Đoạn 2: Tuy nhiên cần chú ý là không nên áp dụng canh đều cho các văn bản có từ quá dài hoặc câu quá ngắn vì có thể tạo ra khoảng cách không đều giữa các từ.", { align: 'justify' });
+            
+            pdf.addParagraph("Đoạn 3: Dòng cuối của mỗi đoạn luôn được canh trái để tránh việc kéo giãn quá mức.", { align: 'justify' });
+            
+            pdf.previewPDF();
+        }
+
+        function testMixedJustify() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Demo Mixed Text Canh Đều");
+            
+            pdf.addSubTitle("Mixed Text với Canh Đều:");
+            
+            // Mixed paragraph với justify
+            pdf.addMixedParagraph([
+                pdf.normal("Đây là "),
+                pdf.bold("mixed text "),
+                pdf.normal("với nhiều "),
+                pdf.italic("định dạng khác nhau "),
+                pdf.normal("được canh đều. "),
+                pdf.colored("Text màu đỏ", [255, 0, 0]),
+                pdf.normal(" cũng được "),
+                pdf.boldItalic("canh đều tốt "),
+                pdf.normal("như text bình thường.")
+            ], { align: 'justify' });
+            
+            pdf.addSubTitle("So sánh với Canh Trái:");
+            
+            // Cùng nội dung nhưng canh trái
+            pdf.addMixedParagraph([
+                pdf.normal("Đây là "),
+                pdf.bold("mixed text "),
+                pdf.normal("với nhiều "),
+                pdf.italic("định dạng khác nhau "),
+                pdf.normal("được canh trái. "),
+                pdf.colored("Text màu đỏ", [255, 0, 0]),
+                pdf.normal(" với "),
+                pdf.boldItalic("canh trái bình thường "),
+                pdf.normal("sẽ có vẻ không đều bằng.")
+            ], { align: 'left' });
+            
+            pdf.addSubTitle("Mixed Text Phức Tạp:");
+            
+            pdf.addMixedParagraph([
+                pdf.bold("Tiêu đề: "),
+                pdf.normal("Đây là một đoạn văn "),
+                pdf.italic("phức tạp "),
+                pdf.normal("với "),
+                pdf.colored("nhiều màu sắc", [0, 150, 0]),
+                pdf.normal(", "),
+                pdf.bold("font chữ khác nhau"),
+                pdf.normal(", và "),
+                pdf.colored("kích thước", [255, 100, 0], 'normal', 14),
+                pdf.normal(" đa dạng để kiểm tra tính năng canh đều của mixed text.")
+            ], { align: 'justify' });
+            
+            pdf.previewPDF();
+        }
+    </script>
+</body>
+</html>
