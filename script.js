@@ -557,6 +557,249 @@ async function generateAllPDFs() {
 }
 
 // Auto-run khi tải trang (chỉ chạy console log)
+// Demo Leader Dots
+function createLeaderDotsDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('Demo Leader Dots')
+        .addSpace(15);
+    
+    // 1. Leader dots cơ bản
+    pdfService.addSubTitle('1. Leader Dots Cơ Bản')
+        .addLeaderDots('Chương 1: Giới thiệu', '5')
+        .addLeaderDots('Chương 2: Phát triển', '15')
+        .addLeaderDots('Chương 3: Kết luận và khuyến nghị', '25')
+        .addSpace(15);
+    
+    // 2. Table of Contents
+    const tocItems = [
+        { title: 'Lời nói đầu', page: 3 },
+        { title: 'Chương 1: Tổng quan', page: 5 },
+        { title: '1.1 Khái niệm cơ bản', page: 7, isSubItem: true },
+        { title: '1.2 Phạm vi ứng dụng', page: 12, isSubItem: true },
+        { title: 'Chương 2: Thực hiện', page: 18 },
+        { title: '2.1 Chuẩn bị', page: 20, isSubItem: true },
+        { title: '2.2 Triển khai', page: 25, isSubItem: true },
+        { title: 'Kết luận', page: 35 },
+        { title: 'Tài liệu tham khảo', page: 40 }
+    ];
+    
+    pdfService.addTableOfContents(tocItems)
+        .addNewPage();
+    
+    // 3. Price List
+    const priceItems = [
+        { name: 'Combo A - Gà rán + Khoai tây + Nước ngọt', price: 85000 },
+        { name: 'Combo B - Burger bò + Khoai tây + Trà đá', price: 95000 },
+        { name: 'Combo C - Pizza cỡ vừa + Salad + Nước cam', price: 125000 },
+        { name: 'Gà rán (1 miếng)', price: 25000 },
+        { name: 'Khoai tây chiên (size M)', price: 20000 },
+        { name: 'Nước ngọt các loại', price: 15000 },
+        { name: 'Trà đá', price: 10000 }
+    ];
+    
+    pdfService.addPriceList(priceItems, {
+        title: 'BẢNG GIÁ THỨC ĂN NHANH'
+    }).addNewPage();
+    
+    // 4. Restaurant Menu
+    const menuSections = [
+        {
+            name: 'KHAI VỊ',
+            items: [
+                { name: 'Salad trộn', description: 'Rau xanh tươi, sốt mayonnaise', price: 45000 },
+                { name: 'Chả cá Lã Vọng', description: 'Đặc sản Hà Nội truyền thống', price: 85000 },
+                { name: 'Gỏi cuốn tôm thịt', description: '2 cuốn, kèm tương chấm', price: 35000 }
+            ]
+        },
+        {
+            name: 'MÓN CHÍNH',
+            items: [
+                { name: 'Phở bò tái chín', description: 'Nước dùng niêu 12 tiếng', price: 55000 },
+                { name: 'Cơm tấm sườn nướng', description: 'Kèm chả trứng, bì', price: 65000 },
+                { name: 'Bún bò Huế', description: 'Đậm đà hương vị cố đô', price: 50000 },
+                { name: 'Mì Quảng tôm cua', description: 'Bánh tráng nướng, rau thơm', price: 60000 }
+            ]
+        },
+        {
+            name: 'TRÁNG MIỆNG',
+            items: [
+                { name: 'Chè ba màu', description: 'Đậu xanh, đậu đỏ, thạch', price: 25000 },
+                { name: 'Kem flan', description: 'Làm tại nhà, thơm béo', price: 20000 },
+                { name: 'Trái cây tươi', description: 'Theo mùa', price: 30000 }
+            ]
+        }
+    ];
+    
+    pdfService.addMenu(menuSections, {
+        title: 'THỰC ĐƠN NHÀ HÀNG VIỆT NAM'
+    });
+    
+    pdfService.addFooter('Trang {pageNumber} / {totalPages}', {
+        align: 'center'
+    });
+    
+    pdfService.savePDF('leader-dots-demo.pdf');
+}
+
+// Demo Index
+function createIndexDemo() {
+    const pdfService = new JsPdfService();
+    
+    pdfService.addTitle('Demo Chỉ Mục (Index)')
+        .addSpace(15);
+    
+    const indexEntries = [
+        { term: 'API', pages: ['15', '23', '45'] },
+        { term: 'Authentication', pages: ['8', '12'] },
+        { term: 'Database', pages: ['25', '30', '35'] },
+        { term: 'Error Handling', pages: ['18', '42'] },
+        { term: 'Framework', pages: ['5', '10', '20'] },
+        { term: 'Git', pages: ['2', '7'] },
+        { term: 'HTML', pages: ['12', '15', '18', '22'] },
+        { term: 'JavaScript', pages: ['20', '25', '30', '35', '40'] },
+        { term: 'JSON', pages: ['28', '32'] },
+        { term: 'Node.js', pages: ['35', '38', '42'] },
+        { term: 'OAuth', pages: ['8', '13'] },
+        { term: 'PDF', pages: ['45', '48', '50'] },
+        { term: 'REST API', pages: ['15', '18', '22'] },
+        { term: 'Security', pages: ['8', '12', '16'] },
+        { term: 'Testing', pages: ['40', '43', '46'] },
+        { term: 'Validation', pages: ['18', '25'] },
+        { term: 'WebSocket', pages: ['32', '36'] },
+        { term: 'XML', pages: ['28', '31'] }
+    ];
+    
+    pdfService.addIndex(indexEntries, {
+        title: 'CHỈ MỤC THUẬT NGỮ',
+        columns: 2
+    });
+    
+    pdfService.addFooter('Trang {pageNumber} / {totalPages}');
+    pdfService.savePDF('index-demo.pdf');
+}
+
+// Demo chỉ Table of Contents
+function createTableOfContentsDemo() {
+    const pdfService = new JsPdfService();
+    
+    const tocItems = [
+        'Lời nói đầu',
+        { title: 'Chương I: TỔNG QUAN VỀ DỰ ÁN', page: 5 },
+        { title: '1.1. Mục tiêu dự án', page: 7, isSubItem: true },
+        { title: '1.2. Phạm vi thực hiện', page: 9, isSubItem: true },
+        { title: '1.3. Đối tượng hưởng lợi', page: 12, isSubItem: true },
+        { title: 'Chương II: KẾ HOẠCH THỰC HIỆN', page: 15 },
+        { title: '2.1. Giai đoạn chuẩn bị', page: 17, isSubItem: true },
+        { title: '2.2. Giai đoạn triển khai', page: 22, isSubItem: true },
+        { title: '2.3. Giai đoạn nghiệm thu', page: 28, isSubItem: true },
+        { title: 'Chương III: NGÂN SÁCH VÀ NGUỒN LỰC', page: 32 },
+        { title: '3.1. Dự toán chi phí', page: 34, isSubItem: true },
+        { title: '3.2. Nguồn kinh phí', page: 38, isSubItem: true },
+        { title: '3.3. Nhân lực thực hiện', page: 41, isSubItem: true },
+        { title: 'Chương IV: QUẢN LÝ RỦI RO', page: 45 },
+        { title: 'KẾT LUẬN VÀ KHUYẾN NGHỊ', page: 50 },
+        { title: 'PHỤ LỤC', page: 55 },
+        { title: 'TÀI LIỆU THAM KHẢO', page: 60 }
+    ];
+    
+    pdfService.addTableOfContents(tocItems, {
+        title: 'MỤC LỤC ĐỀ ÁN',
+        titleOptions: {
+            fontSize: 18,
+            fontStyle: 'bold',
+            align: 'center',
+            color: [0, 0, 139]
+        }
+    });
+    
+    pdfService.savePDF('table-of-contents-demo.pdf');
+}
+
+// Demo Restaurant Menu
+function createRestaurantMenuDemo() {
+    const pdfService = new JsPdfService();
+    
+    const menuSections = [
+        {
+            name: '🥗 SALAD & KHAI VỊ',
+            items: [
+                { name: 'Caesar Salad', description: 'Xà lách romaine, phô mai parmesan, crouton', price: 150000 },
+                { name: 'Salad Nga', description: 'Khoai tây, cà rốt, trứng, mayonnaise', price: 120000 },
+                { name: 'Gỏi cuốn tôm thịt', description: 'Bánh tráng tươi, rau thơm, tôm tươi', price: 80000 },
+                { name: 'Nem nướng Nha Trang', description: 'Bánh tráng, bún, rau sống', price: 95000 }
+            ]
+        },
+        {
+            name: '🍜 PHỞ & BÚN',
+            items: [
+                { name: 'Phở bò tái chín', description: 'Nước dùng niêu 24h, thịt bò Úc', price: 85000 },
+                { name: 'Phở gà', description: 'Gà ta thả vườn, nước dùng ngọt thanh', price: 75000 },
+                { name: 'Bún bò Huế', description: 'Đặc sản cố đô, chua cay đậm đà', price: 80000 },
+                { name: 'Bún chả Hà Nội', description: 'Thịt nướng than hoa, nem cua bể', price: 90000 },
+                { name: 'Bún riêu cua', description: 'Cua đồng tươi, cà chua, tóp mỡ', price: 70000 }
+            ]
+        },
+        {
+            name: '🍛 CỠM & MÌ',
+            items: [
+                { name: 'Cơm tấm sườn nướng', description: 'Sườn non nướng than, chả trứng, bì', price: 95000 },
+                { name: 'Cơm gà Hải Nam', description: 'Gà luộc, cơm nấu nước gà, nước mắm gừng', price: 85000 },
+                { name: 'Mì Quảng tôm cua', description: 'Bánh tráng nướng, quẹt ớt tôm', price: 90000 },
+                { name: 'Cao lầu Hội An', description: 'Mì vàng đặc biệt, char siu, rau thơm', price: 85000 }
+            ]
+        },
+        {
+            name: '🍹 THỨC UỐNG',
+            items: [
+                { name: 'Cà phê đen đá', description: 'Robusta Buôn Ma Thuột nguyên chất', price: 25000 },
+                { name: 'Cà phê sữa đá', description: 'Pha phin truyền thống, sữa đặc', price: 30000 },
+                { name: 'Trà đá chanh', description: 'Trà tươi, chanh tươi vắt', price: 20000 },
+                { name: 'Sinh tố bơ', description: 'Bơ 034 Đắk Lắk, sữa tươi', price: 45000 },
+                { name: 'Nước dừa tươi', description: 'Dừa xiêm xanh Bến Tre', price: 35000 }
+            ]
+        },
+        {
+            name: '🍰 TRÁNG MIỆNG',
+            items: [
+                { name: 'Chè ba màu', description: 'Đậu xanh, đậu đỏ, thạch lá cẩm', price: 35000 },
+                { name: 'Kem flan', description: 'Làm tại nhà, caramen đắng', price: 30000 },
+                { name: 'Bánh flan nướng', description: 'Trứng gà ta, vanilla Madagascar', price: 40000 },
+                { name: 'Trái cây theo mùa', description: 'Tùy theo mùa vụ', price: 50000 }
+            ]
+        }
+    ];
+    
+    pdfService.addMenu(menuSections, {
+        title: '🍽️ THỰC ĐƠN NHÀ HÀNG SÓNG VIỆT',
+        titleOptions: {
+            fontSize: 20,
+            fontStyle: 'bold',
+            align: 'center',
+            color: [220, 20, 60]
+        },
+        sectionOptions: {
+            fontSize: 14,
+            fontStyle: 'bold',
+            color: [0, 100, 0]
+        }
+    });
+    
+    pdfService.addSpace(20)
+        .addText('🏠 Địa chỉ: 123 Phố Cổ, Hoàn Kiếm, Hà Nội', null, null, {
+            fontSize: 10,
+            align: 'center',
+            color: [100, 100, 100]
+        })
+        .addText('📞 Hotline: 0987.654.321 | 🌐 Website: sóngviet.vn', null, null, {
+            fontSize: 10,
+            align: 'center',
+            color: [100, 100, 100]
+        });
+    
+    pdfService.savePDF('restaurant-menu-demo.pdf');
+}
+
 console.log('📄 PDF Service đã sẵn sàng! Nhấn các button để test.');
 console.log('✍️ Các phương thức chữ ký mới:');
 console.log('- addSignatureFromFile(name, title, imagePath, date, options)');
@@ -566,3 +809,9 @@ console.log('🖼️ Các phương thức ảnh mới:');
 console.log('- addImageFromPath(path, x, y, w, h, options)');
 console.log('- addImageFit(imageData, x, y, maxW, maxH, options)');
 console.log('- addImage() với options: align, caption, border, format');
+console.log('📑 Các phương thức Leader Dots mới:');
+console.log('- addLeaderDots(leftText, rightText, options)');
+console.log('- addTableOfContents(items, options)');
+console.log('- addPriceList(items, options)');
+console.log('- addMenu(sections, options)');
+console.log('- addIndex(entries, options)');

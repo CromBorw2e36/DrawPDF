@@ -903,6 +903,303 @@ class JsPdfService{
         return this;
     }
 
+    // Thêm leader dots (dấu chấm dẫn)
+    addLeaderDots(leftText, rightText, options = {}) {
+        const leaderOptions = {
+            fontSize: 11,
+            fontStyle: 'normal',
+            color: [0, 0, 0],
+            dotChar: '.',
+            dotSpacing: 3, // Khoảng cách giữa các dấu chấm
+            minDots: 3, // Số chấm tối thiểu
+            leftPadding: 5, // Khoảng cách sau text trái
+            rightPadding: 5, // Khoảng cách trước text phải
+            lineHeight: 6,
+            ...options
+        };
+        
+        // Thiết lập font
+        this.doc.setFontSize(leaderOptions.fontSize);
+        try {
+            this.doc.setFont('Roboto', leaderOptions.fontStyle);
+        } catch {
+            this.doc.setFont('helvetica', leaderOptions.fontStyle);
+        }
+        this.doc.setTextColor(...leaderOptions.color);
+        
+        // Tính toán vị trí
+        const leftTextWidth = this.doc.getTextWidth(leftText);
+        const rightTextWidth = this.doc.getTextWidth(rightText);
+        const dotWidth = this.doc.getTextWidth(leaderOptions.dotChar);
+        
+        const leftX = this.margins.left;
+        const rightX = this.pageWidth - this.margins.right - rightTextWidth;
+        const leftEndX = leftX + leftTextWidth + leaderOptions.leftPadding;
+        const rightStartX = rightX - leaderOptions.rightPadding;
+        
+        // Tính số lượng chấm
+        const availableWidth = rightStartX - leftEndX;
+        const dotsCount = Math.max(
+            leaderOptions.minDots, 
+            Math.floor(availableWidth / (dotWidth + leaderOptions.dotSpacing))
+        );
+        
+        // Kiểm tra page break
+        this.checkPageBreak(leaderOptions.lineHeight + 3);
+        
+        // Vẽ text trái
+        this.doc.text(leftText, leftX, this.currentY);
+        
+        // Vẽ các dấu chấm
+        let dotX = leftEndX;
+        for (let i = 0; i < dotsCount; i++) {
+            if (dotX + dotWidth <= rightStartX) {
+                this.doc.text(leaderOptions.dotChar, dotX, this.currentY);
+                dotX += dotWidth + leaderOptions.dotSpacing;
+            }
+        }
+        
+        // Vẽ text phải
+        this.doc.text(rightText, rightX, this.currentY);
+        
+        this.currentY += leaderOptions.lineHeight;
+        
+        return this;
+    }
+
+    // Thêm table of contents với leader dots
+    addTableOfContents(items, options = {}) {
+        const tocOptions = {
+            title: 'MỤC LỤC',
+            titleOptions: {
+                fontSize: 16,
+                fontStyle: 'bold',
+                align: 'center'
+            },
+            itemOptions: {
+                fontSize: 11,
+                fontStyle: 'normal',
+                indent: 0
+            },
+            subItemOptions: {
+                fontSize: 10,
+                fontStyle: 'normal',
+                indent: 15
+            },
+            ...options
+        };
+        
+        // Thêm tiêu đề mục lục
+        if (tocOptions.title) {
+            this.addText(tocOptions.title, null, null, tocOptions.titleOptions);
+            this.addSpace(10);
+        }
+        
+        // Thêm các mục
+        items.forEach(item => {
+            const itemText = typeof item === 'string' ? item : item.title;
+            const pageNum = typeof item === 'object' ? item.page : '';
+            const isSubItem = typeof item === 'object' && item.isSubItem;
+            
+            const itemOpts = isSubItem ? tocOptions.subItemOptions : tocOptions.itemOptions;
+            const leftPadding = itemOpts.indent || 0;
+            
+            // Tạo text với indent
+            const paddedText = ' '.repeat(leftPadding / 3) + itemText;
+            
+            this.addLeaderDots(paddedText, pageNum.toString(), {
+                ...itemOpts,
+                leftPadding: 5,
+                rightPadding: 5
+            });
+        });
+        
+        return this;
+    }
+
+    // Thêm price list với leader dots
+    addPriceList(items, options = {}) {
+        const priceOptions = {
+            title: 'BẢNG GIÁ',
+            titleOptions: {
+                fontSize: 16,
+                fontStyle: 'bold',
+                align: 'center'
+            },
+            itemOptions: {
+                fontSize: 11,
+                fontStyle: 'normal'
+            },
+            currency: 'VNĐ',
+            ...options
+        };
+        
+        // Thêm tiêu đề
+        if (priceOptions.title) {
+            this.addText(priceOptions.title, null, null, priceOptions.titleOptions);
+            this.addSpace(10);
+        }
+        
+        // Thêm các mục giá
+        items.forEach(item => {
+            const itemName = item.name || item.title;
+            const price = item.price || item.cost || 0;
+            const priceText = this.formatPrice(price, priceOptions.currency);
+            
+            this.addLeaderDots(itemName, priceText, {
+                ...priceOptions.itemOptions,
+                leftPadding: 8,
+                rightPadding: 8
+            });
+        });
+        
+        return this;
+    }
+
+    // Thêm menu với leader dots
+    addMenu(sections, options = {}) {
+        const menuOptions = {
+            title: 'THỰC ĐƠN',
+            titleOptions: {
+                fontSize: 18,
+                fontStyle: 'bold',
+                align: 'center',
+                color: [139, 0, 0]
+            },
+            sectionOptions: {
+                fontSize: 14,
+                fontStyle: 'bold',
+                color: [0, 0, 139]
+            },
+            itemOptions: {
+                fontSize: 11,
+                fontStyle: 'normal'
+            },
+            currency: 'VNĐ',
+            ...options
+        };
+        
+        // Thêm tiêu đề menu
+        if (menuOptions.title) {
+            this.addText(menuOptions.title, null, null, menuOptions.titleOptions);
+            this.addSpace(15);
+        }
+        
+        // Thêm các section
+        sections.forEach(section => {
+            // Tên section
+            this.addText(section.name, null, null, menuOptions.sectionOptions);
+            this.addSpace(8);
+            
+            // Các món trong section
+            section.items.forEach(item => {
+                const dishName = `${item.name}${item.description ? ` - ${item.description}` : ''}`;
+                const priceText = this.formatPrice(item.price, menuOptions.currency);
+                
+                this.addLeaderDots(dishName, priceText, {
+                    ...menuOptions.itemOptions,
+                    leftPadding: 10,
+                    rightPadding: 10,
+                    dotChar: '.',
+                    dotSpacing: 2
+                });
+            });
+            
+            this.addSpace(12);
+        });
+        
+        return this;
+    }
+
+    // Thêm index với leader dots
+    addIndex(entries, options = {}) {
+        const indexOptions = {
+            title: 'CHỈ MỤC',
+            titleOptions: {
+                fontSize: 16,
+                fontStyle: 'bold',
+                align: 'center'
+            },
+            itemOptions: {
+                fontSize: 10,
+                fontStyle: 'normal'
+            },
+            columns: 2, // Số cột
+            ...options
+        };
+        
+        // Thêm tiêu đề
+        if (indexOptions.title) {
+            this.addText(indexOptions.title, null, null, indexOptions.titleOptions);
+            this.addSpace(10);
+        }
+        
+        if (indexOptions.columns === 1) {
+            // Single column
+            entries.forEach(entry => {
+                this.addLeaderDots(entry.term, entry.pages.join(', '), {
+                    ...indexOptions.itemOptions,
+                    leftPadding: 5,
+                    rightPadding: 5,
+                    lineHeight: 5
+                });
+            });
+        } else {
+            // Multiple columns
+            const itemsPerColumn = Math.ceil(entries.length / indexOptions.columns);
+            const columnWidth = (this.pageWidth - this.margins.left - this.margins.right) / indexOptions.columns;
+            
+            for (let col = 0; col < indexOptions.columns; col++) {
+                const startIdx = col * itemsPerColumn;
+                const endIdx = Math.min(startIdx + itemsPerColumn, entries.length);
+                const columnItems = entries.slice(startIdx, endIdx);
+                
+                const originalY = this.currentY;
+                const columnX = this.margins.left + (col * columnWidth);
+                
+                // Reset Y cho cột mới (trừ cột đầu tiên)
+                if (col > 0) this.currentY = originalY;
+                
+                columnItems.forEach(entry => {
+                    const termWidth = this.doc.getTextWidth(entry.term);
+                    const pagesWidth = this.doc.getTextWidth(entry.pages.join(', '));
+                    
+                    // Tính toán leader dots cho cột
+                    this.doc.setFontSize(indexOptions.itemOptions.fontSize);
+                    const dotWidth = this.doc.getTextWidth('.');
+                    const availableWidth = columnWidth - termWidth - pagesWidth - 15;
+                    const dotsCount = Math.max(3, Math.floor(availableWidth / (dotWidth + 2)));
+                    
+                    // Vẽ term
+                    this.doc.text(entry.term, columnX, this.currentY);
+                    
+                    // Vẽ dots
+                    let dotX = columnX + termWidth + 5;
+                    for (let i = 0; i < dotsCount; i++) {
+                        this.doc.text('.', dotX, this.currentY);
+                        dotX += dotWidth + 2;
+                    }
+                    
+                    // Vẽ pages
+                    const pageX = columnX + columnWidth - pagesWidth - 5;
+                    this.doc.text(entry.pages.join(', '), pageX, this.currentY);
+                    
+                    this.currentY += 5;
+                });
+            }
+        }
+        
+        return this;
+    }
+
+    // Format giá tiền
+    formatPrice(price, currency = 'VNĐ') {
+        if (typeof price === 'number') {
+            return price.toLocaleString('vi-VN') + ' ' + currency;
+        }
+        return price.toString() + ' ' + currency;
+    }
+
     // Lấy thông tin trang
     getPageInfo() {
         return {
