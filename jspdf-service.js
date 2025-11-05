@@ -650,6 +650,7 @@ class JsPdfService {
       fontSize: 11,
       titleFontSize: 10,
       nameFontSize: 12,
+      dateFontSize: 10,
       spacing: 8,
       imageWidth: 60,
       imageHeight: 20,
@@ -675,12 +676,13 @@ class JsPdfService {
     // Ngày tháng - căn giữa trong khối
     this.doc.setFontSize(signatureOptions.fontSize);
     try {
-      this.doc.setFont("Roboto", "normal");
+      this.doc.setFont("Roboto",  "bold");
     } catch {
-      this.doc.setFont("helvetica", "normal");
+      this.doc.setFont("helvetica", "bold");
     }
     this.doc.setTextColor(0, 0, 0);
 
+    this.doc.setFontSize(signatureOptions.dateFontSize);
     const dateWidth = this.doc.getTextWidth(currentDate);
     const dateX = centerX - dateWidth / 2;
     this.doc.text(currentDate, dateX, this.currentY);
@@ -700,7 +702,7 @@ class JsPdfService {
     this.currentY += 5;
 
     // Ghi chú ký tên - căn giữa trong khối
-    const noteText = "(Ký và ghi rõ họ tên)";
+    const noteText = signatureOptions.noteText ?? "(Ký và ghi rõ họ tên)";
     this.doc.setFontSize(9);
     try {
       this.doc.setFont("Roboto", "italic");
@@ -889,20 +891,20 @@ class JsPdfService {
 
     // Date trái - hỗ trợ mixed text
     const leftDate = leftSig.date || new Date().toLocaleDateString("vi-VN");
-    this.renderCenteredText(leftDate, leftCenterX, this.currentY, 11, 'normal');
+    this.renderCenteredText(leftDate, leftCenterX, this.currentY, 11, "normal");
     this.currentY += 8;
 
     // Title trái - hỗ trợ mixed text
-    this.renderCenteredText(leftSig.title, leftCenterX, this.currentY, 10, 'bold');
+    this.renderCenteredText(leftSig.title, leftCenterX, this.currentY, 10, "bold");
     this.currentY += 5;
 
     // Note trái
     const leftNote = "(Ký và ghi rõ họ tên)";
-    this.renderCenteredText(leftNote, leftCenterX, this.currentY, 9, 'italic', [100, 100, 100]);
+    this.renderCenteredText(leftNote, leftCenterX, this.currentY, 9, "italic", [100, 100, 100]);
     this.currentY += 25;
 
     // Name trái - hỗ trợ mixed text
-    this.renderCenteredText(leftSig.name, leftCenterX, this.currentY, 11, 'bold');
+    this.renderCenteredText(leftSig.name, leftCenterX, this.currentY, 11, "bold");
 
     const leftEndY = this.currentY;
 
@@ -911,20 +913,20 @@ class JsPdfService {
 
     // Date phải - hỗ trợ mixed text
     const rightDate = rightSig.date || new Date().toLocaleDateString("vi-VN");
-    this.renderCenteredText(rightDate, rightCenterX, this.currentY, 11, 'normal');
+    this.renderCenteredText(rightDate, rightCenterX, this.currentY, 11, "normal");
     this.currentY += 8;
 
     // Title phải - hỗ trợ mixed text
-    this.renderCenteredText(rightSig.title, rightCenterX, this.currentY, 10, 'bold');
+    this.renderCenteredText(rightSig.title, rightCenterX, this.currentY, 10, "bold");
     this.currentY += 5;
 
     // Note phải
     const rightNote = "(Ký và ghi rõ họ tên)";
-    this.renderCenteredText(rightNote, rightCenterX, this.currentY, 9, 'italic', [100, 100, 100]);
+    this.renderCenteredText(rightNote, rightCenterX, this.currentY, 9, "italic", [100, 100, 100]);
     this.currentY += 25;
 
     // Name phải - hỗ trợ mixed text
-    this.renderCenteredText(rightSig.name, rightCenterX, this.currentY, 11, 'bold');
+    this.renderCenteredText(rightSig.name, rightCenterX, this.currentY, 11, "bold");
 
     // Điều chỉnh Y về vị trí thấp nhất
     this.currentY = Math.max(leftEndY, this.currentY) + 10;
@@ -933,7 +935,7 @@ class JsPdfService {
   }
 
   // Hàm helper để render text căn giữa (hỗ trợ cả text và mixed text)
-  renderCenteredText(content, centerX, y, fontSize = 11, fontStyle = 'normal', color = [0, 0, 0]) {
+  renderCenteredText(content, centerX, y, fontSize = 11, fontStyle = "normal", color = [0, 0, 0]) {
     // Kiểm tra nếu content là mixed text (array hoặc object có thuộc tính text)
     if (Array.isArray(content)) {
       // Xử lý mixed text array
@@ -942,33 +944,33 @@ class JsPdfService {
       
       // Tính tổng độ rộng để căn giữa
       let totalWidth = 0;
-      content.forEach(part => {
-        const text = typeof part === 'string' ? part : part.text;
-        const partFontSize = (typeof part === 'object' && part.fontSize) ? part.fontSize : fontSize;
-        const partStyle = (typeof part === 'object' && part.style) ? part.style : fontStyle;
+      content.forEach((part) => {
+        const text = typeof part === "string" ? part : part.text;
+        const partFontSize = typeof part === "object" && part.fontSize ? part.fontSize : fontSize;
+        const partStyle = typeof part === "object" && part.style ? part.style : fontStyle;
         
         this.doc.setFontSize(partFontSize);
         try {
-          this.doc.setFont('Roboto', partStyle);
+          this.doc.setFont("Roboto", partStyle);
         } catch {
-          this.doc.setFont('helvetica', partStyle);
+          this.doc.setFont("helvetica", partStyle);
         }
         totalWidth += this.doc.getTextWidth(text);
       });
       
       // Vẽ mixed text căn giữa
-      let currentX = centerX - (totalWidth / 2);
-      content.forEach(part => {
-        const text = typeof part === 'string' ? part : part.text;
-        const partFontSize = (typeof part === 'object' && part.fontSize) ? part.fontSize : fontSize;
-        const partStyle = (typeof part === 'object' && part.style) ? part.style : fontStyle;
-        const partColor = (typeof part === 'object' && part.color) ? part.color : color;
+      let currentX = centerX - totalWidth / 2;
+      content.forEach((part) => {
+        const text = typeof part === "string" ? part : part.text;
+        const partFontSize = typeof part === "object" && part.fontSize ? part.fontSize : fontSize;
+        const partStyle = typeof part === "object" && part.style ? part.style : fontStyle;
+        const partColor = typeof part === "object" && part.color ? part.color : color;
         
         this.doc.setFontSize(partFontSize);
         try {
-          this.doc.setFont('Roboto', partStyle);
+          this.doc.setFont("Roboto", partStyle);
         } catch {
-          this.doc.setFont('helvetica', partStyle);
+          this.doc.setFont("helvetica", partStyle);
         }
         this.doc.setTextColor(partColor[0], partColor[1], partColor[2]);
         
@@ -977,7 +979,7 @@ class JsPdfService {
       });
       
       this.currentY = tempY;
-    } else if (typeof content === 'object' && content.text) {
+    } else if (typeof content === "object" && content.text) {
       // Xử lý single text part object
       const text = content.text;
       const partFontSize = content.fontSize || fontSize;
@@ -986,27 +988,27 @@ class JsPdfService {
       
       this.doc.setFontSize(partFontSize);
       try {
-        this.doc.setFont('Roboto', partStyle);
+        this.doc.setFont("Roboto", partStyle);
       } catch {
-        this.doc.setFont('helvetica', partStyle);
+        this.doc.setFont("helvetica", partStyle);
       }
       this.doc.setTextColor(partColor[0], partColor[1], partColor[2]);
       
       const textWidth = this.doc.getTextWidth(text);
-      this.doc.text(text, centerX - (textWidth / 2), y);
+      this.doc.text(text, centerX - textWidth / 2, y);
     } else {
       // Xử lý text đơn giản
       const text = content.toString();
       this.doc.setFontSize(fontSize);
       try {
-        this.doc.setFont('Roboto', fontStyle);
+        this.doc.setFont("Roboto", fontStyle);
       } catch {
-        this.doc.setFont('helvetica', fontStyle);
+        this.doc.setFont("helvetica", fontStyle);
       }
       this.doc.setTextColor(color[0], color[1], color[2]);
       
       const textWidth = this.doc.getTextWidth(text);
-      this.doc.text(text, centerX - (textWidth / 2), y);
+      this.doc.text(text, centerX - textWidth / 2, y);
     }
   }
 
