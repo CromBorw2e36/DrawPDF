@@ -26,7 +26,39 @@ async function init(data = {}) {
 
   // =========================================================
   // HEADER
-  pdf.addTitle("BẢNG ĐÁNH GIÁ ỨNG VIÊN", { fontFamily: "Roboto" }).addSpace(4);
+  // pdf.addTitle("BẢNG ĐÁNH GIÁ ỨNG VIÊN", { fontFamily: "Roboto" }).addSpace(4);
+  doc.autoTable({
+    startY: pdf.getCurrentY() - 10,
+    theme: "grid",
+    margin: { left: M.left, right: M.right },
+    tableWidth: usableW, 
+    styles: {
+      font: "Roboto",
+      fontStyle: "bold",
+      fontSize: 17,
+      cellPadding: 2,
+      valign: "middle",     
+      minCellHeight: 20,
+    },
+    body: [
+      [{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"],
+    ],    columnStyles: {
+      0: { cellWidth: 50 }, 
+      1: { cellWidth: usableW - 50 + 5, halign: "center" }, 
+    },
+    didDrawCell: function (dataCell) {
+      // Chèn ảnh vào cột đầu tiên
+      data.imgPath = "../image/hong-hung-logo.png"; 
+      if (dataCell.column.index === 0 && dataCell.row.index === 0 && data.imgPath) {
+        const { x, y, width, height } = dataCell.cell;
+        const imgSize = Math.min(width, height) - 4; 
+        const imgX = x + (width - imgSize) / 2;
+        const imgY = y + (height - imgSize) / 2;
+        doc.addImage(data.imgPath, "PNG", imgX, imgY, imgSize, imgSize);
+      }
+    },
+  });
+  pdf.addSpace(20);  
   setRoboto("normal");
 
   // =========================================================
@@ -36,6 +68,7 @@ async function init(data = {}) {
     fontFamily: "Roboto",
     lineHeight: pdf.lineHeight,
   });
+
   doc.autoTable({
     startY: pdf.getCurrentY() + 2,
     theme: "grid",
@@ -158,7 +191,40 @@ async function init(data = {}) {
   // =========================================================
   // TRANG 2
   pdf.addNewPage();
-  pdf.addTitle("BẢNG ĐÁNH GIÁ ỨNG VIÊN", { fontFamily: "Roboto" }).addSpace(4);
+
+  doc.autoTable({
+    startY: pdf.getCurrentY() - 10,
+    theme: "grid",
+    margin: { left: M.left, right: M.right },
+    tableWidth: usableW, 
+    styles: {
+      font: "Roboto",
+      fontStyle: "bold",
+      fontSize: 17,
+      cellPadding: 2,
+      valign: "middle",     
+      minCellHeight: 20,
+    },
+    body: [
+      [{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"],
+    ],    columnStyles: {
+      0: { cellWidth: 50 }, 
+      1: { cellWidth: usableW - 50 , halign: "center" }, 
+    },
+    didDrawCell: function (dataCell) {
+      // Chèn ảnh vào cột đầu tiên
+      data.imgPath = "../image/hong-hung-logo.png"; 
+      if (dataCell.column.index === 0 && dataCell.row.index === 0 && data.imgPath) {
+        const { x, y, width, height } = dataCell.cell;
+        const imgSize = Math.min(width, height) - 4; 
+        const imgX = x + (width - imgSize) / 2;
+        const imgY = y + (height - imgSize) / 2;
+        doc.addImage(data.imgPath, "PNG", imgX, imgY, imgSize, imgSize);
+      }
+    },
+  });
+  pdf.addSpace(15); 
+
   // Thiết lập font size 10 cho nội dung trang 2
   doc.setFontSize(10);
   // ---- block phỏng vấn: nhãn trái + khung phải
@@ -224,7 +290,7 @@ async function init(data = {}) {
 
   // =========================================================
   // 3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ
-  pdf.addSpace(4).addSubTitle("3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ", {
+  pdf.addSpace(10).addSubTitle("3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ", {
     fontSize: 12,
     fontFamily: "Roboto",
     lineHeight: pdf.lineHeight,
@@ -274,16 +340,18 @@ async function init(data = {}) {
   setRoboto("normal");
   doc.text("Họ tên:", rightX + 8, topY + 18);
   doc.text("Ngày: ......./....../.........", rightX + 8, topY + 25);
-  // vùng ký tên
-  doc.text("(Ký và ghi rõ họ tên)", rightX + rightW / 2, topY + 35, { align: "center" });
-  // đường gạch ký
-  doc.line(rightX + 14, topY + 50, rightX + rightW - 14, topY + 50);
+
+  //Note chỉnh sửa: Chổ này nên để add hình chữ ký số nếu có
 
   pdf.resetPosition(topY + blockH + 4);
 
   // Footer (số trang)
-  pdf.addFooter("Trang {pageNumber}/{totalPages}", { fontFamily: "Roboto" });
-
+  pdf.addFooter("Trang {pageNumber}/{totalPages}", { fontFamily: "Roboto" })
+      .addFooter("HDY-HRD-SOP01.F05 (01-01/10/2024)", {
+            align: "left",
+            fontSize: 8,
+            color: [128, 128, 128],
+          });
   // Generate PDF and display in iframe
   const pdfDataUrl = pdf.generateDataURL();
   console.log(pdfDataUrl);
