@@ -12,14 +12,22 @@ async function init(data = {}) {
 
   // ====== helpers nội bộ ======
   const setRoboto = (style = "normal") => doc.setFont("Roboto", style);
-  const box = (x, y, w, h) => doc.rect(x, y, w, h);
-  const tick = (x, y, checked) => {
+  const box = (x, y, w, h) => doc.rect(x, y, w, h);  const tick = (x, y, checked, style = "X") => {
     doc.rect(x, y, 4, 4);
     if (checked) {
       const lw = doc.getLineWidth();
       doc.setLineWidth(0.5);
-      doc.line(x + 0.7, y + 0.7, x + 3.3, y + 3.3);
-      doc.line(x + 3.3, y + 0.7, x + 0.7, y + 3.3);
+      
+      if (style === "V" || style === "check") {
+        // Vẽ dấu V (checkmark)
+        doc.line(x + 0.8, y + 2.2, x + 1.8, y + 3.0);
+        doc.line(x + 1.8, y + 3.0, x + 3.2, y + 1.0);
+      } else {
+        // Vẽ dấu X (mặc định)
+        doc.line(x + 0.7, y + 0.7, x + 3.3, y + 3.3);
+        doc.line(x + 3.3, y + 0.7, x + 0.7, y + 3.3);
+      }
+      
       doc.setLineWidth(lw);
     }
   };
@@ -247,9 +255,11 @@ async function init(data = {}) {
   doc.setFontSize(10);
   // ---- block phỏng vấn: nhãn trái + khung phải
   function drawInterviewBlock(label, pass, fail, height, obj = {}) {
+    obj.label = null;
     obj.content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet, mauris in tristique lobortis, dolor quam pulvinar velit, in fringilla nisl magna at metus. Nullam suscipit a magna ut porttitor. Nunc lacus arcu, ornare in iaculis a, interdum nec ligula. Morbi vestibulum volutpat ultrices.";
     obj.name = "Nguyễn Văn A";
     obj.pathSignature = "../image/chu-ki-mau.jpg";
+
     const col1W = 42;
     const x1 = M.left,
       y1 = pdf.getCurrentY() + 2;
@@ -307,13 +317,15 @@ async function init(data = {}) {
       "Họ và tên: " + (obj.name || "........................................................"),
       x2 + 2,
       y1 + height - 4
-    );
-
+    );    // Note chỉnh sửa: Thêm đường kẻ ngang để tách biệt phần kết quả như một row
+    const lineY = y1 + height + 2;
+    doc.line(M.left + col1W, lineY, M.left + usableW, lineY); // Đường kẻ ngang từ trái sang phải
+    
     // kết quả checkbox
-    const baseY = y1 + height + 4;
-    let cx = x2 + w2 - 120;
+    const baseY = y1 + height + 8;
+    let cx = x2 + 2;
     doc.text("Kết quả :", cx, baseY);
-    cx += 14;
+    cx += 30;
     tick(cx, baseY - 4, !!pass);
     doc.text("Đạt/Phù hợp", cx + 6, baseY);
     cx += 50;
@@ -332,19 +344,20 @@ async function init(data = {}) {
 
   // =========================================================
   // 3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ
-  pdf.addSpace(10).addSubTitle("3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ", {
+  pdf.addSpace(5).addSubTitle("3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ", {
     fontSize: 12,
     fontFamily: "Roboto",
     lineHeight: pdf.lineHeight,
   });
   doc.setFontSize(8);
+    setRoboto("normal");
 
   const leftW = usableW / 2 - 2,
     rightW = usableW / 2 - 2;
   const leftX = M.left,
     rightX = M.left + leftW + 4;
   const topY = pdf.getCurrentY() + 2,
-    blockH = 65;
+    blockH = 70;
 
   // khối trái
   box(leftX, topY, leftW, blockH);
@@ -354,10 +367,11 @@ async function init(data = {}) {
   ly += 6;
   tick(leftX + 2, ly - 4, !!data.returnFile);
   doc.text("Trả hồ sơ (không đạt)", leftX + 8, ly);
-
-  ly += 8;
+  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  ly += 6;
   doc.text(`Ngày nhận việc: ${data.ngayNhanViec || "......./....../........"}`, leftX + 2, ly);
-  ly += 5;
+  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  ly += 6;
   doc.text(`Cấp bậc nhân sự: ${data.capBac || ""}`, leftX + 2, ly);
   ly += 5;
   doc.text(`Ngạch lương: ${data.ngachLuong || ""}`, leftX + 2, ly);
@@ -365,15 +379,20 @@ async function init(data = {}) {
   doc.text(`Nhóm chức danh: ${data.nhomChucDanh || ""}`, leftX + 2, ly);
   ly += 5;
   doc.text(`Bậc: ${data.bac || ""}`, leftX + 2, ly);
-
+  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
   ly += 6;
+  setRoboto("italic");
   doc.text("(Chọn 1 trong 2 lựa chọn)", leftX + 2, ly);
+  setRoboto("normal");
   ly += 6;
   tick(leftX + 2, ly - 4, !!data.hdtv);
   doc.text("Ký HĐTV và đánh giá thử việc: ... tháng", leftX + 8, ly);
   ly += 6;
   tick(leftX + 2, ly - 4, !!data.hdlc);
-  doc.text("Ký HĐLĐ xác định thời hạn (theo đề xuất của Công ty)", leftX + 8, ly);
+  doc.text("Ký HĐLĐ xác định thời hạn: ... tháng", leftX + 8, ly);
+  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  ly += 6;
+  doc.text("Chế độ khác (ngoài quy định của Công ty):  ", leftX + 2, ly);
 
   // khối phải: cấp thẩm quyền phê duyệt
   box(rightX, topY, rightW, blockH);
