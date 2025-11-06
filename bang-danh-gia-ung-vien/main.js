@@ -4,13 +4,70 @@ async function init(data = {}) {
 
   // Thiết lập font Roboto mặc định cho toàn bộ document
   doc.setFont("Roboto", "normal");
-
   // tiện dùng
   const M = pdf.margins;
   const pageW = pdf.pageWidth;
   const usableW = pageW - M.left - M.right;
 
-  // ====== helpers nội bộ ======
+  // ====== function để vẽ header ======
+  const drawHeader = (yPosition = M.top) => {
+    doc.autoTable({
+      startY: yPosition,
+      theme: "grid",
+      margin: { left: M.left, right: M.right },
+      tableWidth: usableW,
+      styles: {
+        font: "Roboto",
+        fontStyle: "bold",
+        fontSize: 17,
+        cellPadding: 2,
+        valign: "middle",
+        minCellHeight: 20,
+        lineColor: [0, 0, 0],
+        textColor: [0, 0, 0],
+        fillColor: [255, 255, 255],
+      },
+      body: [[{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"]],
+      columnStyles: {
+        0: { cellWidth: 50 },
+        1: { cellWidth: usableW - 50 + 5, halign: "center" },
+      },
+      didDrawCell: function (dataCell) {
+        // Chèn ảnh vào cột đầu tiên
+        if (dataCell.column.index === 0 && dataCell.row.index === 0 && data.imgPath) {
+          const { x, y, width, height } = dataCell.cell;
+          const imgSize = Math.min(width, height) - 4;
+          const imgX = x + (width - imgSize) / 2;
+          const imgY = y + (height - imgSize) / 2;
+          try {
+            doc.addImage(data.imgPath, "PNG", imgX, imgY, imgSize, imgSize);
+          } catch (error) {
+            console.warn("Could not load logo image:", error);
+          }
+        }
+      },
+    });
+  };  // ====== hook để tự động thêm header trên trang mới ======  
+  const autoHeaderHook = {
+    didDrawPage: function(hookData) {
+      // Chỉ vẽ header nếu không phải trang đầu tiên
+      if (hookData.pageNumber > 1) {
+        // Vẽ header ở đầu trang mới
+        drawHeader(M.top);
+      }
+    },
+    
+    // Hook để điều chỉnh startY khi trang mới được tạo
+    willDrawPage: function(hookData) {
+      if (hookData.pageNumber > 1) {
+        // Đảm bảo content bắt đầu sau vùng header (khoảng 40px từ top)
+        const minStartY = M.top + 40;
+        if (hookData.cursor && hookData.cursor.y < minStartY) {
+          hookData.cursor.y = minStartY;
+        }
+      }
+    }
+  };  // ====== helpers nội bộ ======
   const setRoboto = (style = "normal") => doc.setFont("Roboto", style);
   const box = (x, y, w, h) => doc.rect(x, y, w, h);
   const tick = (x, y, checked, style = "X") => {
@@ -32,42 +89,14 @@ async function init(data = {}) {
       doc.setLineWidth(lw);
     }
   };
-
   // =========================================================
   // HEADER
-  // pdf.addTitle("BẢNG ĐÁNH GIÁ ỨNG VIÊN", { fontFamily: "Roboto" }).addSpace(4);
-  doc.autoTable({
-    startY: pdf.getCurrentY() - 10,
-    theme: "grid",
-    margin: { left: M.left, right: M.right },
-    tableWidth: usableW,
-    styles: {
-      font: "Roboto",
-      fontStyle: "bold",
-      fontSize: 17,
-      cellPadding: 2,
-      valign: "middle",
-      minCellHeight: 20,
-      lineColor: [0, 0, 0],
-      textColor: [0, 0, 0],
-    },
-    body: [[{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"]],
-    columnStyles: {
-      0: { cellWidth: 50 },
-      1: { cellWidth: usableW - 50 + 5, halign: "center" },
-    },
-    didDrawCell: function (dataCell) {
-      // Chèn ảnh vào cột đầu tiên
-      data.imgPath = "../image/hong-hung-logo.png";
-      if (dataCell.column.index === 0 && dataCell.row.index === 0 && data.imgPath) {
-        const { x, y, width, height } = dataCell.cell;
-        const imgSize = Math.min(width, height) - 4;
-        const imgX = x + (width - imgSize) / 2;
-        const imgY = y + (height - imgSize) / 2;
-        doc.addImage(data.imgPath, "PNG", imgX, imgY, imgSize, imgSize);
-      }
-    },
-  });
+  // Đặt đường dẫn ảnh
+  data.imgPath = "../image/hong-hung-logo.png";
+  
+  // Vẽ header cho trang đầu tiên
+  drawHeader(pdf.getCurrentY() - 10);
+  
   pdf.addSpace(20);
   setRoboto("normal");
 
@@ -120,6 +149,7 @@ async function init(data = {}) {
       2: { cellWidth: 25 },
       3: { cellWidth: 45 },
     },
+    ...autoHeaderHook, // Thêm hook để auto header
   });
   pdf.resetPosition(doc.lastAutoTable.finalY + 3);
   pdf.addSpace(4);
@@ -171,6 +201,16 @@ async function init(data = {}) {
       "Xác nhận qua:\n+ Công bố bài báo hoặc công trình nghiên cứu trên các tạp chí khoa học hoặc các hội đồng nghiệm thu;\n+ Hoặc, kết quả thực hiện các sáng kiến cải tiến mang lại hiệu quả cao cho Công ty;\n+ Hoặc, kết quả ứng dụng các kỹ thuật chuyên môn cao tại Bệnh viện.\n………………………………………………………………………………………………….",
       data.d8 ?? "",
     ],
+    [
+      "8  Năng lực nghiên cứu, sáng tạo",
+      "Xác nhận qua:\n+ Công bố bài báo hoặc công trình nghiên cứu trên các tạp chí khoa học hoặc các hội đồng nghiệm thu;\n+ Hoặc, kết quả thực hiện các sáng kiến cải tiến mang lại hiệu quả cao cho Công ty;\n+ Hoặc, kết quả ứng dụng các kỹ thuật chuyên môn cao tại Bệnh viện.\n………………………………………………………………………………………………….",
+      data.d8 ?? "",
+    ],
+    [
+      "8  Năng lực nghiên cứu, sáng tạo",
+      "Xác nhận qua:\n+ Công bố bài báo hoặc công trình nghiên cứu trên các tạp chí khoa học hoặc các hội đồng nghiệm thu;\n+ Hoặc, kết quả thực hiện các sáng kiến cải tiến mang lại hiệu quả cao cho Công ty;\n+ Hoặc, kết quả ứng dụng các kỹ thuật chuyên môn cao tại Bệnh viện.\n………………………………………………………………………………………………….",
+      data.d8 ?? "",
+    ],
   ];
 
   const total = bodyDanhGia.reduce((s, r) => s + Number(r[2] || 0), 0);
@@ -210,6 +250,7 @@ async function init(data = {}) {
       1: { cellWidth: 120 },
       2: { cellWidth: 25, halign: "center" },
     },
+    ...autoHeaderHook, // Thêm hook để auto header
   });
   pdf.resetPosition(doc.lastAutoTable.finalY + 4);
 
@@ -293,16 +334,24 @@ async function init(data = {}) {
     textLines.forEach((line, index) => {
       doc.text(line, x2 + 2, textY + index * 4);
     });
-    setRoboto("normal");
-
-    //Note chỉnh sửa: Nội dung nhận xét
+    setRoboto("normal");    //Note chỉnh sửa: Nội dung nhận xét
     if (obj.content) {
-      const commentLines = doc.splitTextToSize(obj.content, w2 - 8);
-      let commentY = textY + textLines.length * 4 + 2;
-      commentLines.forEach((line, index) => {
-        doc.text(line, x2 + 2, commentY + index * 4);
+      const commentY = textY + textLines.length * 4 + 2;
+      // Tạm thời lưu currentY
+      const savedY = pdf.currentY;
+      pdf.currentY = commentY;
+      
+      // Sử dụng addText với justify alignment
+      pdf.addText(obj.content, x2 + 2, null, {
+        fontSize: 10,
+        maxWidth: w2 - 8,
+        align: "justify",
+        lineHeight: 4,
+        spacing: 0
       });
-    } // ký tên & họ tên
+      
+      // Không cần restore Y vì drawInterviewBlock sẽ tự set
+    }// ký tên & họ tên
     doc.text("Ký tên:", x2 + 2, y1 + height - 10);
 
     // Note chỉnh sửa: Thêm hình chữ ký số nếu có
@@ -359,7 +408,7 @@ async function init(data = {}) {
 
   // =========================================================
   // 3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ
-  pdf.addSpace(5).addSubTitle("3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ", {
+  pdf.addSpace(7).addSubTitle("3. PHÊ DUYỆT KẾT QUẢ TUYỂN CHỌN VÀ CHẾ ĐỘ NHÂN SỰ", {
     fontSize: 12,
     fontFamily: "Roboto",
     lineHeight: pdf.lineHeight,
