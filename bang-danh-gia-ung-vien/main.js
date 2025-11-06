@@ -39,6 +39,7 @@ async function init(data = {}) {
       cellPadding: 2,
       valign: "middle",     
       minCellHeight: 20,
+      lineColor: [0, 0, 0],
     },
     body: [
       [{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"],
@@ -74,23 +75,26 @@ async function init(data = {}) {
     theme: "grid",
     margin: { left: M.left, right: M.right },
     tableWidth: usableW,
-    styles: { font: "Roboto", fontStyle: "normal", fontSize: 10, cellPadding: 2, valign: "middle" },
+    styles: { font: "Roboto", fontStyle: "normal", fontSize: 10, cellPadding: 2, valign: "middle",lineColor: [0, 0, 0], },
     headStyles: { font: "Roboto", fontStyle: "bold" },
     body: [
       ["Họ tên ứng viên", { content: data.hoTen || "", colSpan: 3 }],
       ["Ngày tháng năm sinh", { content: data.ngaySinh || "", colSpan: 3 }],
       ["Trình độ chuyên môn", data.trinhDo || "", "Giới tính:", data.gioiTinh || ""],
       [
-        { content: "Vị trí /chức danh ứng tuyển", colSpan: 3, styles: { halign: "left" } },
-        data.viTri || "",
+        { content: "Vị trí /chức danh ứng tuyển", styles: { halign: "left" } },
+        { content: data.viTri || "", colSpan: 3},
       ],
       [
         {
           content: "Điểm Bài kiểm tra năng lực chuyên môn (nếu có):",
-          colSpan: 3,
+          colSpan: 1,
           styles: { halign: "left" },
         },
-        data.diemTest ?? "",
+        {
+          content: data.diemTest ?? "",
+          colSpan: 3,
+        },
       ],
     ],
     columnStyles: {
@@ -109,7 +113,6 @@ async function init(data = {}) {
     fontFamily: "Roboto",
     lineHeight: pdf.lineHeight,
   });
-
   const bodyDanhGia = [
     [
       "1  Trình độ học vấn",
@@ -153,30 +156,44 @@ async function init(data = {}) {
     ],
   ];
 
+  const total = bodyDanhGia.reduce((s, r) => s + Number(r[2] || 0), 0);
+  // Thêm dòng tổng kết vào cuối bảng
+  bodyDanhGia.push([
+      { content: "Tổng kết", 
+        colSpan: 2,
+        styles: { halign: "center", fontStyle: "bold"}
+      },
+      total,
+    ]
+  );
+
   doc.autoTable({
     startY: pdf.getCurrentY() + 2,
     theme: "grid",
     margin: { left: M.left, right: M.right },
-    tableWidth: usableW,
+    tableWidth: usableW,    
     head: [["Tiêu chí đánh giá", "Bằng chứng đánh giá", "Điểm đánh giá (Từ 0 đến 3 điểm)"]],
-    body: bodyDanhGia,
-    styles: { font: "Roboto", fontStyle: "normal", fontSize: 10, cellPadding: 2, valign: "middle" },
-    headStyles: { font: "Roboto", fontStyle: "bold" },
+    body: bodyDanhGia,    
+    styles: { font: "Roboto", fontStyle: "normal", fontSize: 10, cellPadding: 2, valign: "middle",lineColor: [0, 0, 0], },
+    headStyles: { 
+      font: "Roboto", 
+      fontStyle: "bold", 
+      fillColor: [255, 255, 255], 
+      textColor: [0, 0, 0],
+      lineColor: [0, 0, 0],
+      lineWidth: 0.1,
+      halign: "center",
+    }, // Màu nền trắng, chữ đen và border đen cho header
     columnStyles: {
-      0: { cellWidth: 60 },
-      1: { cellWidth: 100 },
+      0: { cellWidth: 40 },
+      1: { cellWidth: 120 },
       2: { cellWidth: 25, halign: "center" },
     },
   });
   pdf.resetPosition(doc.lastAutoTable.finalY + 4);
-  pdf.addSpace(4);
 
-  // Tổng điểm & ghi chú
-  const total = bodyDanhGia.reduce((s, r) => s + Number(r[2] || 0), 0);
-  setRoboto("bold");
-  doc.text(`TỔNG ĐIỂM: ${total}`, M.left, pdf.getCurrentY());
+  //  ghi chú
   setRoboto("normal");
-  pdf.addSpace(4);
   pdf.addParagraph(
     [
       "Kết quả điểm đánh giá:",
@@ -185,7 +202,7 @@ async function init(data = {}) {
       "- Đạt 06 - 13 điểm: Xem xét xếp ngạch nhân viên;",
       "- Đạt dưới 06 điểm: Không tuyển dụng.",
     ],
-    { fontSize: 9, lineHeight: 3, spacing: 0.5, fontFamily: "Roboto" }
+    { fontSize: 10, lineHeight: 4, spacing: 0.5, fontFamily: "Roboto" }
   );
 
   // =========================================================
@@ -204,6 +221,7 @@ async function init(data = {}) {
       cellPadding: 2,
       valign: "middle",     
       minCellHeight: 20,
+      lineColor: [0, 0, 0],
     },
     body: [
       [{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"],
@@ -228,41 +246,65 @@ async function init(data = {}) {
   // Thiết lập font size 10 cho nội dung trang 2
   doc.setFontSize(10);
   // ---- block phỏng vấn: nhãn trái + khung phải
-  function drawInterviewBlock(label, pass, fail, height) {
+  function drawInterviewBlock(label, pass, fail, height, obj = {}) {
+    obj.content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet, mauris in tristique lobortis, dolor quam pulvinar velit, in fringilla nisl magna at metus. Nullam suscipit a magna ut porttitor. Nunc lacus arcu, ornare in iaculis a, interdum nec ligula. Morbi vestibulum volutpat ultrices.";
+    obj.name = "Nguyễn Văn A";
+    obj.pathSignature = "../image/chu-ki-mau.jpg";
     const col1W = 42;
     const x1 = M.left,
       y1 = pdf.getCurrentY() + 2;
     box(x1, y1, col1W, height + 10); // khung trái
     setRoboto("bold");
-    doc.text(label, x1 + 2, y1 + 6);
+    doc.text(obj.label ?? label, x1 + 2, y1 + (height + 10) / 2);
     setRoboto("normal");
 
     const x2 = x1 + col1W,
       w2 = usableW - col1W;
-    box(x2, y1, w2, height + 10); // khung phải
+    box(x2, y1, w2, height + 10); // khung phải    // nội dung
+    setRoboto("italic");
+    const contentText = "Nội dung nhận xét: (kiến thức chuyên môn, kinh nghiệm, kỹ năng, thái độ...)";
+    const textLines = doc.splitTextToSize(contentText, w2 - 8); // Chia text thành nhiều dòng
+    let textY = y1 + 6;
+    textLines.forEach((line, index) => {
+      doc.text(line, x2 + 2, textY + (index * 4));
+    });
+    setRoboto("normal");
 
-    // nội dung
-    doc.text(
-      "Nội dung nhận xét: (kiến thức chuyên môn, kinh nghiệm, kỹ năng, thái độ...)",
-      x2 + 2,
-      y1 + 6
-    );
-
-    // vẽ các đường gạch chấm thủ công để tránh chồng lấp
-    for (let i = 0; i < 2; i++) {
-      const lineY = y1 + 12 + i * 5;
-      // vẽ đường chấm
-      let dotX = x2 + 4;
-      while (dotX < x2 + w2 - 8) {
-        doc.circle(dotX, lineY, 0.3, "F");
-        dotX += 3;
+    //Note chỉnh sửa: Nội dung nhận xét
+    if (obj.content) {
+      const commentLines = doc.splitTextToSize(obj.content, w2 - 8);
+      let commentY = textY + (textLines.length * 4) + 2;
+      commentLines.forEach((line, index) => {
+        doc.text(line, x2 + 2, commentY + (index * 4));
+      });
+    }    // ký tên & họ tên
+    doc.text("Ký tên:", x2 + 2, y1 + height - 10);
+    
+    // Note chỉnh sửa: Thêm hình chữ ký số nếu có
+    if (obj.pathSignature) {
+      try {
+        const signatureX = x2 + w2 - 60; // Đặt chữ ký ở phía bên phải
+        const signatureY = y1 + height - 18;
+        const signatureW = 50;
+        const signatureH = 15;
+        doc.addImage(obj.pathSignature, "JPEG", signatureX, signatureY, signatureW, signatureH);
+      } catch (error) {
+        console.warn("Không thể load chữ ký:", obj.pathSignature, error);
+        // Vẽ placeholder cho chữ ký
+        const signatureX = x2 + w2 - 60;
+        const signatureY = y1 + height - 18;
+        doc.setFillColor(240, 240, 240);
+        doc.rect(signatureX, signatureY, 50, 15, "F");
+        doc.setTextColor(128, 128, 128);
+        doc.setFontSize(8);
+        doc.text("Chữ ký", signatureX + 25, signatureY + 8, { align: "center" });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
       }
     }
-
-    // ký tên & họ tên
-    doc.text("Ký tên:", x2 + 2, y1 + height - 10);
+    
     doc.text(
-      "Họ và tên: ........................................................",
+      "Họ và tên: " + (obj.name || "........................................................"),
       x2 + 2,
       y1 + height - 4
     );
