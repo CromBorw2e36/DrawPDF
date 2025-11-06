@@ -1863,34 +1863,107 @@ function createRealWorldNumberingDemo() {
     console.log('✅ Technical Document Demo PDF đã được tạo!');
 }
 
-async function createPhieuDanhGiaUngVien(){
-    const pdfService = new JsPdfService();
-    pdfService.addTitle('PHIẾU ĐÁNH GIÁ ỨNG VIÊN')
-        .addSpace(20);
-    pdfService.doc.autoTable({ // Muốn width 100%
-        startY: 33,
-        theme: "grid",
-        body: [
-            ["Họ tên ứng viên", "NGUYỄN MINH TRIỀN"],
-            ["Ngày tháng năm sinh", "27/08/2003"],
-            [
-            { content: "Trình độ chuyên môn", styles: { cellWidth: 60 } },
-            "THCS",
-            { content: "Giới tính", styles: { cellWidth: 25 } }, // Không thấy hiển thị lên
-            "",
-            ],
-            [{ content: "Vị trí / chức danh ứng tuyển", colSpan: 3, styles: { halign: "left" } }, ""],
-            [{ content: "Điểm bài kiểm tra năng lực chuyên môn (nếu có)", colSpan: 3, styles: { halign: "left" } }, ""],
-        ],
-        styles: { fontSize: 10, valign: "middle" },
-        headStyles: { font: 'Roboto', fontStyle: 'bold' },
-        bodyStyles: { font: 'Roboto', fontStyle: 'normal' },
-        columnStyles: {
-            0: { cellWidth: 55 },
-            1: { cellWidth: 60 },
-            2: { cellWidth: 25 },
-            3: { cellWidth: 45 },
-        },
-        });
-        pdfService.savePDF('phieu-danh-gia-ung-vien.pdf');
+async function createPhieuDanhGiaUngVien() {
+  const pdfService = new JsPdfService();
+  const doc = pdfService.doc;
+
+  // Tính bề rộng usable = trang - 2*margin
+  const margin = { left: 14, right: 14 };
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  const fullTableWidth = pageWidth - margin.left - margin.right;
+
+  pdfService.addTitle('PHIẾU ĐÁNH GIÁ ỨNG VIÊN').addSpace(20);
+
+  // --- 1) THÔNG TIN ỨNG VIÊN (4 cột, dùng colSpan cho các dòng chỉ có 2 trường) ---
+  doc.autoTable({
+    startY: 33,
+    theme: "grid",
+    margin,
+    tableWidth: fullTableWidth,                 // ← full width
+    styles: { fontSize: 10, valign: "middle", font: 'Roboto', fontStyle: 'normal' },
+    headStyles: { font: 'Roboto', fontStyle: 'bold' },
+    bodyStyles: { font: 'Roboto', fontStyle: 'normal' },
+
+    // ✅ MỌI HÀNG PHẢI TƯƠNG ỨNG 4 CỘT
+    body: [
+      // Hàng 2 trường → gộp làm 3 cột còn lại
+      ["Họ tên ứng viên", { content: "NGUYỄN MINH TRIỀN", colSpan: 3 }],
+      ["Ngày tháng năm sinh", { content: "27/08/2003", colSpan: 3 }],
+
+      // Hàng 4 trường đầy đủ (có Giới tính)
+      [
+        { content: "Trình độ chuyên môn", styles: { cellWidth: 60 } },
+        "THCS",
+        { content: "Giới tính", styles: { cellWidth: 25 } },
+        "Nam",
+      ],
+
+      // Hàng 1 trường → gộp 3 cột
+      [{ content: "Vị trí / chức danh ứng tuyển", colSpan: 3, styles: { halign: "left" } }, ""],
+      [{ content: "Điểm bài kiểm tra năng lực chuyên môn (nếu có)", colSpan: 3, styles: { halign: "left" } }, ""],
+    ],
+
+    // (Tuỳ chọn) Ép tỉ lệ cột — KHÔNG bắt buộc nếu để AutoTable tự tính
+    columnStyles: {
+      0: { cellWidth: 55 },
+      1: { cellWidth: 60 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 45 },
+    },
+  });
+
+  // --- 2) ĐÁNH GIÁ ỨNG VIÊN ---
+  doc.text("2. ĐÁNH GIÁ ỨNG VIÊN", margin.left, doc.lastAutoTable.finalY + 10);
+
+  const bodyDanhGia = [
+    ["Trình độ học vấn", "Xác nhận qua hồ sơ, lý lịch cá nhân và quá trình làm việc", "1"],
+    ["Thâm niên", "Xác nhận qua hồ sơ, lý lịch cá nhân", "1"],
+    ["Ngoại ngữ", "Bằng cấp / Chứng chỉ", "0"],
+    ["Tin học", "Xác nhận qua hồ sơ, lý lịch cá nhân", "0"],
+    ["Kinh nghiệm", "Xác nhận qua hồ sơ, lý lịch cá nhân và quá trình làm việc", "1"],
+    ["Năng lực giải quyết vấn đề", "Bằng cấp / Chứng chỉ hoặc qua kỳ thi do Công ty tổ chức", "1"],
+    ["Năng lực tư vấn, đào tạo", "Bằng cấp / Chứng chỉ hoặc qua kỳ thi do Công ty tổ chức", "1"],
+    ["Năng lực nghiên cứu, sáng tạo", "Bằng cấp / Chứng chỉ", "1"],
+  ];
+
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 13,
+    theme: "plain",
+    margin,
+    tableWidth: fullTableWidth,                // ← full width
+    head: [["Tiêu chí đánh giá", "Bằng chứng đánh giá", "Điểm đánh giá (0–3)"]],
+    body: bodyDanhGia,
+    styles: { fontSize: 10, cellPadding: 2, valign: "middle", font: 'Roboto', fontStyle: 'normal' },
+    headStyles: { font: 'Roboto', fontStyle: 'bold' },
+    columnStyles: {
+      0: { cellWidth: 60 },
+      1: { cellWidth: 100 },
+      2: { cellWidth: 25, halign: "center" },
+    },
+  });
+  
+
+  // --- Tổng điểm & ghi chú ---
+  const tong = bodyDanhGia.reduce((s, r) => s + Number(r[2] || 0), 0);
+  const finalY = doc.lastAutoTable.finalY + 10;
+
+  doc.setFont('Roboto', 'bold');
+  doc.text(`TỔNG ĐIỂM: ${tong}`, margin.left, finalY);
+
+  doc.setFont('Roboto', 'normal');
+  doc.setFontSize(10);
+  doc.text(
+    [
+      "Kết quả đánh giá:",
+      "- Đạt 22–24 điểm: Xem xét xếp ngạch chuyên gia;",
+      "- Đạt 14–21 điểm: Xem xét xếp ngạch chuyên viên;",
+      "- Đạt 06–13 điểm: Xem xét xếp ngạch nhân viên;",
+      "- Đạt dưới 06 điểm: Không tuyển dụng.",
+    ],
+    margin.left,
+    finalY + 8
+  );
+
+  pdfService.savePDF('phieu-danh-gia-ung-vien.pdf');
 }
