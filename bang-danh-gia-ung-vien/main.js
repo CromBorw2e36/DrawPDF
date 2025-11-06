@@ -166,14 +166,14 @@ async function init(data = {}) {
     const col1W = 42;
     const x1 = M.left,
       y1 = pdf.getCurrentY() + 2;
-    box(x1, y1, col1W, height); // khung trái
+    box(x1, y1, col1W, height + 10); // khung trái
     setRoboto("bold");
     doc.text(label, x1 + 2, y1 + 6);
     setRoboto("normal");
 
     const x2 = x1 + col1W,
       w2 = usableW - col1W;
-    box(x2, y1, w2, height); // khung phải
+    box(x2, y1, w2, height + 10); // khung phải
 
     // nội dung
     doc.text(
@@ -202,7 +202,7 @@ async function init(data = {}) {
     );
 
     // kết quả checkbox
-    const baseY = y1 + height - 4;
+    const baseY = y1 + height + 4;
     let cx = x2 + w2 - 120;
     doc.text("Kết quả :", cx, baseY);
     cx += 14;
@@ -213,7 +213,7 @@ async function init(data = {}) {
     doc.text("Không đạt/Không phù hợp", cx + 6, baseY);
 
     // cập nhật vị trí currentY chính xác
-    pdf.currentY = y1 + height + 2;
+    pdf.currentY = y1 + height + 10;
   }
 
   drawInterviewBlock("Phỏng vấn viên 1", data.pv1Pass, data.pv1Fail, 40);
