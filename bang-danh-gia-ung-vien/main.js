@@ -360,9 +360,8 @@ async function init(data = {}) {
     blockH = 70;
 
   // khối trái
-  box(leftX, topY, leftW, blockH);
-  let ly = topY + 6;
-  tick(leftX + 2, ly - 4, !!data.approveHir, "V");
+  box(leftX, topY, leftW, blockH);  let ly = topY + 6;
+  tick(leftX + 2, ly - 4, !!data.approveHire, "V");
   doc.text("Đồng ý tuyển dụng", leftX + 8, ly);
   ly += 6;
   tick(leftX + 2, ly - 4, !!data.returnFile, "V");
@@ -393,16 +392,42 @@ async function init(data = {}) {
   doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
   ly += 6;
   doc.text("Chế độ khác (ngoài quy định của Công ty):  ", leftX + 2, ly);
-
   // khối phải: cấp thẩm quyền phê duyệt
   box(rightX, topY, rightW, blockH);
   setRoboto("bold");
   doc.text("CẤP THẨM QUYỀN PHÊ DUYỆT", rightX + rightW / 2, topY + 6, { align: "center" });
   setRoboto("normal");
-  doc.text("Họ tên:", rightX + 8, topY + 18);
-  doc.text("Ngày: ......./....../.........", rightX + 8, topY + 25);
+  data.tenPheDuyet = "Nguyễn Thị B";
+  data.ngayPheDuyet = "15/10/2024";
+  data.pathSignaturePheDuyet = "../image/chu-ki-mau.jpg";
+  // Họ tên với giá trị từ data
+  doc.text("Họ tên: " + (data.tenPheDuyet || "........................................................"), rightX + 8, topY + 18);
+  
+  // Ngày với giá trị từ data
+  doc.text("Ngày: " + (data.ngayPheDuyet || "......./....../........"), rightX + 8, topY + 25);
 
-  //Note chỉnh sửa: Chổ này nên để add hình chữ ký số nếu có
+  // Thêm hình chữ ký số nếu có
+  if (data.pathSignaturePheDuyet) {
+    try {
+      const signatureX = rightX + rightW - 60; // Đặt chữ ký ở phía bên phải
+      const signatureY = topY + 30;
+      const signatureW = 50;
+      const signatureH = 20;
+      doc.addImage(data.pathSignaturePheDuyet, "JPEG", signatureX, signatureY, signatureW, signatureH);
+    } catch (error) {
+      console.warn("Không thể load chữ ký phê duyệt:", data.pathSignaturePheDuyet, error);
+      // Vẽ placeholder cho chữ ký
+      const signatureX = rightX + rightW - 60;
+      const signatureY = topY + 30;
+      doc.setFillColor(240, 240, 240);
+      doc.rect(signatureX, signatureY, 50, 20, "F");
+      doc.setTextColor(128, 128, 128);
+      doc.setFontSize(8);
+      doc.text("Chữ ký", signatureX + 25, signatureY + 10, { align: "center" });
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(8);
+    }
+  }
 
   pdf.resetPosition(topY + blockH + 4);
 
