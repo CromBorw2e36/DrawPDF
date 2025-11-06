@@ -326,10 +326,10 @@ async function init(data = {}) {
     let cx = x2 + 2;
     doc.text("Kết quả :", cx, baseY);
     cx += 30;
-    tick(cx, baseY - 4, !!pass);
+    tick(cx, baseY - 4, !!pass, "V");
     doc.text("Đạt/Phù hợp", cx + 6, baseY);
     cx += 50;
-    tick(cx, baseY - 4, !!fail);
+    tick(cx, baseY - 4, !!fail, "V");
     doc.text("Không đạt/Không phù hợp", cx + 6, baseY);
 
     // cập nhật vị trí currentY chính xác
@@ -362,10 +362,10 @@ async function init(data = {}) {
   // khối trái
   box(leftX, topY, leftW, blockH);
   let ly = topY + 6;
-  tick(leftX + 2, ly - 4, !!data.approveHire);
+  tick(leftX + 2, ly - 4, !!data.approveHir, "V");
   doc.text("Đồng ý tuyển dụng", leftX + 8, ly);
   ly += 6;
-  tick(leftX + 2, ly - 4, !!data.returnFile);
+  tick(leftX + 2, ly - 4, !!data.returnFile, "V");
   doc.text("Trả hồ sơ (không đạt)", leftX + 8, ly);
   doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
   ly += 6;
@@ -385,10 +385,10 @@ async function init(data = {}) {
   doc.text("(Chọn 1 trong 2 lựa chọn)", leftX + 2, ly);
   setRoboto("normal");
   ly += 6;
-  tick(leftX + 2, ly - 4, !!data.hdtv);
+  tick(leftX + 2, ly - 4, !!data.hdtv, "V");
   doc.text("Ký HĐTV và đánh giá thử việc: ... tháng", leftX + 8, ly);
   ly += 6;
-  tick(leftX + 2, ly - 4, !!data.hdlc);
+  tick(leftX + 2, ly - 4, !!data.hdlc, "V");
   doc.text("Ký HĐLĐ xác định thời hạn: ... tháng", leftX + 8, ly);
   doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
   ly += 6;
