@@ -2126,7 +2126,7 @@ class JsPdfService {
     if (numberOptions.lineHeight === null) {
       // Tính lineHeight dựa trên fontSize
       numberOptions.lineHeight = Math.max(
-        pdf.lineHeight,
+        this.lineHeight,
         Math.ceil(numberOptions.fontSize * numberOptions.lineSpacing)
       );
     }
