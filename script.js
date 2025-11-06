@@ -1862,3 +1862,35 @@ function createRealWorldNumberingDemo() {
     
     console.log('✅ Technical Document Demo PDF đã được tạo!');
 }
+
+async function createPhieuDanhGiaUngVien(){
+    const pdfService = new JsPdfService();
+    pdfService.addTitle('PHIẾU ĐÁNH GIÁ ỨNG VIÊN')
+        .addSpace(20);
+    pdfService.doc.autoTable({ // Muốn width 100%
+        startY: 33,
+        theme: "grid",
+        body: [
+            ["Họ tên ứng viên", "NGUYỄN MINH TRIỀN"],
+            ["Ngày tháng năm sinh", "27/08/2003"],
+            [
+            { content: "Trình độ chuyên môn", styles: { cellWidth: 60 } },
+            "THCS",
+            { content: "Giới tính", styles: { cellWidth: 25 } }, // Không thấy hiển thị lên
+            "",
+            ],
+            [{ content: "Vị trí / chức danh ứng tuyển", colSpan: 3, styles: { halign: "left" } }, ""],
+            [{ content: "Điểm bài kiểm tra năng lực chuyên môn (nếu có)", colSpan: 3, styles: { halign: "left" } }, ""],
+        ],
+        styles: { fontSize: 10, valign: "middle" },
+        headStyles: { font: 'Roboto', fontStyle: 'bold' },
+        bodyStyles: { font: 'Roboto', fontStyle: 'normal' },
+        columnStyles: {
+            0: { cellWidth: 55 },
+            1: { cellWidth: 60 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 45 },
+        },
+        });
+        pdfService.savePDF('phieu-danh-gia-ung-vien.pdf');
+}
