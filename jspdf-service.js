@@ -138,7 +138,7 @@ class JsPdfService {
     const titleOptions = {
       fontSize: 18,
       fontStyle: "bold",
-      color: [0, 0, 139],
+      color: [0, 0, 0],
       align: "center",
       lineHeight: 7, // Giảm từ 10 xuống 7
       ...options,
@@ -527,6 +527,108 @@ class JsPdfService {
       window.open(pdfDataUrl, "_blank");
     } catch (error) {
       console.error("Lỗi khi preview PDF:", error);
+    }
+  }
+
+  // Export PDF thành File để upload lên server
+  exportPDFFile(filename = "document.pdf") {
+    try {
+      const pdfBlob = this.doc.output("blob");
+      const file = new File([pdfBlob], filename, { 
+        type: "application/pdf",
+        lastModified: Date.now()
+      });
+      
+      console.log(`PDF file đã được tạo: ${filename}, Size: ${file.size} bytes`);
+      return file;
+    } catch (error) {
+      console.error("Lỗi khi tạo PDF file:", error);
+      return null;
+    }
+  }
+
+  // Export PDF thành ArrayBuffer để upload
+  exportPDFArrayBuffer() {
+    try {
+      const arrayBuffer = this.doc.output("arraybuffer");
+      console.log(`PDF ArrayBuffer đã được tạo, Size: ${arrayBuffer.byteLength} bytes`);
+      return arrayBuffer;
+    } catch (error) {
+      console.error("Lỗi khi tạo PDF ArrayBuffer:", error);
+      return null;
+    }
+  }
+
+  // Export PDF với nhiều format khác nhau
+  exportPDF(format = "file", filename = "document.pdf") {
+    try {
+      switch (format.toLowerCase()) {
+        case "file":
+          return this.exportPDFFile(filename);
+        
+        case "blob":
+          return this.generateBlob();
+        
+        case "arraybuffer":
+          return this.exportPDFArrayBuffer();
+        
+        case "dataurl":
+          return this.generateDataURL();
+        
+        case "base64":
+          return this.doc.output("datauristring").split(",")[1];
+        
+        case "binarystring":
+          return this.doc.output("binarystring");
+        
+        default:
+          console.warn(`Format không hỗ trợ: ${format}. Sử dụng format 'file' mặc định.`);
+          return this.exportPDFFile(filename);
+      }
+    } catch (error) {
+      console.error(`Lỗi khi export PDF với format ${format}:`, error);
+      return null;
+    }
+  }
+
+  // Upload PDF lên server (hàm tiện ích)
+  async uploadPDFToServer(url, filename = "document.pdf", options = {}) {
+    try {
+      const file = this.exportPDFFile(filename);
+      if (!file) {
+        throw new Error("Không thể tạo PDF file");
+      }
+
+      const formData = new FormData();
+      formData.append(options.fieldName || "pdf", file);
+      
+      // Thêm các field khác nếu có
+      if (options.additionalData) {
+        Object.keys(options.additionalData).forEach(key => {
+          formData.append(key, options.additionalData[key]);
+        });
+      }
+
+      const uploadOptions = {
+        method: "POST",
+        body: formData,
+        ...options.fetchOptions
+      };
+
+      console.log(`Đang upload PDF tới: ${url}`);
+      const response = await fetch(url, uploadOptions);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Upload thành công:", result);
+      return result;
+      
+    } catch (error) {
+      console.error("Lỗi khi upload PDF:", error);
+      throw error;
     }
   }
 

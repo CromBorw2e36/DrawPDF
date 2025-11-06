@@ -1,6 +1,6 @@
 async function init() {
   const obj = {
-    TenCongTy: "CÔNG TY ABC",
+    TenCongTy: "HÙNG VƯƠNG CORPORATION",
     SoPhieu: "123/QD-ABC",
     NgayKy: "15/06/2024",
     CanCu: "Biên bản thỏa thuận chấm dứt hợp đồng",
@@ -12,40 +12,84 @@ async function init() {
   }; // Placeholder to avoid empty file error
 
   const pdf = new JsPdfService();
+
+  // Thêm header với hai cột
+  const headerY = pdf.currentY;
+  const leftColumnX = pdf.margins.left;
+  const rightColumnX = pdf.pageWidth / 2 + 10;
+  const columnWidth = (pdf.pageWidth - pdf.margins.left - pdf.margins.right) / 2 - 10;
+
+  // Cột trái - Thông tin công ty (canh giữa)
+  const leftCenterX = leftColumnX + columnWidth / 2;
+  
+  // Dòng 1: Công ty + Tên công ty
+  pdf.doc.setFontSize(10);
+  const companyText = "CÔNG TY " + obj.TenCongTy;
+  const companyWidth = pdf.doc.getTextWidth(companyText);
+  pdf.doc.setFont("Roboto", "bold");
+  pdf.doc.text(companyText, leftCenterX - companyWidth / 2, headerY);
+  
+  // Dòng 2: Khoảng trống
+  const line2Y = headerY + 6;
+  
+  // Dòng 3: Gạch dưới
+  const line3Y = headerY + 12;
+  const underlineText = "_________________";
+  const underlineWidth = pdf.doc.getTextWidth(underlineText);
+  pdf.doc.setFont("Roboto", "normal");
+  pdf.doc.text(underlineText, leftCenterX - underlineWidth / 2, line3Y);
+  
+  // Dòng 4: Số quyết định
+  const line4Y = headerY + 18;
+  const soPhieuText = "Số: " + obj.SoPhieu;
+  const soPhieuWidth = pdf.doc.getTextWidth(soPhieuText);
+  pdf.doc.setFont("Roboto", "italic");
+  pdf.doc.text(soPhieuText, leftCenterX - soPhieuWidth / 2, line4Y);
+
+  // Cột phải - Thông tin quốc gia và ngày ký (canh giữa)
+  const rightCenterX = rightColumnX + columnWidth / 2;
+
+  // Dòng 1: Cộng hòa xã hội chủ nghĩa Việt Nam
+  pdf.doc.setFontSize(10);
+  const vnText = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM";
+  const vnWidth = pdf.doc.getTextWidth(vnText);
+  pdf.doc.setFont("Roboto", "bold");
+  pdf.doc.text(vnText, rightCenterX - vnWidth / 2, headerY);
+  
+  // Dòng 2: Độc lập - Tự do - Hạnh phúc
+  const docLapText = "Độc lập - Tự do - Hạnh phúc";
+  const docLapWidth = pdf.doc.getTextWidth(docLapText);
+  pdf.doc.setFont("Roboto", "bold");
+  pdf.doc.text(docLapText, rightCenterX - docLapWidth / 2, line2Y);
+  
+  // Dòng 3: Gạch dưới
+  const rightUnderlineText = "_________________";
+  const rightUnderlineWidth = pdf.doc.getTextWidth(rightUnderlineText);
+  pdf.doc.setFont("Roboto", "normal");
+  pdf.doc.text(rightUnderlineText, rightCenterX - rightUnderlineWidth / 2, line3Y);
+  
+  // Dòng 4: Tây Ninh, ngày
+  const dateText = "Tây Ninh, ngày " + obj.NgayKy;
+  const dateWidth = pdf.doc.getTextWidth(dateText);
+  pdf.doc.setFont("Roboto", "italic");
+  pdf.doc.text(dateText, rightCenterX - dateWidth / 2, line4Y);
+
+  // Cập nhật vị trí Y sau header
+  pdf.currentY = headerY + 25;
+  pdf.addSpace(5);
+
   pdf
-    // .addTable(
-    //   [
-    //     [
-    //       [
-    //         { text: "Công ty ", style: "normal" },
-    //         { text: obj.TenCongTy, style: "bold" },
-    //         { text: "\n..............." , style: "normal"},
-    //         { text: "\nSố: " + obj.SoPhieu, style: "italic" },
-    //       ],
-    //       [
-    //         { text: "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", style: "bold" },
-    //         { text: "\nĐộc lập - Tự do - Hạnh phúc", style: "italic" },
-    //         { text: "\nTây Ninh, ngày ", style: "italic" },
-    //         { text: obj.NgayKy, style: "bold" },
-    //       ],
-    //     ],
-    //   ],
-    //   {
-    //     columnWidths: "equal",
-    //     borderWidth: 0,
-    //     columnAligns: ["left", "right"],
-    //   }
-    // )
-    .addSpace(10)
-    .addTitle("QUYẾT ĐỊNH", { lineHeight: pdf.lineHeight, fontSize: 14 })
-    .addSubTitle("Về việc chấm dứt Hợp đồng lao động", { align: "center", fontSize: 10 })
-    .addSpace(3)
-    .addSubTitle("CÔNG TY " + obj.TenCongTy, { align: "center", fontSize: 10 })
+    .addSpace(5)
+    .addTitle("QUYẾT ĐỊNH", { lineHeight: 4, fontSize: 18 })
+    .addSubTitle("Về việc chấm dứt Hợp đồng lao động", { align: "center", fontSize: 10, lineHeight: 3 })
+    .addSpace(2)
+    .addSubTitle("CÔNG TY " + obj.TenCongTy, { align: "center", fontSize: 10, lineHeight: 3 })
     .addParagraph(`- Căn cứ Bộ luật lao động hiện hành;`)
     .addParagraph(`- Căn cứ Điều lệ Công ty ${obj.TenCongTy};`)
     .addParagraph(`- Căn cứ hợp đồng lao động số ${obj.SoPhieu} ký ngày ${obj.NgayKy};`)
     .addParagraph(`- Căn cứ ${obj.CanCu},`)
-    .addSubTitle("QUYẾT ĐỊNH", { align: "center", lineHeight: pdf.lineHeight, fontSize: 10 })
+    .addSpace(3)
+    .addSubTitle("QUYẾT ĐỊNH", { align: "center", lineHeight: 3, fontSize: 10 })
     .addMixedParagraph([pdf.bold("Điều 1."), pdf.normal("Chấm dứt Hợp đồng lao động đối với:")], {
       align: "left",
     })
@@ -61,12 +105,12 @@ async function init() {
           numberStyle: "decimal",
           fontSize: 10,
           indent: 6,
-          lineHeight: pdf.lineHeight,
+          lineHeight: 3,
           showIndex: false,
         },
       }
     )
-    .addSpace(2)
+    .addSpace(3)
     .addMixedParagraph(
       [
         pdf.bold("Điều 2."),
@@ -74,6 +118,7 @@ async function init() {
       ],
       { align: "justify" }
     )
+    .addSpace(3)
     .addMixedParagraph(
       [
         pdf.bold("Điều 3."),
@@ -81,6 +126,7 @@ async function init() {
       ],
       { align: "justify" }
     )
+    .addSpace(3)
     .addMixedParagraph(
       [
         pdf.bold("Điều 4."),
