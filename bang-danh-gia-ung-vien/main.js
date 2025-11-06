@@ -12,12 +12,13 @@ async function init(data = {}) {
 
   // ====== helpers nội bộ ======
   const setRoboto = (style = "normal") => doc.setFont("Roboto", style);
-  const box = (x, y, w, h) => doc.rect(x, y, w, h);  const tick = (x, y, checked, style = "X") => {
+  const box = (x, y, w, h) => doc.rect(x, y, w, h);
+  const tick = (x, y, checked, style = "X") => {
     doc.rect(x, y, 4, 4);
     if (checked) {
       const lw = doc.getLineWidth();
       doc.setLineWidth(0.5);
-      
+
       if (style === "V" || style === "check") {
         // Vẽ dấu V (checkmark)
         doc.line(x + 0.8, y + 2.2, x + 1.8, y + 3.0);
@@ -27,7 +28,7 @@ async function init(data = {}) {
         doc.line(x + 0.7, y + 0.7, x + 3.3, y + 3.3);
         doc.line(x + 3.3, y + 0.7, x + 0.7, y + 3.3);
       }
-      
+
       doc.setLineWidth(lw);
     }
   };
@@ -39,35 +40,35 @@ async function init(data = {}) {
     startY: pdf.getCurrentY() - 10,
     theme: "grid",
     margin: { left: M.left, right: M.right },
-    tableWidth: usableW, 
+    tableWidth: usableW,
     styles: {
       font: "Roboto",
       fontStyle: "bold",
       fontSize: 17,
       cellPadding: 2,
-      valign: "middle",     
+      valign: "middle",
       minCellHeight: 20,
       lineColor: [0, 0, 0],
+      textColor: [0, 0, 0],
     },
-    body: [
-      [{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"],
-    ],    columnStyles: {
-      0: { cellWidth: 50 }, 
-      1: { cellWidth: usableW - 50 + 5, halign: "center" }, 
+    body: [[{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"]],
+    columnStyles: {
+      0: { cellWidth: 50 },
+      1: { cellWidth: usableW - 50 + 5, halign: "center" },
     },
     didDrawCell: function (dataCell) {
       // Chèn ảnh vào cột đầu tiên
-      data.imgPath = "../image/hong-hung-logo.png"; 
+      data.imgPath = "../image/hong-hung-logo.png";
       if (dataCell.column.index === 0 && dataCell.row.index === 0 && data.imgPath) {
         const { x, y, width, height } = dataCell.cell;
-        const imgSize = Math.min(width, height) - 4; 
+        const imgSize = Math.min(width, height) - 4;
         const imgX = x + (width - imgSize) / 2;
         const imgY = y + (height - imgSize) / 2;
         doc.addImage(data.imgPath, "PNG", imgX, imgY, imgSize, imgSize);
       }
     },
   });
-  pdf.addSpace(20);  
+  pdf.addSpace(20);
   setRoboto("normal");
 
   // =========================================================
@@ -83,7 +84,15 @@ async function init(data = {}) {
     theme: "grid",
     margin: { left: M.left, right: M.right },
     tableWidth: usableW,
-    styles: { font: "Roboto", fontStyle: "normal", fontSize: 10, cellPadding: 2, valign: "middle",lineColor: [0, 0, 0], },
+    styles: {
+      font: "Roboto",
+      fontStyle: "normal",
+      fontSize: 10,
+      cellPadding: 2,
+      valign: "middle",
+      lineColor: [0, 0, 0],
+      textColor: [0, 0, 0],
+    },
     headStyles: { font: "Roboto", fontStyle: "bold" },
     body: [
       ["Họ tên ứng viên", { content: data.hoTen || "", colSpan: 3 }],
@@ -91,7 +100,7 @@ async function init(data = {}) {
       ["Trình độ chuyên môn", data.trinhDo || "", "Giới tính:", data.gioiTinh || ""],
       [
         { content: "Vị trí /chức danh ứng tuyển", styles: { halign: "left" } },
-        { content: data.viTri || "", colSpan: 3},
+        { content: data.viTri || "", colSpan: 3 },
       ],
       [
         {
@@ -167,26 +176,30 @@ async function init(data = {}) {
   const total = bodyDanhGia.reduce((s, r) => s + Number(r[2] || 0), 0);
   // Thêm dòng tổng kết vào cuối bảng
   bodyDanhGia.push([
-      { content: "Tổng kết", 
-        colSpan: 2,
-        styles: { halign: "center", fontStyle: "bold"}
-      },
-      total,
-    ]
-  );
+    { content: "Tổng kết", colSpan: 2, styles: { halign: "center", fontStyle: "bold" } },
+    total,
+  ]);
 
   doc.autoTable({
     startY: pdf.getCurrentY() + 2,
     theme: "grid",
     margin: { left: M.left, right: M.right },
-    tableWidth: usableW,    
+    tableWidth: usableW,
     head: [["Tiêu chí đánh giá", "Bằng chứng đánh giá", "Điểm đánh giá (Từ 0 đến 3 điểm)"]],
-    body: bodyDanhGia,    
-    styles: { font: "Roboto", fontStyle: "normal", fontSize: 10, cellPadding: 2, valign: "middle",lineColor: [0, 0, 0], },
-    headStyles: { 
-      font: "Roboto", 
-      fontStyle: "bold", 
-      fillColor: [255, 255, 255], 
+    body: bodyDanhGia,
+    styles: {
+      font: "Roboto",
+      fontStyle: "normal",
+      fontSize: 10,
+      cellPadding: 2,
+      valign: "middle",
+      lineColor: [0, 0, 0],
+      textColor: [0, 0, 0], 
+    },
+    headStyles: {
+      font: "Roboto",
+      fontStyle: "bold",
+      fillColor: [255, 255, 255],
       textColor: [0, 0, 0],
       lineColor: [0, 0, 0],
       lineWidth: 0.1,
@@ -221,42 +234,43 @@ async function init(data = {}) {
     startY: pdf.getCurrentY() - 10,
     theme: "grid",
     margin: { left: M.left, right: M.right },
-    tableWidth: usableW, 
+    tableWidth: usableW,
     styles: {
       font: "Roboto",
       fontStyle: "bold",
       fontSize: 17,
       cellPadding: 2,
-      valign: "middle",     
+      valign: "middle",
       minCellHeight: 20,
       lineColor: [0, 0, 0],
+      textColor: [0, 0, 0], 
     },
-    body: [
-      [{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"],
-    ],    columnStyles: {
-      0: { cellWidth: 50 }, 
-      1: { cellWidth: usableW - 50 , halign: "center" }, 
+    body: [[{ content: "" }, "BẢNG ĐÁNH GIÁ ỨNG VIÊN"]],
+    columnStyles: {
+      0: { cellWidth: 50 },
+      1: { cellWidth: usableW - 50, halign: "center" },
     },
     didDrawCell: function (dataCell) {
       // Chèn ảnh vào cột đầu tiên
-      data.imgPath = "../image/hong-hung-logo.png"; 
+      data.imgPath = "../image/hong-hung-logo.png";
       if (dataCell.column.index === 0 && dataCell.row.index === 0 && data.imgPath) {
         const { x, y, width, height } = dataCell.cell;
-        const imgSize = Math.min(width, height) - 4; 
+        const imgSize = Math.min(width, height) - 4;
         const imgX = x + (width - imgSize) / 2;
         const imgY = y + (height - imgSize) / 2;
         doc.addImage(data.imgPath, "PNG", imgX, imgY, imgSize, imgSize);
       }
     },
   });
-  pdf.addSpace(15); 
+  pdf.addSpace(15);
 
   // Thiết lập font size 10 cho nội dung trang 2
   doc.setFontSize(10);
   // ---- block phỏng vấn: nhãn trái + khung phải
   function drawInterviewBlock(label, pass, fail, height, obj = {}) {
     obj.label = null;
-    obj.content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet, mauris in tristique lobortis, dolor quam pulvinar velit, in fringilla nisl magna at metus. Nullam suscipit a magna ut porttitor. Nunc lacus arcu, ornare in iaculis a, interdum nec ligula. Morbi vestibulum volutpat ultrices.";
+    obj.content =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet, mauris in tristique lobortis, dolor quam pulvinar velit, in fringilla nisl magna at metus. Nullam suscipit a magna ut porttitor. Nunc lacus arcu, ornare in iaculis a, interdum nec ligula. Morbi vestibulum volutpat ultrices.";
     obj.name = "Nguyễn Văn A";
     obj.pathSignature = "../image/chu-ki-mau.jpg";
 
@@ -272,24 +286,25 @@ async function init(data = {}) {
       w2 = usableW - col1W;
     box(x2, y1, w2, height + 10); // khung phải    // nội dung
     setRoboto("italic");
-    const contentText = "Nội dung nhận xét: (kiến thức chuyên môn, kinh nghiệm, kỹ năng, thái độ...)";
+    const contentText =
+      "Nội dung nhận xét: (kiến thức chuyên môn, kinh nghiệm, kỹ năng, thái độ...)";
     const textLines = doc.splitTextToSize(contentText, w2 - 8); // Chia text thành nhiều dòng
     let textY = y1 + 6;
     textLines.forEach((line, index) => {
-      doc.text(line, x2 + 2, textY + (index * 4));
+      doc.text(line, x2 + 2, textY + index * 4);
     });
     setRoboto("normal");
 
     //Note chỉnh sửa: Nội dung nhận xét
     if (obj.content) {
       const commentLines = doc.splitTextToSize(obj.content, w2 - 8);
-      let commentY = textY + (textLines.length * 4) + 2;
+      let commentY = textY + textLines.length * 4 + 2;
       commentLines.forEach((line, index) => {
-        doc.text(line, x2 + 2, commentY + (index * 4));
+        doc.text(line, x2 + 2, commentY + index * 4);
       });
-    }    // ký tên & họ tên
+    } // ký tên & họ tên
     doc.text("Ký tên:", x2 + 2, y1 + height - 10);
-    
+
     // Note chỉnh sửa: Thêm hình chữ ký số nếu có
     if (obj.pathSignature) {
       try {
@@ -312,15 +327,15 @@ async function init(data = {}) {
         doc.setFontSize(10);
       }
     }
-    
+
     doc.text(
       "Họ và tên: " + (obj.name || "........................................................"),
       x2 + 2,
       y1 + height - 4
-    );    // Note chỉnh sửa: Thêm đường kẻ ngang để tách biệt phần kết quả như một row
+    ); // Note chỉnh sửa: Thêm đường kẻ ngang để tách biệt phần kết quả như một row
     const lineY = y1 + height + 2;
     doc.line(M.left + col1W, lineY, M.left + usableW, lineY); // Đường kẻ ngang từ trái sang phải
-    
+
     // kết quả checkbox
     const baseY = y1 + height + 8;
     let cx = x2 + 2;
@@ -350,7 +365,7 @@ async function init(data = {}) {
     lineHeight: pdf.lineHeight,
   });
   doc.setFontSize(8);
-    setRoboto("normal");
+  setRoboto("normal");
 
   const leftW = usableW / 2 - 2,
     rightW = usableW / 2 - 2;
@@ -360,16 +375,17 @@ async function init(data = {}) {
     blockH = 70;
 
   // khối trái
-  box(leftX, topY, leftW, blockH);  let ly = topY + 6;
+  box(leftX, topY, leftW, blockH);
+  let ly = topY + 6;
   tick(leftX + 2, ly - 4, !!data.approveHire, "V");
   doc.text("Đồng ý tuyển dụng", leftX + 8, ly);
   ly += 6;
   tick(leftX + 2, ly - 4, !!data.returnFile, "V");
   doc.text("Trả hồ sơ (không đạt)", leftX + 8, ly);
-  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  doc.line(leftX, ly + 2, leftX + leftW, ly + 2); // dòng phân cách
   ly += 6;
   doc.text(`Ngày nhận việc: ${data.ngayNhanViec || "......./....../........"}`, leftX + 2, ly);
-  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  doc.line(leftX, ly + 2, leftX + leftW, ly + 2); // dòng phân cách
   ly += 6;
   doc.text(`Cấp bậc nhân sự: ${data.capBac || ""}`, leftX + 2, ly);
   ly += 5;
@@ -378,7 +394,7 @@ async function init(data = {}) {
   doc.text(`Nhóm chức danh: ${data.nhomChucDanh || ""}`, leftX + 2, ly);
   ly += 5;
   doc.text(`Bậc: ${data.bac || ""}`, leftX + 2, ly);
-  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  doc.line(leftX, ly + 2, leftX + leftW, ly + 2); // dòng phân cách
   ly += 6;
   setRoboto("italic");
   doc.text("(Chọn 1 trong 2 lựa chọn)", leftX + 2, ly);
@@ -389,7 +405,7 @@ async function init(data = {}) {
   ly += 6;
   tick(leftX + 2, ly - 4, !!data.hdlc, "V");
   doc.text("Ký HĐLĐ xác định thời hạn: ... tháng", leftX + 8, ly);
-  doc.line(leftX, ly + 2, leftX + leftW , ly + 2 ); // dòng phân cách
+  doc.line(leftX, ly + 2, leftX + leftW, ly + 2); // dòng phân cách
   ly += 6;
   doc.text("Chế độ khác (ngoài quy định của Công ty):  ", leftX + 2, ly);
   // khối phải: cấp thẩm quyền phê duyệt
@@ -401,8 +417,12 @@ async function init(data = {}) {
   data.ngayPheDuyet = "15/10/2024";
   data.pathSignaturePheDuyet = "../image/chu-ki-mau.jpg";
   // Họ tên với giá trị từ data
-  doc.text("Họ tên: " + (data.tenPheDuyet || "........................................................"), rightX + 8, topY + 18);
-  
+  doc.text(
+    "Họ tên: " + (data.tenPheDuyet || "........................................................"),
+    rightX + 8,
+    topY + 18
+  );
+
   // Ngày với giá trị từ data
   doc.text("Ngày: " + (data.ngayPheDuyet || "......./....../........"), rightX + 8, topY + 25);
 
@@ -413,7 +433,14 @@ async function init(data = {}) {
       const signatureY = topY + 30;
       const signatureW = 50;
       const signatureH = 20;
-      doc.addImage(data.pathSignaturePheDuyet, "JPEG", signatureX, signatureY, signatureW, signatureH);
+      doc.addImage(
+        data.pathSignaturePheDuyet,
+        "JPEG",
+        signatureX,
+        signatureY,
+        signatureW,
+        signatureH
+      );
     } catch (error) {
       console.warn("Không thể load chữ ký phê duyệt:", data.pathSignaturePheDuyet, error);
       // Vẽ placeholder cho chữ ký
@@ -432,12 +459,13 @@ async function init(data = {}) {
   pdf.resetPosition(topY + blockH + 4);
 
   // Footer (số trang)
-  pdf.addFooter("Trang {pageNumber}/{totalPages}", { fontFamily: "Roboto" })
-      .addFooter("HDY-HRD-SOP01.F05 (01-01/10/2024)", {
-            align: "left",
-            fontSize: 8,
-            color: [128, 128, 128],
-          });
+  pdf
+    .addFooter("Trang {pageNumber}/{totalPages}", { fontFamily: "Roboto" })
+    .addFooter("HDY-HRD-SOP01.F05 (01-01/10/2024)", {
+      align: "left",
+      fontSize: 8,
+      color: [128, 128, 128],
+    });
   // Generate PDF and display in iframe
   const pdfDataUrl = pdf.generateDataURL();
   console.log(pdfDataUrl);
