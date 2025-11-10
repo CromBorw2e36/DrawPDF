@@ -992,7 +992,7 @@ class JsPdfService {
     this.currentY = originalY;
 
     // Date trái - hỗ trợ mixed text
-    const leftDate = leftSig.date || new Date().toLocaleDateString("vi-VN");
+    const leftDate = leftSig.date || "";
     this.renderCenteredText(leftDate, leftCenterX, this.currentY, 11, "normal");
     this.currentY += 8;
 
@@ -1014,7 +1014,7 @@ class JsPdfService {
     this.currentY = originalY;
 
     // Date phải - hỗ trợ mixed text
-    const rightDate = rightSig.date || new Date().toLocaleDateString("vi-VN");
+    const rightDate = rightSig.date || "";
     this.renderCenteredText(rightDate, rightCenterX, this.currentY, 11, "normal");
     this.currentY += 8;
 
