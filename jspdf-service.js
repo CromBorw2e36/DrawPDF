@@ -411,7 +411,8 @@ class JsPdfService {
     const headerOptions = {
       fontSize: 10,
       fontStyle: "normal",
-      align: "center",
+      align: "center", // "left", "center", "right"
+      color: [0, 0, 0], // Màu text [R, G, B]
       y: 10,
       ...options,
     };
@@ -419,24 +420,40 @@ class JsPdfService {
     const totalPages = this.doc.internal.getNumberOfPages();
     const currentPage = this.doc.internal.getCurrentPageInfo().pageNumber;
 
+    // Lưu màu text hiện tại
+    const originalTextColor = this.doc.internal.getCurrentPageInfo().color || [0, 0, 0];
+
     for (let i = 1; i <= totalPages; i++) {
       this.doc.setPage(i);
       this.doc.setFontSize(headerOptions.fontSize);
+      
+      // Thiết lập màu text
+      this.doc.setTextColor(headerOptions.color[0], headerOptions.color[1], headerOptions.color[2]);
+      
       try {
         this.doc.setFont("Roboto", headerOptions.fontStyle);
       } catch {
         this.doc.setFont("helvetica", headerOptions.fontStyle);
       }
 
+      let xPos;
+      const textWidth = this.doc.getTextWidth(text);
+      
       if (headerOptions.align === "center") {
-        const textWidth = this.doc.getTextWidth(text);
-        const centerX = (this.pageWidth - textWidth) / 2;
-        this.doc.text(text, centerX, headerOptions.y);
+        xPos = (this.pageWidth - textWidth) / 2;
+      } else if (headerOptions.align === "right") {
+        xPos = this.pageWidth - this.margins.right - textWidth;
       } else {
-        this.doc.text(text, this.margins.left, headerOptions.y);
+        // left alignment (default)
+        xPos = this.margins.left;
       }
+      
+      this.doc.text(text, xPos, headerOptions.y);
     }
 
+    // Khôi phục màu text gốc
+    this.doc.setTextColor(originalTextColor[0] || 0, originalTextColor[1] || 0, originalTextColor[2] || 0);
+    
     // Quay lại trang hiện tại
     this.doc.setPage(currentPage);
 
@@ -1000,7 +1017,7 @@ class JsPdfService {
     this.currentY += 5;
 
     // Note trái
-    const leftNote = "(Ký và ghi rõ họ tên)";
+    const leftNote = leftSig.note  || "(Ký và ghi rõ họ tên)";
     this.renderCenteredText(leftNote, leftCenterX, this.currentY, 9, "italic", [100, 100, 100]);
     this.currentY += 25;
     // Xử lý chữ ký trái - thêm image hoặc nameTag
@@ -1048,7 +1065,7 @@ class JsPdfService {
     this.currentY += 5;
 
     // Note phải
-    const rightNote = "(Ký và ghi rõ họ tên)";
+    const rightNote =  rightSig.note || "(Ký và ghi rõ họ tên)";
     this.renderCenteredText(rightNote, rightCenterX, this.currentY, 9, "italic", [100, 100, 100]);
     this.currentY += 25;
 
