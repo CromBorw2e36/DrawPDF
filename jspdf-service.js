@@ -534,11 +534,11 @@ class JsPdfService {
   exportPDFFile(filename = "document.pdf") {
     try {
       const pdfBlob = this.doc.output("blob");
-      const file = new File([pdfBlob], filename, { 
+      const file = new File([pdfBlob], filename, {
         type: "application/pdf",
-        lastModified: Date.now()
+        lastModified: Date.now(),
       });
-      
+
       console.log(`PDF file đã được tạo: ${filename}, Size: ${file.size} bytes`);
       return file;
     } catch (error) {
@@ -565,22 +565,22 @@ class JsPdfService {
       switch (format.toLowerCase()) {
         case "file":
           return this.exportPDFFile(filename);
-        
+
         case "blob":
           return this.generateBlob();
-        
+
         case "arraybuffer":
           return this.exportPDFArrayBuffer();
-        
+
         case "dataurl":
           return this.generateDataURL();
-        
+
         case "base64":
           return this.doc.output("datauristring").split(",")[1];
-        
+
         case "binarystring":
           return this.doc.output("binarystring");
-        
+
         default:
           console.warn(`Format không hỗ trợ: ${format}. Sử dụng format 'file' mặc định.`);
           return this.exportPDFFile(filename);
@@ -601,10 +601,10 @@ class JsPdfService {
 
       const formData = new FormData();
       formData.append(options.fieldName || "pdf", file);
-      
+
       // Thêm các field khác nếu có
       if (options.additionalData) {
-        Object.keys(options.additionalData).forEach(key => {
+        Object.keys(options.additionalData).forEach((key) => {
           formData.append(key, options.additionalData[key]);
         });
       }
@@ -612,12 +612,12 @@ class JsPdfService {
       const uploadOptions = {
         method: "POST",
         body: formData,
-        ...options.fetchOptions
+        ...options.fetchOptions,
       };
 
       console.log(`Đang upload PDF tới: ${url}`);
       const response = await fetch(url, uploadOptions);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -625,7 +625,6 @@ class JsPdfService {
       const result = await response.json();
       console.log("Upload thành công:", result);
       return result;
-      
     } catch (error) {
       console.error("Lỗi khi upload PDF:", error);
       throw error;
@@ -778,7 +777,7 @@ class JsPdfService {
     // Ngày tháng - căn giữa trong khối
     this.doc.setFontSize(signatureOptions.fontSize);
     try {
-      this.doc.setFont("Roboto",  "bold");
+      this.doc.setFont("Roboto", "bold");
     } catch {
       this.doc.setFont("helvetica", "bold");
     }
@@ -1043,14 +1042,14 @@ class JsPdfService {
       // Xử lý mixed text array
       const tempY = this.currentY;
       this.currentY = y;
-      
+
       // Tính tổng độ rộng để căn giữa
       let totalWidth = 0;
       content.forEach((part) => {
         const text = typeof part === "string" ? part : part.text;
         const partFontSize = typeof part === "object" && part.fontSize ? part.fontSize : fontSize;
         const partStyle = typeof part === "object" && part.style ? part.style : fontStyle;
-        
+
         this.doc.setFontSize(partFontSize);
         try {
           this.doc.setFont("Roboto", partStyle);
@@ -1059,7 +1058,7 @@ class JsPdfService {
         }
         totalWidth += this.doc.getTextWidth(text);
       });
-      
+
       // Vẽ mixed text căn giữa
       let currentX = centerX - totalWidth / 2;
       content.forEach((part) => {
@@ -1067,7 +1066,7 @@ class JsPdfService {
         const partFontSize = typeof part === "object" && part.fontSize ? part.fontSize : fontSize;
         const partStyle = typeof part === "object" && part.style ? part.style : fontStyle;
         const partColor = typeof part === "object" && part.color ? part.color : color;
-        
+
         this.doc.setFontSize(partFontSize);
         try {
           this.doc.setFont("Roboto", partStyle);
@@ -1075,11 +1074,11 @@ class JsPdfService {
           this.doc.setFont("helvetica", partStyle);
         }
         this.doc.setTextColor(partColor[0], partColor[1], partColor[2]);
-        
+
         this.doc.text(text, currentX, y);
         currentX += this.doc.getTextWidth(text);
       });
-      
+
       this.currentY = tempY;
     } else if (typeof content === "object" && content.text) {
       // Xử lý single text part object
@@ -1087,7 +1086,7 @@ class JsPdfService {
       const partFontSize = content.fontSize || fontSize;
       const partStyle = content.style || fontStyle;
       const partColor = content.color || color;
-      
+
       this.doc.setFontSize(partFontSize);
       try {
         this.doc.setFont("Roboto", partStyle);
@@ -1095,7 +1094,7 @@ class JsPdfService {
         this.doc.setFont("helvetica", partStyle);
       }
       this.doc.setTextColor(partColor[0], partColor[1], partColor[2]);
-      
+
       const textWidth = this.doc.getTextWidth(text);
       this.doc.text(text, centerX - textWidth / 2, y);
     } else {
@@ -1108,7 +1107,7 @@ class JsPdfService {
         this.doc.setFont("helvetica", fontStyle);
       }
       this.doc.setTextColor(color[0], color[1], color[2]);
-      
+
       const textWidth = this.doc.getTextWidth(text);
       this.doc.text(text, centerX - textWidth / 2, y);
     }
@@ -2179,11 +2178,12 @@ class JsPdfService {
     const textColor = Array.isArray(numberOptions.color) ? numberOptions.color : [0, 0, 0];
     this.doc.setTextColor(...textColor);
 
-    // Kiểm tra page break
-    this.checkPageBreak(numberOptions.lineHeight + 5);
-
     // Chia text thành các dòng với độ rộng tối đa (trừ đi phần indent)
     const lines = this.doc.splitTextToSize(text, numberOptions.maxWidth);
+
+    // Kiểm tra page break cho toàn bộ item trước khi vẽ
+    const totalHeight = lines.length * (3 + numberOptions.lineHeight);
+    this.checkPageBreak(totalHeight + 10);
 
     // Tính toán vị trí X cho số và text dựa trên alignment
     let numberX = this.margins.left;
@@ -2192,6 +2192,12 @@ class JsPdfService {
     // Vẽ từng dòng với alignment
     let currentLineY = this.currentY;
     lines.forEach((line, index) => {
+      // Kiểm tra page break cho mỗi dòng
+      this.checkPageBreak(3 + numberOptions.lineHeight + 5);
+
+      // Cập nhật currentLineY sau khi có thể đã chuyển trang
+      currentLineY = this.currentY;
+
       if (index === 0) {
         // Dòng đầu tiên: vẽ số trước
         if (numberOptions.showIndex) {
@@ -2242,7 +2248,13 @@ class JsPdfService {
           // Dòng đầu tiên có số
           textX = this.margins.left + numberOptions.indent;
           if (!isLastLine && line.trim().length > 0) {
-            this.drawJustifiedText(line, textX, currentLineY, numberOptions.maxWidth, numberOptions);
+            this.drawJustifiedText(
+              line,
+              textX,
+              currentLineY,
+              numberOptions.maxWidth,
+              numberOptions
+            );
           } else {
             // Dòng cuối hoặc dòng trống thì canh trái bình thường
             this.doc.text(line, textX, currentLineY);
@@ -2251,7 +2263,13 @@ class JsPdfService {
           // Các dòng tiếp theo thụt lề như nhau
           textX = this.margins.left + numberOptions.indent;
           if (!isLastLine && line.trim().length > 0) {
-            this.drawJustifiedText(line, textX, currentLineY, numberOptions.maxWidth, numberOptions);
+            this.drawJustifiedText(
+              line,
+              textX,
+              currentLineY,
+              numberOptions.maxWidth,
+              numberOptions
+            );
           } else {
             // Dòng cuối hoặc dòng trống thì canh trái bình thường
             this.doc.text(line, textX, currentLineY);
@@ -2267,12 +2285,12 @@ class JsPdfService {
         }
         this.doc.text(line, textX, currentLineY);
       }
-      
-      currentLineY += 3 + numberOptions.lineHeight;
+
+      // Cập nhật vị trí Y cho dòng tiếp theo
+      this.currentY = currentLineY + 3 + numberOptions.lineHeight;
     });
 
-    // Cập nhật vị trí Y và số
-    this.currentY = currentLineY;
+    // Cập nhật số đếm
     this.currentNumberByStyle[numberOptions.numberStyle]++;
 
     return this;

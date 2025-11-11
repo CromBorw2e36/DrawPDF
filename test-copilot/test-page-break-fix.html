@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page Break trong Numbered List</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a9c;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Page Break trong Numbered List</h1>
+    <p>Test tính năng kiểm tra page break khi item của numbered list quá dài.</p>
+    
+    <div class="test-section">
+        <h3>Test Cases:</h3>
+        <button onclick="testLongItems()">Test Items Dài (Before Fix)</button>
+        <button onclick="testVeryLongItems()">Test Items Rất Dài</button>
+        <button onclick="testMixedLongItems()">Test Mix Items Ngắn & Dài</button>
+        <button onclick="testRealWorldExample()">Test Ví Dụ Thực Tế</button>
+    </div>
+    
+    <script>
+        function testLongItems() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Page Break - Items Dài");
+            pdf.addSpace(10);
+            
+            // Thêm một số content để đẩy gần cuối trang
+            for (let i = 0; i < 25; i++) {
+                pdf.addText(`Dòng số ${i + 1} để đẩy content xuống gần cuối trang`, null, null, {
+                    fontSize: 10
+                });
+            }
+            
+            pdf.addSpace(10);
+            pdf.addText("Danh sách với items dài:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold"
+            });
+            
+            pdf.addNumberedList([
+                "Item ngắn đầu tiên",
+                "Item thứ hai với nội dung rất dài để kiểm tra việc page break có hoạt động đúng không. Text này cần phải đủ dài để spanning qua nhiều dòng và có thể gây ra page break ở giữa item. Chúng ta cần đảm bảo rằng khi một item quá dài và cần xuống dòng nhiều lần, thì page break sẽ được kiểm tra cho mỗi dòng để tránh tình trạng text chạy qua lề dưới của trang.",
+                "Item thứ ba ngắn",
+                "Item thứ tư cũng rất dài để test thêm một lần nữa. Nội dung này cần phải đủ dài để có thể test được tình huống mà một item bắt đầu ở cuối trang này và có thể tiếp tục sang trang khác một cách hợp lý và không bị cắt đứt một cách xấu xí."
+            ], {
+                itemOptions: {
+                    align: "justify",
+                    fontSize: 11,
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testVeryLongItems() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Items Rất Dài");
+            pdf.addSpace(10);
+            
+            // Đẩy gần cuối trang
+            for (let i = 0; i < 30; i++) {
+                pdf.addText(`Content filler ${i + 1}`, null, null, { fontSize: 9 });
+            }
+            
+            const veryLongText = "Đây là một item với nội dung cực kỳ dài để test khả năng xử lý page break. ".repeat(20) + 
+                                "Nội dung này được lặp lại nhiều lần để đảm bảo rằng item này sẽ span qua nhiều dòng và có thể gây ra page break. " +
+                                "Chúng ta cần kiểm tra xem liệu page break có được xử lý đúng cách hay không khi item này được render.";
+            
+            pdf.addNumberedList([
+                veryLongText,
+                "Item thứ hai cũng dài tương tự. " + "Nội dung lặp lại. ".repeat(15),
+                "Item ngắn",
+                "Item cuối cũng dài. " + "Text lặp lại để test. ".repeat(25)
+            ], {
+                itemOptions: {
+                    align: "left",
+                    fontSize: 10,
+                    numberStyle: "roman"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testMixedLongItems() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Mix Items Ngắn & Dài");
+            pdf.addSpace(10);
+            
+            // Đẩy xuống
+            for (let i = 0; i < 28; i++) {
+                pdf.addText(`Filler content ${i + 1}`, null, null, { fontSize: 9 });
+            }
+            
+            pdf.addNumberedList([
+                "Item ngắn số 1",
+                "Item dài số 2: " + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(10) + 
+                "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+                "Item ngắn số 3",
+                "Item ngắn số 4",
+                "Item dài số 5: " + "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; ".repeat(8) +
+                "Mauris viverra venec netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede.",
+                "Item ngắn số 6"
+            ], {
+                itemOptions: {
+                    align: "justify",
+                    fontSize: 11,
+                    numberStyle: "alpha"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testRealWorldExample() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Ví Dụ Thực Tế - Hợp Đồng");
+            pdf.addSpace(10);
+            
+            // Đẩy xuống gần cuối trang
+            for (let i = 0; i < 32; i++) {
+                pdf.addText(`Điều khoản ${i + 1}: Nội dung ngắn`, null, null, { fontSize: 9 });
+            }
+            
+            pdf.addText("Điều 7. Cam kết bảo mật thông tin:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold"
+            });
+            
+            // Sử dụng nội dung từ file thực tế
+            pdf.addNumberedList([
+                `"Thông tin mật" của Công ty TNHH XNK TM CN DV Hùng Duy và các Đơn vị thành viên trực thuộc là bao gồm nhưng không giới hạn những nội dung sau đây: bí mật công nghệ, bí mật kinh doanh, thông tin khách hàng, kế hoạch tài chính, chiến lược công ty,... và các thông tin, tài liệu, ý tưởng thể hiện hoặc lưu trữ dưới dạng văn bản, dữ liệu máy tính, thư điện tử, hình ảnh, mã code, phần mềm tin học,...`,
+                `Bên B đồng ý và cam kết vô điều kiện rằng tuyệt đối bảo vệ và bảo mật thông tin mật (không được tiết lộ, sử dụng, cung cấp thông tin mật) cho bất kỳ cá nhân, tổ chức, bên thứ ba dưới bất kỳ cách thức và bất kỳ lý do nào (nếu chưa nhận được sự đồng ý bằng văn bản của Bên A) mà Bên B có được trong quá trình làm việc, có liên quan đến công việc và/hoặc thuộc quyền sở hữu hợp pháp của mình nhưng chưa được bộc lộ. Trừ trường hợp buộc phải thực hiện tiết lộ theo quy định của pháp luật và/hoặc yêu cầu của Cơ quan Nhà nước có thẩm quyền, Bên B phải thông báo cho Bên A biết trước để Bên A áp dụng những biện pháp cần thiết nhằm bảo vệ quyền và lợi ích hợp pháp của công ty trước những thông tin mật sắp bị bộc lộ.`,
+                `Bên B đồng ý và cam kết vô điều kiện rằng sẽ không tiến hành bất kỳ hoạt động giao dịch (ví dụ: liên hệ, cung cấp thông tin, trao đổi, mua bán,...) với bất kỳ cá nhân, tổ chức, bên thứ ba về thông tin mật làm ảnh hưởng trực tiếp/gián tiếp đến quyền và lợi ích hợp pháp của công ty. Đồng thời chấp nhận mọi hình thức kỷ luật hoặc yêu cầu bồi thường từ công ty do những thiệt hại/tổn thất/mất mát phát sinh do vi phạm nghĩa vụ bảo mật theo hợp đồng này.`,
+            ], {
+                itemOptions: {
+                    numberStyle: "number",
+                    numberFormat: "-",
+                    indent: 4,
+                    fontSize: 10.5,
+                    align: "justify",
+                },
+                resetNumbers: true,
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        console.log("Test Page Break cho Numbered List loaded!");
+        console.log("Các cải tiến:");
+        console.log("- Kiểm tra page break cho mỗi dòng");
+        console.log("- Tính toán tổng chiều cao trước khi vẽ");
+        console.log("- Cập nhật vị trí Y chính xác");
+    </script>
+</body>
+</html>

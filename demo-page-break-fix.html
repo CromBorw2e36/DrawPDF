@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Fix Page Break</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+</head>
+<body>
+    <h1>Demo Fix Page Break - Numbered List</h1>
+    <p>Demonstrate the fix for page break issues in numbered list items</p>
+    
+    <button onclick="testPageBreakFix()" style="background: #4CAF50; color: white; padding: 15px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px;">
+        🚀 Test Page Break Fix
+    </button>
+    
+    <script>
+        function testPageBreakFix() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Kiểm Tra Page Break Fix");
+            pdf.addSpace(10);
+            
+            // Thêm nhiều content để đẩy xuống gần cuối trang
+            pdf.addText("Các dòng filler để đẩy content xuống gần cuối trang:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold"
+            });
+            
+            for (let i = 1; i <= 35; i++) {
+                pdf.addText(`Dòng ${i}: Lorem ipsum dolor sit amet, consectetur adipiscing elit.`, null, null, {
+                    fontSize: 9
+                });
+            }
+            
+            pdf.addSpace(5);
+            pdf.addText("===== DANH SÁCH VỚI ITEMS DÀI =====", null, null, {
+                fontSize: 12,
+                fontStyle: "bold",
+                align: "center"
+            });
+            pdf.addSpace(3);
+            
+            // Danh sách với items rất dài - sẽ test page break
+            pdf.addNumberedList([
+                "Item đầu tiên có nội dung rất rất dài để test page break. Trước khi fix, item này có thể chạy xuống cuối trang và không được kiểm tra page break đúng cách, dẫn tới việc text bị overflow qua lề dưới của trang. Sau khi fix, mỗi dòng sẽ được kiểm tra page break riêng biệt để đảm bảo layout đẹp và chính xác.",
+                
+                "Item thứ hai cũng có nội dung dài tương tự. Nội dung này được thiết kế để test khả năng xử lý page break của hệ thống. Với fix mới, hàm addNumberedText sẽ kiểm tra page break cho mỗi dòng, không chỉ kiểm tra một lần ở đầu item như trước đây.",
+                
+                "Item ngắn để tạo contrast",
+                
+                "Item cuối cùng với nội dung cực kỳ dài để đảm bảo rằng fix hoạt động ổn định. " + 
+                "Text này được lặp lại nhiều lần. ".repeat(15) + 
+                "Mục đích là để tạo ra một item có đủ độ dài để có thể span qua nhiều dòng và test khả năng page break của từng dòng."
+            ], {
+                itemOptions: {
+                    fontSize: 10,
+                    align: "justify",
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.addSpace(10);
+            pdf.addText("✅ Đã fix: Kiểm tra page break cho mỗi dòng", null, null, {
+                fontSize: 11,
+                color: [0, 150, 0],
+                fontStyle: "bold"
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        console.log("Demo Page Break Fix ready!");
+    </script>
+</body>
+</html>
