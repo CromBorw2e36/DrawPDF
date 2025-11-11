@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo: Page Break Per Item</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+</head>
+<body>
+    <h1>🎯 Demo: Page Break Per Item</h1>
+    <p><strong>Cải tiến:</strong> Kiểm tra page break cho từng item thay vì từng dòng</p>
+    
+    <button onclick="demoPageBreakPerItem()" style="background: #4CAF50; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+        🚀 Demo Page Break Per Item
+    </button>
+    
+    <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 5px;">
+        <h3>✨ Những cải tiến:</h3>
+        <ul>
+            <li>✅ <strong>Page break theo item:</strong> Mỗi item được coi như một đơn vị hoàn chỉnh</li>
+            <li>✅ <strong>Ước tính chiều cao:</strong> Tính toán trước để quyết định page break</li>
+            <li>✅ <strong>Tối ưu hiệu suất:</strong> Giảm số lần kiểm tra không cần thiết</li>
+            <li>✅ <strong>Layout đẹp hơn:</strong> Items không bị cắt đứt một cách xấu xí</li>
+        </ul>
+    </div>
+    
+    <script>
+        function demoPageBreakPerItem() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Demo: Page Break Per Item");
+            pdf.addSpace(10);
+            
+            pdf.addText("Mô phỏng tình huống thực tế:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(5);
+            
+            // Đẩy content xuống gần cuối trang
+            for (let i = 1; i <= 34; i++) {
+                pdf.addText(`${i}. Nội dung để đẩy danh sách xuống gần cuối trang`, null, null, {
+                    fontSize: 9
+                });
+            }
+            
+            pdf.addSpace(8);
+            pdf.addText("📋 DANH SÁCH VỚI PAGE BREAK TỐI ƯU:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold",
+                color: [0, 100, 0],
+                align: "center"
+            });
+            pdf.addSpace(5);
+            
+            // Danh sách sẽ test page break per item
+            pdf.addNumberedList([
+                "Item ngắn đầu tiên",
+                
+                "Item dài thứ hai: Đây là một item có nội dung rất dài để test khả năng page break per item. Với cách tiếp cận mới, toàn bộ item này sẽ được ước tính chiều cao trước, sau đó quyết định có cần chuyển trang hay không. Điều này đảm bảo item không bị cắt đứt một cách xấu xí giữa các trang.",
+                
+                "Item thứ ba vừa phải: Nội dung này có độ dài trung bình để tạo sự đa dạng trong test case và kiểm tra tính ổn định của thuật toán page break mới.",
+                
+                "Item thứ tư rất dài: " + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(10) + "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                
+                "Item cuối ngắn gọn"
+            ], {
+                itemOptions: {
+                    fontSize: 10,
+                    align: "justify",
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.addSpace(15);
+            pdf.addText("✅ Kết quả: Mỗi item được xử lý như một đơn vị hoàn chỉnh!", null, null, {
+                fontSize: 11,
+                color: [0, 150, 0],
+                fontStyle: "bold",
+                align: "center"
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        console.log("Demo Page Break Per Item ready!");
+        console.log("Key improvements:");
+        console.log("1. Pre-calculate item height");
+        console.log("2. Check page break per item (not per line)");
+        console.log("3. Treat items as complete units");
+        console.log("4. Optimize performance");
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page Break Per Item</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a9c;
+        }
+        .highlight {
+            background: #4CAF50;
+            font-weight: bold;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .improvement {
+            background: #E8F5E8;
+            border-left: 4px solid #4CAF50;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Test Page Break Per Item (Cải Tiến)</h1>
+    
+    <div class="improvement">
+        <h3>✨ Cải tiến mới:</h3>
+        <ul>
+            <li><strong>Kiểm tra page break từng item</strong> thay vì từng dòng</li>
+            <li><strong>Ước tính chiều cao item</strong> trước khi render</li>
+            <li><strong>Tối ưu performance</strong> - giảm số lần kiểm tra page break</li>
+            <li><strong>Items được coi như đơn vị hoàn chỉnh</strong></li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Cases:</h3>
+        <button onclick="testItemBasedPageBreak()" class="highlight">🎯 Test Page Break Per Item</button>
+        <button onclick="testMixedItemSizes()">📏 Test Mixed Item Sizes</button>
+        <button onclick="testRealWorldContract()">📋 Test Real Contract</button>
+        <button onclick="testPerformanceComparison()">⚡ Test Performance</button>
+    </div>
+    
+    <script>
+        function testItemBasedPageBreak() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Page Break Per Item (Cải Tiến Mới)");
+            pdf.addSpace(10);
+            
+            // Thêm content để đẩy xuống gần cuối trang
+            for (let i = 1; i <= 32; i++) {
+                pdf.addText(`Content filler ${i}`, null, null, { fontSize: 9 });
+            }
+            
+            pdf.addSpace(5);
+            pdf.addText("🎯 DANH SÁCH VỚI PAGE BREAK PER ITEM:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold",
+                color: [0, 100, 0]
+            });
+            pdf.addSpace(3);
+            
+            // Test với các items có độ dài khác nhau
+            pdf.addNumberedList([
+                "Item 1: Ngắn",
+                
+                "Item 2: Dài - " + "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ".repeat(8) + 
+                "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+                
+                "Item 3: Trung bình - Nulla facilisi morbi tempus iaculis urna id volutpat lacus laoreet non.",
+                
+                "Item 4: Rất dài - " + "Vestibulum ante ipsum primis in faucibus orci luctus. ".repeat(12) +
+                "Mauris viverra venec netus et malesuada fames ac turpis egestas integer.",
+                
+                "Item 5: Ngắn lại",
+                
+                "Item 6: Cực dài - " + "Suspendisse potenti nullam ac tortor vitae purus faucibus ornare. ".repeat(15) +
+                "In hac habitasse platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper."
+            ], {
+                itemOptions: {
+                    fontSize: 10,
+                    align: "justify",
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.addSpace(10);
+            pdf.addText("✅ Mỗi item được kiểm tra page break riêng biệt", null, null, {
+                fontSize: 11,
+                color: [0, 150, 0],
+                fontStyle: "bold"
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testMixedItemSizes() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Mixed Item Sizes");
+            pdf.addSpace(10);
+            
+            // Đẩy xuống
+            for (let i = 1; i <= 35; i++) {
+                pdf.addText(`Setup line ${i}`, null, null, { fontSize: 8 });
+            }
+            
+            const items = [];
+            for (let i = 1; i <= 10; i++) {
+                if (i % 3 === 1) {
+                    // Items ngắn
+                    items.push(`Item ${i}: Ngắn`);
+                } else if (i % 3 === 2) {
+                    // Items trung bình
+                    items.push(`Item ${i}: Trung bình - ` + "Text để test độ dài vừa phải. ".repeat(3));
+                } else {
+                    // Items dài
+                    items.push(`Item ${i}: Dài - ` + "Text dài để test page break per item. ".repeat(8));
+                }
+            }
+            
+            pdf.addNumberedList(items, {
+                itemOptions: {
+                    fontSize: 10,
+                    align: "left",
+                    numberStyle: "roman"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testRealWorldContract() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Real World - Hợp Đồng");
+            pdf.addSpace(10);
+            
+            // Đẩy xuống gần cuối trang
+            for (let i = 1; i <= 30; i++) {
+                pdf.addText(`Điều ${i}: Nội dung hợp đồng mẫu`, null, null, { fontSize: 9 });
+            }
+            
+            pdf.addText("Điều 7. Cam kết bảo mật thông tin của Bên B", null, null, {
+                fontSize: 12,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(3);
+            
+            // Nội dung thực từ hợp đồng
+            pdf.addNumberedList([
+                `"Thông tin mật" của Công ty TNHH XNK TM CN DV Hùng Duy và các Đơn vị thành viên trực thuộc là bao gồm nhưng không giới hạn những nội dung sau đây: bí mật công nghệ, bí mật kinh doanh, thông tin khách hàng, kế hoạch tài chính, chiến lược công ty,... và các thông tin, tài liệu, ý tưởng thể hiện hoặc lưu trữ dưới dạng văn bản, dữ liệu máy tính, thư điện tử, hình ảnh, mã code, phần mềm tin học,...`,
+                
+                `Bên B đồng ý và cam kết vô điều kiện rằng tuyệt đối bảo vệ và bảo mật thông tin mật (không được tiết lộ, sử dụng, cung cấp thông tin mật) cho bất kỳ cá nhân, tổ chức, bên thứ ba dưới bất kỳ cách thức và bất kỳ lý do nào (nếu chưa nhận được sự đồng ý bằng văn bản của Bên A) mà Bên B có được trong quá trình làm việc, có liên quan đến công việc và/hoặc thuộc quyền sở hữu hợp pháp của mình nhưng chưa được bộc lộ.`,
+                
+                `Bên B đồng ý và cam kết vô điều kiện rằng sẽ không tiến hành bất kỳ hoạt động giao dịch (ví dụ: liên hệ, cung cấp thông tin, trao đổi, mua bán,...) với bất kỳ cá nhân, tổ chức, bên thứ ba về thông tin mật làm ảnh hưởng trực tiếp/gián tiếp đến quyền và lợi ích hợp pháp của công ty.`
+            ], {
+                itemOptions: {
+                    numberStyle: "number",
+                    numberFormat: "-",
+                    indent: 4,
+                    fontSize: 10.5,
+                    align: "justify",
+                },
+                resetNumbers: true,
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testPerformanceComparison() {
+            console.time("Performance Test");
+            
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Performance Test - Page Break Per Item");
+            pdf.addSpace(10);
+            
+            // Tạo nhiều items để test performance
+            const manyItems = [];
+            for (let i = 1; i <= 50; i++) {
+                if (i % 5 === 0) {
+                    manyItems.push(`Item ${i}: Rất dài - ` + "Text lặp lại để test performance. ".repeat(6));
+                } else if (i % 3 === 0) {
+                    manyItems.push(`Item ${i}: Trung bình - ` + "Text vừa phải. ".repeat(2));
+                } else {
+                    manyItems.push(`Item ${i}: Ngắn`);
+                }
+            }
+            
+            console.log(`Generating ${manyItems.length} items...`);
+            
+            pdf.addNumberedList(manyItems, {
+                itemOptions: {
+                    fontSize: 9,
+                    align: "left",
+                    numberStyle: "decimal"
+                }
+            });
+            
+            console.timeEnd("Performance Test");
+            console.log("✅ Performance test completed!");
+            
+            pdf.previewPDF();
+        }
+        
+        console.log("🚀 Test Page Break Per Item loaded!");
+        console.log("Improvements:");
+        console.log("- Page break check per item (not per line)");
+        console.log("- Estimated height calculation");
+        console.log("- Optimized performance");
+        console.log("- Items treated as complete units");
+    </script>
+</body>
+</html>

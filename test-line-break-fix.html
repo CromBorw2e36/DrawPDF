@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fix Line Break</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+</head>
+<body>
+    <h1>🔧 Test Fix Line Break</h1>
+    <p>Test việc sửa lỗi xuống dòng tự động trong numbered list</p>
+    
+    <button onclick="testLineBreakFix()" style="background: #FF5722; color: white; padding: 15px 20px; border: none; border-radius: 5px; cursor: pointer;">
+        🧪 Test Line Break Fix
+    </button>
+    
+    <script>
+        function testLineBreakFix() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Line Break Fix");
+            pdf.addSpace(10);
+            
+            pdf.addText("Test các items với nội dung dài để kiểm tra xuống dòng:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Item ngắn đầu tiên",
+                
+                "Item dài thứ hai: Đây là một item có nội dung rất dài để test việc xuống dòng tự động. Text này cần phải được chia thành nhiều dòng và hiển thị đúng cách với thụt lề phù hợp cho từng dòng.",
+                
+                "Item thứ ba cũng dài: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                
+                "Item ngắn",
+                
+                "Item cuối rất dài: Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."
+            ], {
+                itemOptions: {
+                    fontSize: 11,
+                    align: "left",
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.addSpace(10);
+            
+            pdf.addText("Test với justify alignment:", null, null, {
+                fontSize: 12,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Item justify ngắn",
+                "Item justify dài: Đây là test cho justify alignment với text dài. Text này sẽ được dãn đều từ lề trái đến lề phải và phải hiển thị đúng cách khi xuống nhiều dòng.",
+                "Item justify khác cũng dài: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Các từ trong dòng này sẽ được dãn đều để tạo ra layout đẹp mắt và chuyên nghiệp."
+            ], {
+                itemOptions: {
+                    fontSize: 11,
+                    align: "justify",
+                    numberStyle: "roman"
+                },
+                resetNumbers: true
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        console.log("Test Line Break Fix ready!");
+    </script>
+</body>
+</html>

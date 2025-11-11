@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Debug Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+</head>
+<body>
+    <h1>Quick Debug Test</h1>
+    
+    <button onclick="quickDebug()" style="padding: 10px 20px;">Debug Line Break</button>
+    
+    <script>
+        function quickDebug() {
+            console.log("Starting debug test...");
+            
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Debug Test");
+            pdf.addSpace(10);
+            
+            // Test với text đơn giản
+            pdf.addNumberedList([
+                "Short item",
+                "Very long item that should automatically wrap to multiple lines and display correctly with proper indentation for each line in the numbered list",
+                "Another short item"
+            ], {
+                itemOptions: {
+                    fontSize: 12,
+                    align: "left"
+                }
+            });
+            
+            console.log("Debug test completed");
+            pdf.previewPDF();
+        }
+    </script>
+</body>
+</html>

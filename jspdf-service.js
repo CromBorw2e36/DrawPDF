@@ -2181,9 +2181,11 @@ class JsPdfService {
     // Chia text thành các dòng với độ rộng tối đa (trừ đi phần indent)
     const lines = this.doc.splitTextToSize(text, numberOptions.maxWidth);
 
-    // Kiểm tra page break cho toàn bộ item trước khi vẽ
-    const totalHeight = lines.length * (3 + numberOptions.lineHeight);
-    this.checkPageBreak(totalHeight + 10);
+    // Kiểm tra page break cho toàn bộ item (nếu chưa được kiểm tra từ bên ngoài)
+    if (numberOptions.skipPageBreakCheck !== true) {
+      const totalHeight = lines.length * (3 + numberOptions.lineHeight);
+      this.checkPageBreak(totalHeight + 10);
+    }
 
     // Tính toán vị trí X cho số và text dựa trên alignment
     let numberX = this.margins.left;
@@ -2192,11 +2194,11 @@ class JsPdfService {
     // Vẽ từng dòng với alignment
     let currentLineY = this.currentY;
     lines.forEach((line, index) => {
-      // Kiểm tra page break cho mỗi dòng
-      this.checkPageBreak(3 + numberOptions.lineHeight + 5);
-
-      // Cập nhật currentLineY sau khi có thể đã chuyển trang
-      currentLineY = this.currentY;
+      // Chỉ kiểm tra page break cho mỗi dòng nếu item rất dài (> 5 dòng)
+      if (lines.length > 5 && numberOptions.skipPageBreakCheck !== true) {
+        this.checkPageBreak(3 + numberOptions.lineHeight + 5);
+        currentLineY = this.currentY; // Cập nhật sau khi có thể chuyển trang
+      }
 
       if (index === 0) {
         // Dòng đầu tiên: vẽ số trước
@@ -2287,9 +2289,12 @@ class JsPdfService {
       }
 
       // Cập nhật vị trí Y cho dòng tiếp theo
-      this.currentY = currentLineY + 3 + numberOptions.lineHeight;
+      currentLineY += 3 + numberOptions.lineHeight;
     });
 
+    // Cập nhật this.currentY sau khi hoàn thành toàn bộ item
+    this.currentY = currentLineY;
+    
     // Cập nhật số đếm
     this.currentNumberByStyle[numberOptions.numberStyle]++;
 
@@ -2339,15 +2344,30 @@ class JsPdfService {
       this.resetNumbering(listOptions.itemOptions.numberStyle, 1);
     }
 
-    // Thêm từng item
+    // Thêm từng item với kiểm tra page break cho mỗi item
     items.forEach((item, index) => {
       const itemText = typeof item === "string" ? item : item.text;
       const itemOpts =
         typeof item === "object"
           ? { ...listOptions.itemOptions, ...item.options }
           : listOptions.itemOptions;
-      this.addNumberedText(itemText, itemOpts);
+      
+      // Tính toán chiều cao ước tính của item này để kiểm tra page break
+      this.doc.setFontSize(itemOpts.fontSize || 11);
+      const maxWidth = itemOpts.maxWidth || 
+        (this.pageWidth - this.margins.left - this.margins.right - (itemOpts.indent || 20));
+      const lines = this.doc.splitTextToSize(itemText, maxWidth);
+      const estimatedHeight = lines.length * ((itemOpts.lineHeight || this.lineHeight) + 3) + 
+                             (listOptions.spacing || 0.5) + 10; // thêm buffer
+      
+      // Kiểm tra page break cho toàn bộ item
+      this.checkPageBreak(estimatedHeight);
+      
+      // Render item với flag để không kiểm tra page break lại
+      const optimizedOpts = { ...itemOpts, skipPageBreakCheck: true };
+      this.addNumberedText(itemText, optimizedOpts);
 
+      // Thêm spacing giữa các item
       if (index < items.length - 1) {
         this.addSpace(listOptions.spacing);
       }
