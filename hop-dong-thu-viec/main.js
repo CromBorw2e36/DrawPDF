@@ -86,7 +86,7 @@ async function init(data = {}) {
   );
   pdf.addMixedText(
     ["Cùng thỏa thuận ký kết Hợp đồng thử việc ", pdf.bold("(HĐTV)"), " với các điều khoản sau:"],
-    { fontSize: 10.5, lineHeight: 10, spacing: 1 }
+    { fontSize: 10.5, lineHeight: pdf.lineHeight + 5, spacing: 1 }
   );
   // ===== Điều 1 =====
   pdf.addSubTitle("Điều 1. Thời hạn và công việc hợp đồng", { fontSize: 12, lineHeight: 2 });
@@ -382,7 +382,7 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addParagraph(
     "Trong thời gian thử việc, đối với thu nhập phát sinh hàng tháng từ 2.000.000 đồng trở lên Công ty sẽ trích 10% từ thu nhập hàng tháng của Người lao động để nộp cho Nhà nước theo quy định của Luật thuế thu nhập cá nhân. Trong trường hợp Người lao động cam kết tổng thu nhập năm chưa đến mức chịu thuế theo quy định của Nhà nước (cam kết theo mẫu quy định) thì Công ty sẽ tạm không thu thuế của Người lao động. Người lao động sẽ tự quyết toán thuế với Cơ quan thuế và chịu trách nhiệm về cam kết của mình.",
-    { fontSize: 10.5, lineHeight: 4, spacing: pdf.lineHeight }
+    { fontSize: 10.5, lineHeight: 4, spacing: pdf.lineHeight, align: "justify" }
   );
   pdf.margins.left -= 5;
   // ===== Điều 8 =====
@@ -414,7 +414,7 @@ async function init(data = {}) {
   pdf.margins.left -= 5;
 
   // ===== Chữ ký =====
-  pdf.addSpace(10);
+  pdf.addSpace(1);
   pdf.addDualSignature(
     {
       date: "", // trống theo mẫu
