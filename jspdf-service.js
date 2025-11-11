@@ -1003,6 +1003,32 @@ class JsPdfService {
     const leftNote = "(Ký và ghi rõ họ tên)";
     this.renderCenteredText(leftNote, leftCenterX, this.currentY, 9, "italic", [100, 100, 100]);
     this.currentY += 25;
+    // Xử lý chữ ký trái - thêm image hoặc nameTag
+    if (leftSig.signaturePath && leftSig.signaturePath.trim()) {
+      // Có đường dẫn chữ ký - thêm ảnh chữ ký
+      try {
+        this.doc.addImage(
+          leftSig.signaturePath,
+          "PNG",
+          leftCenterX - 15,
+          this.currentY - 20,
+          30,
+          15
+        );
+      } catch (error) {
+        console.warn("Không thể thêm chữ ký trái:", error);
+      }
+    } else if (leftSig.nameTag && leftSig.nameTag.trim()) {
+      // Không có đường dẫn chữ ký - ghi chìm nameTag màu trắng
+      const originalTextColor = this.doc.internal.getCurrentPageInfo().color || [0, 0, 0];
+      this.doc.setTextColor(255, 255, 255); // Màu trắng (chìm)
+      this.doc.text(leftSig.nameTag, leftCenterX - 15 / 2, this.currentY - 15);
+      this.doc.setTextColor(
+        originalTextColor[0] || 0,
+        originalTextColor[1] || 0,
+        originalTextColor[2] || 0
+      ); // Khôi phục màu gốc
+    }
 
     // Name trái - hỗ trợ mixed text
     this.renderCenteredText(leftSig.name, leftCenterX, this.currentY, 11, "bold");
@@ -1025,6 +1051,33 @@ class JsPdfService {
     const rightNote = "(Ký và ghi rõ họ tên)";
     this.renderCenteredText(rightNote, rightCenterX, this.currentY, 9, "italic", [100, 100, 100]);
     this.currentY += 25;
+
+    // Xử lý chữ ký phải - thêm image hoặc nameTag
+    if (rightSig.signaturePath && rightSig.signaturePath.trim()) {
+      // Có đường dẫn chữ ký - thêm ảnh chữ ký
+      try {
+        this.doc.addImage(
+          rightSig.signaturePath,
+          "PNG",
+          rightCenterX - 15,
+          this.currentY - 20,
+          30,
+          15
+        );
+      } catch (error) {
+        console.warn("Không thể thêm chữ ký phải:", error);
+      }
+    } else if (rightSig.nameTag && rightSig.nameTag.trim()) {
+      // Không có đường dẫn chữ ký - ghi chìm nameTag màu trắng
+      const originalTextColor = this.doc.internal.getCurrentPageInfo().color || [0, 0, 0];
+      this.doc.setTextColor(255, 255, 255); // Màu trắng (chìm)
+      this.doc.text(rightSig.nameTag, rightCenterX - 15 / 2, this.currentY - 15);
+      this.doc.setTextColor(
+        originalTextColor[0] || 0,
+        originalTextColor[1] || 0,
+        originalTextColor[2] || 0
+      ); // Khôi phục màu gốc
+    }
 
     // Name phải - hỗ trợ mixed text
     this.renderCenteredText(rightSig.name, rightCenterX, this.currentY, 11, "bold");
@@ -2294,7 +2347,7 @@ class JsPdfService {
 
     // Cập nhật this.currentY sau khi hoàn thành toàn bộ item
     this.currentY = currentLineY;
-    
+
     // Cập nhật số đếm
     this.currentNumberByStyle[numberOptions.numberStyle]++;
 
@@ -2351,18 +2404,21 @@ class JsPdfService {
         typeof item === "object"
           ? { ...listOptions.itemOptions, ...item.options }
           : listOptions.itemOptions;
-      
+
       // Tính toán chiều cao ước tính của item này để kiểm tra page break
       this.doc.setFontSize(itemOpts.fontSize || 11);
-      const maxWidth = itemOpts.maxWidth || 
-        (this.pageWidth - this.margins.left - this.margins.right - (itemOpts.indent || 20));
+      const maxWidth =
+        itemOpts.maxWidth ||
+        this.pageWidth - this.margins.left - this.margins.right - (itemOpts.indent || 20);
       const lines = this.doc.splitTextToSize(itemText, maxWidth);
-      const estimatedHeight = lines.length * ((itemOpts.lineHeight || this.lineHeight) + 3) + 
-                             (listOptions.spacing || 0.5) + 10; // thêm buffer
-      
+      const estimatedHeight =
+        lines.length * ((itemOpts.lineHeight || this.lineHeight) + 3) +
+        (listOptions.spacing || 0.5) +
+        10; // thêm buffer
+
       // Kiểm tra page break cho toàn bộ item
       this.checkPageBreak(estimatedHeight);
-      
+
       // Render item với flag để không kiểm tra page break lại
       const optimizedOpts = { ...itemOpts, skipPageBreakCheck: true };
       this.addNumberedText(itemText, optimizedOpts);
@@ -2590,5 +2646,26 @@ class JsPdfService {
       pageSize: this.doc.internal.pageSize,
       currentY: this.currentY,
     };
+  }
+  /**
+   * Căn đều dấu ":" trong danh sách các dòng mô tả (kiểu biểu mẫu hành chính)
+   * @param {string[]} lines - danh sách các dòng (mỗi dòng chứa 1 dấu ":")
+   * @param {number} [padSize=1] - số khoảng trắng thêm sau dấu ":" (mặc định 1)
+   * @returns {string[]} danh sách dòng đã căn đều
+   */
+  alignColons(lines, padSize = 1) {
+    // Tách phần trước và sau dấu ":", đo độ dài phần trước dài nhất
+    const parts = lines.map((l) => {
+      const [left, right] = l.split(":");
+      return { left: left ?? "", right: right ?? "" };
+    });
+    const maxLen = Math.max(...parts.map((p) => p.left.trimEnd().length));
+
+    // Gắn lại với số khoảng trắng phù hợp
+    const pad = " ".repeat(padSize);
+    return parts.map((p) => {
+      const spaces = " ".repeat(maxLen - p.left.trimEnd().length);
+      return `${p.left.trimEnd()}${spaces} :${pad}${p.right.trimStart()}`;
+    });
   }
 }

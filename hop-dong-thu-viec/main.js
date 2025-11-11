@@ -395,7 +395,10 @@ async function init(data = {}) {
   pdf.addNumberedList(
     [
       "Những vấn đề về lao động không ghi trong hợp đồng này thì áp dụng theo Nội quy lao động,  Thoả ước lao động tập thể và theo quy định của pháp luật. ",
-      `Hợp đồng thử việc này được lập thành 02 bản có giá trị như nhau, mỗi bên giữ 01 bản và có hiệu lực kể từ ngày ${val(data.effectiveDate, "…………………..")}.`,
+      `Hợp đồng thử việc này được lập thành 02 bản có giá trị như nhau, mỗi bên giữ 01 bản và có hiệu lực kể từ ngày ${val(
+        data.effectiveDate,
+        "………………….."
+      )}.`,
       "Hợp đồng này được lập tại Công ty TNHH XNK TM CN DV Hùng Duy.",
     ],
     {
@@ -420,11 +423,15 @@ async function init(data = {}) {
       date: "", // trống theo mẫu
       title: "NGƯỜI LAO ĐỘNG",
       name: val(data.signerEmployee, ""), // để trống cho ký tay
+      signaturePath: data.signaturePathA || null,
+      nameTag: "signaturePathA",
     },
     {
       date: "",
       title: "NGƯỜI SỬ DỤNG LAO ĐỘNG",
       name: "LÊ MINH TRÚC",
+      signaturePath: data.signaturePathA || null,
+      nameTag: "signaturePathA",
     }
   );
 

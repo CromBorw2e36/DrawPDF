@@ -1,7 +1,53 @@
 async function init(data = {}) {
+
+  //các properties cần thiết của biến data
+  // data = {
+  //   // Thông tin chung hợp đồng
+  //   soVanBan: string,                    // Số văn bản hợp đồng
+  //   ngayHop: string,                     // Ngày ký hợp đồng (dd/mm/yyyy)
+  //   ngayBatDauHopDong: string,           // Ngày bắt đầu hợp đồng (dd/mm/yyyy)
+  //   ngayKetThucHopDong: string,          // Ngày kết thúc hợp đồng (dd/mm/yyyy)
+  //   ngayHieuLucHopDong: string,          // Ngày có hiệu lực hợp đồng (dd/mm/yyyy)
+  //   
+  //   // Thông tin công ty (Bên A)
+  //   companyFullName: string,             // Tên đầy đủ công ty
+  //   companyShortName: string,            // Tên viết tắt công ty
+  //   companyAddress: string,              // Địa chỉ công ty
+  //   companyPhone: string,                // Số điện thoại công ty
+  //   a_representative: string,            // Tên người đại diện Bên A
+  //   a_nationality: string,               // Quốc tịch người đại diện Bên A
+  //   a_title: string,                     // Chức vụ người đại diện Bên A
+  //   
+  //   // Thông tin người học việc (Bên B)
+  //   b_fullName: string,                  // Họ tên đầy đủ người học việc
+  //   b_nationality: string,               // Quốc tịch người học việc
+  //   b_birthYear: string,                 // Năm sinh người học việc
+  //   b_gender: string,                    // Giới tính người học việc
+  //   b_address: string,                   // Địa chỉ thường trú người học việc
+  //   b_idNo: string,                      // Số CCCD/CMND người học việc
+  //   b_idDate: string,                    // Ngày cấp CCCD/CMND (dd/mm/yyyy)
+  //   b_idPlace: string,                   // Nơi cấp CCCD/CMND
+  //   
+  //   // Thông tin công việc và địa điểm
+  //   noiLamViec: string,                  // Nơi làm việc/học việc
+  //   huongDanCongViec: string,            // Nội dung hướng dẫn công việc cụ thể
+  //   
+  //   // Thông tin lương và thanh toán
+  //   luong: string,                       // Mức lương (số tiền)
+  //   ngayNhanLuong: string,               // Ngày nhận lương hàng tháng
+  //   
+  //   // Thông tin chữ ký
+  //   signerA: string,                     // Tên người ký đại diện Bên A
+  //   signerB: string                      // Tên người ký Bên B
+  //   signaturePathA: string,             // Đường dẫn file chữ ký Bên A (nếu có)
+  //   signaturePathB: string              // Đường dẫn file chữ ký Bên B (nếu có)
+  // }
+
+
   const pdf = new JsPdfService();
+  pdf.lineHeight += 1;
   const M = pdf.margins;
-  const lineHeightPage = 4;
+  const lineHeightPage = 6;
   const fontSizeTitle = 16;
   const fontSizeSubTitle = 12;
   const fontSizeContent = 10.5;
@@ -126,10 +172,11 @@ async function init(data = {}) {
   renderTwoColumnHeader(pdf, {
     TenCongTy: "CÔNG TY TNHH XNK TM CN DV Hùng Duy",
   });
-  pdf.addText(`Số: ${val(data.soVanBan, "……….")}`, null, null, {
+  pdf.addText(`Số: ${val(data.soVanBan)}`, null, null, {
     fontSize: fontSizeContent,
     align: "left",
     spacing: 5,
+    fontSize: 12,
   });
   pdf.addSpace(3);
   pdf.addTitle("HỢP ĐỒNG HỌC VIỆC/TẬP NGHỀ", { fontSize: 16, fontStyle: "bold", align: "center" });
@@ -138,7 +185,7 @@ async function init(data = {}) {
   // ===== Căn cứ =====
   pdf.addParagraph(
     "Căn cứ Bộ luật lao động 2019;\n" +
-      `Căn cứ cơ cấu tổ chức và quy chế ${val(data.companyShortName, "Công ty ….")}.`,
+      `Căn cứ cơ cấu tổ chức và quy chế ${val(data.companyShortName, "Công ty ........................")}.`,
     { fontSize: fontSizeContent, lineHeight: lineHeightPage, spacing: 1, align: "left" }
   );
 
@@ -146,7 +193,7 @@ async function init(data = {}) {
   pdf.addParagraph(
     `Hôm nay, ngày ${val(data.ngayHop)} tại Văn phòng ${val(
       data.companyShortName,
-      "Công ty ….."
+      "Công ty ........................"
     )}, chúng tôi gồm có:`,
     { fontSize: fontSizeContent, lineHeight: lineHeightPage, spacing: 1, align: "justify" }
   );
@@ -158,12 +205,9 @@ async function init(data = {}) {
   });
   pdf.addParagraph(
     [
-      `Ông (Bà)          : ${val(
-        data.a_representative,
-        "………"
-      )}                                  Quốc tịch: ${val(data.a_nationality)}`,
+      `Ông (Bà)          : ${val(data.a_representative)}                                  Quốc tịch: ${val(data.a_nationality)}`,
       `Chức vụ           : ${val(data.a_title)}`,
-      `Đại diện cho   : ${val(data.companyFullName, "Công ty ……")}`,
+      `Đại diện cho   : ${val(data.companyFullName, "Công ty ........................")}`,
       `Địa chỉ             : ${val(data.companyAddress)}`,
       `Điện thoại       : ${val(data.companyPhone)}`,
     ].join("\n"),
@@ -223,8 +267,11 @@ async function init(data = {}) {
   pdf.addNumberedList(
     [
       "Vị trí công việc được hướng dẫn học việc/tập nghề:",
-      "Thời gian: từ ngày  ........ đến ngày .......",
-      "Địa điểm: [Ghi địa chỉ nơi học việc/tập nghề chính: trụ sở Công ty/chi nhánh/cơ sở khác của công ty] và những địa điểm khác theo bố trí của Công ty.",
+      `Thời gian: từ ngày  ${val(data.ngayBatDauHopDong)} đến ngày ${val(data.ngayKetThucHopDong)}`,
+      `Địa điểm: ${val(
+        data.noiLamViec ??
+          "[Ghi địa chỉ nơi học việc/tập nghề chính: trụ sở Công ty/chi nhánh/cơ sở khác của công ty]"
+      )}  và những địa điểm khác theo bố trí của Công ty.`,
     ],
     {
       itemOptions: {
@@ -269,7 +316,7 @@ async function init(data = {}) {
   pdf.addNumberedList(
     [
       "Phương pháp vận hành và thao tác vận hành máy ly tâm.",
-      "Hướng dẫn …..",
+      `Hướng dẫn ${val(data.huongDanCongViec)}`,
       "Hướng dẫn các quy định liên quan đến việc đảm bảo an toàn vệ sinh lao động, an toàn vệ sinh thực phẩm.",
       "Đào tạo các kiến thức bổ trợ khác có liên quan (nếu có).",
     ],
@@ -332,11 +379,11 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addNumberedList(
     [
-      "Mức lương: …….. đồng/tháng. (Được tính chi trả theo số ngày thực tế mà Bên B trực tiếp tham gia lao động trong thời gian học việc/tập nghề tại địa điểm của Bên A). ",
-      "Ngày chi trả: vào ngày …. tây hàng tháng. ",
-      "Hình thức chi trả: tiền mặt/chuyển khoản. ",
-      "Trong thời gian học việc/tập nghề, nếu Bên B tham gia lao động ngoài giờ làm việc bình thường được nêu tại Điều 2 của hợp đồng này thì được Bên A trả lương làm thêm giờ theo quy định của Công ty. ",
-      "Bên B được hưởng chế độ phúc lợi theo quy chế của Công ty (nếu có). ",
+      `Mức lương: ${val(data.luong)} đồng/tháng. (Được tính chi trả theo số ngày thực tế mà Bên B trực tiếp tham gia lao động trong thời gian học việc/tập nghề tại địa điểm của Bên A).`,
+      `Ngày chi trả: vào ngày ${val(data.ngayNhanLuong)} tây hàng tháng.`,
+      "Hình thức chi trả: tiền mặt/chuyển khoản.",
+      "Trong thời gian học việc/tập nghề, nếu Bên B tham gia lao động ngoài giờ làm việc bình thường được nêu tại Điều 2 của hợp đồng này thì được Bên A trả lương làm thêm giờ theo quy định của Công ty.",
+      "Bên B được hưởng chế độ phúc lợi theo quy chế của Công ty (nếu có).",
     ],
     {
       itemOptions: {
@@ -663,7 +710,7 @@ async function init(data = {}) {
     [
       "Các nội dung khác liên quan đến việc học việc/tập nghề không được quy định trong hợp đồng này sẽ được áp dụng theo Nội quy lao động, Thỏa ước lao động tập thể và theo quy định của pháp luật. ",
       "Hợp đồng này được lập thành hai (02) bản có giá trị pháp lý như nhau, mỗi bên giữ một (01) bản. ",
-      "Hợp đồng được lập tại Công ty ….., và có hiệu lực kể từ ngày …………………",
+      `Hợp đồng được lập tại ${val(data.ngayBatDauHopDong ?? "Công ty ........................")}, và có hiệu lực kể từ ngày ${val(data.ngayHieuLucHopDong)}`,
     ],
     {
       itemOptions: {
@@ -685,18 +732,20 @@ async function init(data = {}) {
     {
       date: "", // trống theo mẫu
       title: "BÊN B",
-      name: val(data.signerB, ""), // để trống cho ký tay
+      name: val(data.signerB, "Nguyễn Văn A"), // để trống cho ký tay
+      signaturePath: data.signaturePathB || null ,
+      nameTag: "signaturePathB",
     },
     {
       date: "",
       title: "ĐẠI DIỆN BÊN A",
       name: val(data.signerA, ""),
+      signaturePath: data.signaturePathA || null,
+      nameTag: "signaturePathA",
     }
   );
   // ===== Footer =====
-  pdf.addFooter("Trang {pageNumber}/{totalPages}", { fontSize: 8 });
-  // ===== Footer số trang =====
-  pdf.addFooter("Trang {pageNumber}/{totalPages}", { fontSize: 8 });
+  pdf.addFooter("{pageNumber}/{totalPages}", { fontSize: 8, color: [151, 151, 151] });
   // Generate PDF and display in iframe
   const pdfDataUrl = pdf.generateDataURL();
   console.log(pdfDataUrl);
