@@ -17,9 +17,9 @@ async function init(data = {}) {
     align: "center",
     spacing: 5,
   });
-  pdf.addText("---o0o---", null, null, { fontSize: 10, align: "center", spacing: 5 });
+  pdf.addText("---o0o---", null, null, { fontSize: 10.5, align: "center", spacing: 5 });
   pdf.addText(`Số : ${val(data.soVanBan, "")}`, null, null, {
-    fontSize: 10,
+    fontSize: 10.5,
     align: "left",
     spacing: 5,
   });
@@ -32,7 +32,7 @@ async function init(data = {}) {
     lineHeight: 1.5,
   });
   pdf.addMixedText(["Đại diện bởi Bà     : ", pdf.bold("LÊ MINH TRÚC"), " - Quốc tịch: Việt Nam"], {
-    fontSize: 10,
+    fontSize: 10.5,
     lineHeight: 4,
     spacing: 1,
   });
@@ -43,10 +43,10 @@ async function init(data = {}) {
       "Địa chỉ                   : Số 250 Lý Thường Kiệt, Khu phố 4, P.Long Hoa, Thị Xã Hòa Thành, Tây Ninh.",
       "Điện thoại             : 0276-3830099",
     ].join("\n"),
-    { fontSize: 10, lineHeight: 4, spacing: 1 }
+    { fontSize: 10.5, lineHeight: 4, spacing: 1 }
   );
-  pdf.addMixedText(["Sau đây gọi tắt là ", pdf.bold("“Công ty”; “Người sử dụng lao động”")], {
-    fontSize: 10,
+  pdf.addMixedText(["Sau đây gọi tắt là ", pdf.bold('"Công ty", "Người sử dụng lao động"')], {
+    fontSize: 10.5,
     lineHeight: 5,
     spacing: 1,
   });
@@ -68,25 +68,25 @@ async function init(data = {}) {
         "…………………….."
       )} Tại:  ${val(data.empIdPlace, "…………………")}`,
     ].join("\n"),
-    { fontSize: 10, lineHeight: 4, spacing: 1 }
+    { fontSize: 10.5, lineHeight: 4, spacing: 1 }
   );
-  pdf.addMixedText(["Sau đây gọi tắt là ", pdf.bold("“Người lao động”")], {
-    fontSize: 10,
+  pdf.addMixedText(["Sau đây gọi tắt là ", pdf.bold('"Người lao động"')], {
+    fontSize: 10.5,
     lineHeight: 4,
     spacing: 1,
   });
   pdf.addMixedText(
     [
       "Công ty và Người lao động sau đây được gọi riêng là ",
-      pdf.bold("“Bên”"),
+      pdf.bold('"Bên"'),
       " và được gọi chung là ",
-      pdf.bold("“Các bên”"),
+      pdf.bold('"Các bên"'),
     ],
-    { fontSize: 10, lineHeight: 4, spacing: 1 }
+    { fontSize: 10.5, lineHeight: 4, spacing: 1 }
   );
   pdf.addMixedText(
     ["Cùng thỏa thuận ký kết Hợp đồng thử việc ", pdf.bold("(HĐTV)"), " với các điều khoản sau:"],
-    { fontSize: 10, lineHeight: 10, spacing: 1 }
+    { fontSize: 10.5, lineHeight: 10, spacing: 1 }
   );
   // ===== Điều 1 =====
   pdf.addSubTitle("Điều 1. Thời hạn và công việc hợp đồng", { fontSize: 12, lineHeight: 2 });
@@ -106,7 +106,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "{number}.",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
       },
@@ -126,7 +126,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "{number}.",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -146,7 +146,7 @@ async function init(data = {}) {
     "Trong thời gian thử việc, đối với thu nhập phát sinh hàng tháng từ 2.000.000 VNĐ trở lên, Người sử dụng lao động sẽ thực hiện tạm khấu trừ 10% thuế",
     "thu nhập cá nhân đối với người lao động theo quy định pháp luật (trừ trường hợp người lao động có cam kết theo mẫu để không tạm khấu trừ). Người",
     "lao động tự chịu trách nhiệm về việc kê khai quyết toán thuế với Cơ quan thuế và chịu trách nhiệm về cam kết của mình.",
-  ].forEach((line) => pdf.addParagraph(line, { fontSize: 10, lineHeight: 4, spacing: 0.5 }));
+  ].forEach((line) => pdf.addParagraph(line, { fontSize: 10.5, lineHeight: 4, spacing: 0.5 }));
 
   pdf.margins.left += 5;
   pdf.addNumberedList(
@@ -156,7 +156,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "-",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -178,7 +178,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "•",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -193,13 +193,13 @@ async function init(data = {}) {
         `Lương theo doanh số ngành: được chi trả căn cứ chỉ tiêu được giao và kết quả doanh số thực đạt.`,
       ],
       {
-        fontSize: 10,
+        fontSize: 10.5,
         fontStyle: "normal",
         spacing: 3,
-        lineHeight: pdf.lineHeight,
+        lineHeight: pdf.lineHeight + 2.5,
       }
     )
-    .addSpace(3);
+    .addSpace(1);
   pdf.margins.left -= 5;
   pdf.addNumberedList(
     [
@@ -213,7 +213,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "-",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -224,7 +224,7 @@ async function init(data = {}) {
   pdf.margins.left -= 5;
   // — Nghĩa vụ —
   pdf.addParagraph(["2. Nghĩa vụ"], {
-    fontSize: 10,
+    fontSize: 10.5,
     fontStyle: "normal",
     spacing: 3,
     lineHeight: pdf.lineHeight,
@@ -245,7 +245,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "-",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -260,7 +260,7 @@ async function init(data = {}) {
     lineHeight: 1.5,
   });
   pdf.addParagraph(["1. Nghĩa vụ"], {
-    fontSize: 10,
+    fontSize: 10.5,
     fontStyle: "normal",
     spacing: 3,
     lineHeight: pdf.lineHeight,
@@ -276,7 +276,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "-",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -286,7 +286,7 @@ async function init(data = {}) {
   );
   pdf.margins.left -= 5;
   pdf.addParagraph(["2. Quyền hạn"], {
-    fontSize: 10,
+    fontSize: 10.5,
     fontStyle: "normal",
     spacing: 3,
     lineHeight: pdf.lineHeight,
@@ -303,7 +303,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "-",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -333,7 +333,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "{number}.",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -364,7 +364,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "{number}.",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
@@ -382,7 +382,7 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addParagraph(
     "Trong thời gian thử việc, đối với thu nhập phát sinh hàng tháng từ 2.000.000 đồng trở lên Công ty sẽ trích 10% từ thu nhập hàng tháng của Người lao động để nộp cho Nhà nước theo quy định của Luật thuế thu nhập cá nhân. Trong trường hợp Người lao động cam kết tổng thu nhập năm chưa đến mức chịu thuế theo quy định của Nhà nước (cam kết theo mẫu quy định) thì Công ty sẽ tạm không thu thuế của Người lao động. Người lao động sẽ tự quyết toán thuế với Cơ quan thuế và chịu trách nhiệm về cam kết của mình.",
-    { fontSize: 10, lineHeight: 4, spacing: pdf.lineHeight }
+    { fontSize: 10.5, lineHeight: 4, spacing: pdf.lineHeight }
   );
   pdf.margins.left -= 5;
   // ===== Điều 8 =====
@@ -403,7 +403,7 @@ async function init(data = {}) {
         numberStyle: "number",
         numberFormat: "{number}.",
         indent: 4,
-        fontSize: 10,
+        fontSize: 10.5,
         lineHeight: pdf.lineHeight,
         spacing: 1,
         align: "justify",
