@@ -178,7 +178,8 @@ Tạo danh sách có đánh số tự động.
   indent: 6,                // Thụt lề
   lineHeight: 4,
   showIndex: true,          // Hiển thị số thứ tự
-  startNumber: 1            // Số bắt đầu
+  startNumber: 1,           // Số bắt đầu
+  align: "left"             // "left", "center", "right", "justify" - Canh lề
 }
 ```
 
@@ -188,8 +189,15 @@ Tạo danh sách có đánh số tự động.
 - `"alpha"`: A, B, C...
 - `"none"`: Chỉ hiển thị nội dung
 
+**Alignment Options:**
+- `"left"`: Canh trái (mặc định)
+- `"center"`: Canh giữa
+- `"right"`: Canh phải
+- `"justify"`: Canh đều (dãn đều từ trái sang phải)
+
 **Ví dụ:**
 ```javascript
+// Danh sách canh trái (mặc định)
 pdf.addNumberedList([
   "Item đầu tiên",
   "Item thứ hai", 
@@ -198,7 +206,41 @@ pdf.addNumberedList([
   itemOptions: {
     numberStyle: "decimal",
     fontSize: 11,
-    indent: 8
+    indent: 8,
+    align: "left"
+  }
+});
+
+// Danh sách canh giữa
+pdf.addNumberedList([
+  "Item canh giữa",
+  "Text dài sẽ được canh giữa tự động"
+], {
+  itemOptions: {
+    align: "center",
+    fontSize: 12
+  }
+});
+
+// Danh sách canh phải
+pdf.addNumberedList([
+  "Item canh phải",
+  "Số và text đều canh về bên phải"
+], {
+  itemOptions: {
+    align: "right",
+    fontSize: 12
+  }
+});
+
+// Danh sách canh đều
+pdf.addNumberedList([
+  "Item canh đều",
+  "Text dài sẽ được dãn đều từ lề trái đến lề phải, tạo ra khoảng cách đồng đều giữa các từ. Dòng cuối sẽ canh trái bình thường."
+], {
+  itemOptions: {
+    align: "justify",
+    fontSize: 12
   }
 });
 ```

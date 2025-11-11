@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test Justify Alignment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+</head>
+<body>
+    <h1>Quick Test: Justify Alignment</h1>
+    
+    <button onclick="testJustify()" style="background: #4CAF50; color: white; padding: 15px 20px; border: none; border-radius: 5px; cursor: pointer;">
+        Test Justify Alignment
+    </button>
+    
+    <script>
+        function testJustify() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Demo Tính Năng Canh Đều (Justify) cho Numbered List");
+            pdf.addSpace(15);
+            
+            pdf.addText("Ví dụ 1: Text ngắn và dài:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Text ngắn",
+                "Text dài để test tính năng justify alignment khi có nhiều từ trong một dòng và cần được dãn đều từ lề trái đến lề phải",
+                "Text trung bình để kiểm tra",
+                "Dòng cuối cùng trong mỗi mục sẽ được canh trái bình thường để tránh khoảng cách quá lớn giữa các từ"
+            ], {
+                itemOptions: {
+                    align: "justify",
+                    fontSize: 12,
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.addSpace(15);
+            
+            pdf.addText("Ví dụ 2: So sánh với canh trái:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(5);
+            
+            const compareText = "Text dài để so sánh sự khác biệt giữa canh đều và canh trái khi hiển thị trong danh sách có đánh số";
+            
+            pdf.addText("Canh trái (left):", null, null, { fontSize: 12, fontStyle: "bold", color: [0, 100, 0] });
+            pdf.addNumberedList([compareText], {
+                itemOptions: {
+                    align: "left",
+                    fontSize: 11
+                }
+            });
+            
+            pdf.addSpace(8);
+            
+            pdf.addText("Canh đều (justify):", null, null, { fontSize: 12, fontStyle: "bold", color: [100, 0, 100] });
+            pdf.addNumberedList([compareText], {
+                itemOptions: {
+                    align: "justify",
+                    fontSize: 11
+                },
+                resetNumbers: true
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        console.log("Quick Justify Test ready! Click the button to test.");
+    </script>
+</body>
+</html>

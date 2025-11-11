@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Alignment for Numbered List</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="jspdf-service.js"></script>
+</head>
+<body>
+    <h1>Test Alignment for Numbered List</h1>
+    
+    <button onclick="testLeftAlignment()">Test Left Alignment</button>
+    <button onclick="testCenterAlignment()">Test Center Alignment</button>
+    <button onclick="testRightAlignment()">Test Right Alignment</button>
+    
+    <script>
+        function testLeftAlignment() {
+            const pdfService = new JsPdfService();
+            
+            pdfService.addText("Numbered List - Left Alignment", null, null, {
+                fontSize: 16,
+                fontStyle: "bold",
+                align: "center"
+            });
+            
+            pdfService.addSpace(10);
+            
+            pdfService.addNumberedList([
+                "Mục thứ nhất với text dài để kiểm tra việc xuống dòng và canh lề trái",
+                "Mục thứ hai",
+                "Mục thứ ba với nội dung dài hơn để xem cách thức hoạt động của alignment"
+            ], {
+                itemOptions: {
+                    align: "left",
+                    fontSize: 12
+                }
+            });
+            
+            pdfService.save('test-left-alignment.pdf');
+        }
+        
+        function testCenterAlignment() {
+            const pdfService = new JsPdfService();
+            
+            pdfService.addText("Numbered List - Center Alignment", null, null, {
+                fontSize: 16,
+                fontStyle: "bold",
+                align: "center"
+            });
+            
+            pdfService.addSpace(10);
+            
+            pdfService.addNumberedList([
+                "Mục thứ nhất - canh giữa",
+                "Mục thứ hai với text dài để kiểm tra",
+                "Mục thứ ba"
+            ], {
+                itemOptions: {
+                    align: "center",
+                    fontSize: 12
+                }
+            });
+            
+            pdfService.save('test-center-alignment.pdf');
+        }
+        
+        function testRightAlignment() {
+            const pdfService = new JsPdfService();
+            
+            pdfService.addText("Numbered List - Right Alignment", null, null, {
+                fontSize: 16,
+                fontStyle: "bold",
+                align: "center"
+            });
+            
+            pdfService.addSpace(10);
+            
+            pdfService.addNumberedList([
+                "Mục thứ nhất - canh phải",
+                "Mục thứ hai với text dài để kiểm tra việc canh phải",
+                "Mục thứ ba"
+            ], {
+                itemOptions: {
+                    align: "right",
+                    fontSize: 12
+                }
+            });
+            
+            pdfService.save('test-right-alignment.pdf');
+        }
+    </script>
+</body>
+</html>

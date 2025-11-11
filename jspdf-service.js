@@ -2182,20 +2182,92 @@ class JsPdfService {
     // Kiểm tra page break
     this.checkPageBreak(numberOptions.lineHeight + 5);
 
-    // Vẽ số
-    if (numberOptions.showIndex) this.doc.text(formattedNumber, this.margins.left, this.currentY);
-
-    // Vẽ text với thụt lề
-    const textX = this.margins.left + numberOptions.indent;
-
     // Chia text thành các dòng với độ rộng tối đa (trừ đi phần indent)
     const lines = this.doc.splitTextToSize(text, numberOptions.maxWidth);
 
-    // Vẽ từng dòng
+    // Tính toán vị trí X cho số và text dựa trên alignment
+    let numberX = this.margins.left;
+    let textX = this.margins.left + numberOptions.indent;
+
+    // Vẽ từng dòng với alignment
     let currentLineY = this.currentY;
     lines.forEach((line, index) => {
-      // Dòng đầu tiên đã có số, các dòng tiếp theo thụt lề như nhau
-      this.doc.text(line, textX, currentLineY);
+      if (index === 0) {
+        // Dòng đầu tiên: vẽ số trước
+        if (numberOptions.showIndex) {
+          if (numberOptions.align === "center") {
+            const totalWidth = this.doc.getTextWidth(formattedNumber + " " + line);
+            const startX = (this.pageWidth - totalWidth) / 2;
+            numberX = startX;
+            textX = startX + this.doc.getTextWidth(formattedNumber) + 5;
+          } else if (numberOptions.align === "right") {
+            const totalWidth = this.doc.getTextWidth(formattedNumber + " " + line);
+            const startX = this.pageWidth - this.margins.right - totalWidth;
+            numberX = startX;
+            textX = startX + this.doc.getTextWidth(formattedNumber) + 5;
+          } else {
+            // Left alignment (default)
+            numberX = this.margins.left;
+            textX = this.margins.left + numberOptions.indent;
+          }
+          this.doc.text(formattedNumber, numberX, currentLineY);
+        }
+      }
+
+      // Vẽ text với alignment
+      if (numberOptions.align === "center") {
+        if (index === 0 && numberOptions.showIndex) {
+          // Dòng đầu tiên đã được tính toán ở trên
+          this.doc.text(line, textX, currentLineY);
+        } else {
+          // Các dòng tiếp theo canh giữa
+          const lineWidth = this.doc.getTextWidth(line);
+          const centerX = (this.pageWidth - lineWidth) / 2;
+          this.doc.text(line, centerX, currentLineY);
+        }
+      } else if (numberOptions.align === "right") {
+        if (index === 0 && numberOptions.showIndex) {
+          // Dòng đầu tiên đã được tính toán ở trên
+          this.doc.text(line, textX, currentLineY);
+        } else {
+          // Các dòng tiếp theo canh phải
+          const lineWidth = this.doc.getTextWidth(line);
+          const rightX = this.pageWidth - this.margins.right - lineWidth;
+          this.doc.text(line, rightX, currentLineY);
+        }
+      } else if (numberOptions.align === "justify") {
+        // Canh đều - chỉ áp dụng cho các dòng không phải dòng cuối
+        const isLastLine = index === lines.length - 1;
+        if (index === 0) {
+          // Dòng đầu tiên có số
+          textX = this.margins.left + numberOptions.indent;
+          if (!isLastLine && line.trim().length > 0) {
+            this.drawJustifiedText(line, textX, currentLineY, numberOptions.maxWidth, numberOptions);
+          } else {
+            // Dòng cuối hoặc dòng trống thì canh trái bình thường
+            this.doc.text(line, textX, currentLineY);
+          }
+        } else {
+          // Các dòng tiếp theo thụt lề như nhau
+          textX = this.margins.left + numberOptions.indent;
+          if (!isLastLine && line.trim().length > 0) {
+            this.drawJustifiedText(line, textX, currentLineY, numberOptions.maxWidth, numberOptions);
+          } else {
+            // Dòng cuối hoặc dòng trống thì canh trái bình thường
+            this.doc.text(line, textX, currentLineY);
+          }
+        }
+      } else {
+        // Left alignment (default)
+        if (index === 0) {
+          textX = this.margins.left + numberOptions.indent;
+        } else {
+          // Các dòng tiếp theo thụt lề như nhau
+          textX = this.margins.left + numberOptions.indent;
+        }
+        this.doc.text(line, textX, currentLineY);
+      }
+      
       currentLineY += 3 + numberOptions.lineHeight;
     });
 
@@ -2223,6 +2295,7 @@ class JsPdfService {
         fontSize: 14,
         fontStyle: "bold",
         color: [0, 0, 0],
+        align: "left", // Alignment cho title
       },
       itemOptions: {
         fontSize: 11,
@@ -2230,6 +2303,7 @@ class JsPdfService {
         color: [0, 0, 0],
         numberStyle: "decimal",
         indent: 20,
+        align: "left", // Alignment cho items
       },
       spacing: 0.5, // Khoảng cách giữa các item
       resetNumbers: true, // Reset số đếm khi bắt đầu list mới

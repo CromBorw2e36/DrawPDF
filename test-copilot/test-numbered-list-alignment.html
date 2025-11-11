@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Numbered List Alignment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../jspdf-service.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a9c;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Numbered List Alignment</h1>
+    <p>Test tính năng canh lề mới cho hàm addNumberedList</p>
+    
+    <div class="test-section">
+        <h3>Các test case:</h3>
+        <button onclick="testLeftAlignment()">Test Canh Trái (Left)</button>
+        <button onclick="testCenterAlignment()">Test Canh Giữa (Center)</button>
+        <button onclick="testRightAlignment()">Test Canh Phải (Right)</button>
+        <button onclick="testJustifyAlignment()">Test Canh Đều (Justify)</button>
+        <button onclick="testAllAlignments()">Test Tất Cả</button>
+        <button onclick="testMixedStyles()">Test Kết Hợp Styles</button>
+    </div>
+    
+    <script>
+        function testLeftAlignment() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Numbered List - Canh Trái");
+            pdf.addSpace(10);
+            
+            pdf.addText("Danh sách canh trái (mặc định):", null, null, {
+                fontSize: 14,
+                fontStyle: "bold"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Mục thứ nhất với text ngắn",
+                "Mục thứ hai với text dài hơn để kiểm tra việc xuống dòng và canh lề trái khi text quá dài không thể hiển thị trên một dòng",
+                "Mục thứ ba",
+                "Mục thứ tư với nội dung trung bình"
+            ], {
+                itemOptions: {
+                    align: "left",
+                    fontSize: 12,
+                    numberStyle: "decimal"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testCenterAlignment() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Numbered List - Canh Giữa");
+            pdf.addSpace(10);
+            
+            pdf.addText("Danh sách canh giữa:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold",
+                align: "center"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Mục canh giữa ngắn",
+                "Mục với text dài để test canh giữa khi xuống dòng và xem cách thức hoạt động",
+                "Mục thứ ba",
+                "Text trung bình canh giữa"
+            ], {
+                itemOptions: {
+                    align: "center",
+                    fontSize: 12,
+                    numberStyle: "roman"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testRightAlignment() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Numbered List - Canh Phải");
+            pdf.addSpace(10);
+            
+            pdf.addText("Danh sách canh phải:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold",
+                align: "right"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Mục canh phải",
+                "Mục với text dài để kiểm tra canh phải khi text xuống dòng và cách thức hiển thị",
+                "Mục ba",
+                "Text canh phải vừa phải"
+            ], {
+                itemOptions: {
+                    align: "right",
+                    fontSize: 12,
+                    numberStyle: "alpha"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testJustifyAlignment() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Numbered List - Canh Đều");
+            pdf.addSpace(10);
+            
+            pdf.addText("Danh sách canh đều (justify):", null, null, {
+                fontSize: 14,
+                fontStyle: "bold",
+                align: "center"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Mục canh đều với text ngắn",
+                "Mục với text dài để kiểm tra tính năng canh đều khi text xuống dòng và xem cách thức dãn đều khoảng cách giữa các từ từ lề trái đến lề phải",
+                "Mục ba canh đều",
+                "Text dài để test justify alignment và xem cách hoạt động khi có nhiều từ trong một dòng và các dòng tiếp theo"
+            ], {
+                itemOptions: {
+                    align: "justify",
+                    fontSize: 12,
+                    numberStyle: "roman"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testAllAlignments() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("So Sánh Tất Cả Các Kiểu Canh Lề");
+            pdf.addSpace(10);
+            
+            const testItems = [
+                "Mục thứ nhất với text ngắn",
+                "Mục thứ hai với text dài để kiểm tra việc xuống dòng và hiển thị alignment trong trường hợp text dài",
+                "Mục thứ ba với độ dài vừa phải"
+            ];
+            
+            // Left alignment
+            pdf.addText("1. CANH TRÁI (LEFT):", null, null, {
+                fontSize: 13,
+                fontStyle: "bold",
+                color: [0, 100, 0]
+            });
+            pdf.addSpace(3);
+            
+            pdf.addNumberedList(testItems, {
+                itemOptions: {
+                    align: "left",
+                    fontSize: 11,
+                    numberStyle: "decimal"
+                }
+            });
+            pdf.addSpace(8);
+            
+            // Center alignment  
+            pdf.addText("2. CANH GIỮA (CENTER):", null, null, {
+                fontSize: 13,
+                fontStyle: "bold",
+                color: [0, 0, 150]
+            });
+            pdf.addSpace(3);
+            
+            pdf.addNumberedList(testItems, {
+                itemOptions: {
+                    align: "center",
+                    fontSize: 11,
+                    numberStyle: "decimal"
+                },
+                resetNumbers: true
+            });
+            pdf.addSpace(8);
+            
+            // Right alignment
+            pdf.addText("3. CANH PHẢI (RIGHT):", null, null, {
+                fontSize: 13,
+                fontStyle: "bold",
+                color: [150, 0, 0]
+            });
+            pdf.addSpace(3);
+            
+            pdf.addNumberedList(testItems, {
+                itemOptions: {
+                    align: "right",
+                    fontSize: 11,
+                    numberStyle: "decimal"
+                },
+                resetNumbers: true
+            });
+            pdf.addSpace(8);
+            
+            // Justify alignment
+            pdf.addText("4. CANH ĐỀU (JUSTIFY):", null, null, {
+                fontSize: 13,
+                fontStyle: "bold",
+                color: [150, 0, 150]
+            });
+            pdf.addSpace(3);
+            
+            pdf.addNumberedList(testItems, {
+                itemOptions: {
+                    align: "justify",
+                    fontSize: 11,
+                    numberStyle: "decimal"
+                },
+                resetNumbers: true
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        function testMixedStyles() {
+            const pdf = new JsPdfService();
+            
+            pdf.addTitle("Test Kết Hợp Styles và Alignments");
+            pdf.addSpace(10);
+            
+            // Roman numerals với center alignment
+            pdf.addText("Danh sách Roman - Canh Giữa:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold",
+                align: "center"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Mục Roman đầu tiên",
+                "Mục Roman thứ hai với text dài hơn",
+                "Mục Roman thứ ba"
+            ], {
+                itemOptions: {
+                    align: "center",
+                    fontSize: 12,
+                    numberStyle: "roman"
+                }
+            });
+            
+            pdf.addSpace(15);
+            
+            // Alpha với right alignment
+            pdf.addText("Danh sách Alpha - Canh Phải:", null, null, {
+                fontSize: 14,
+                fontStyle: "bold",
+                align: "right"
+            });
+            pdf.addSpace(5);
+            
+            pdf.addNumberedList([
+                "Mục Alpha đầu tiên",
+                "Mục Alpha với text dài để test alignment",
+                "Mục Alpha cuối cùng"
+            ], {
+                itemOptions: {
+                    align: "right",
+                    fontSize: 12,
+                    numberStyle: "alpha"
+                }
+            });
+            
+            pdf.previewPDF();
+        }
+        
+        // Hiển thị thông tin hướng dẫn khi load page
+        window.addEventListener('load', function() {
+            console.log('Test Numbered List Alignment loaded!');
+            console.log('Các tính năng mới:');
+            console.log('- align: "left" (mặc định)');
+            console.log('- align: "center"');
+            console.log('- align: "right"');
+            console.log('- align: "justify" (mới thêm!)');
+        });
+    </script>
+</body>
+</html>
