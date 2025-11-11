@@ -1,4 +1,51 @@
 async function init(data = {}) {
+   //các properties cần thiết của biến data
+   // data = {
+   //   // Thông tin chung hợp đồng
+   //   soVanBan: string,                    // Số văn bản hợp đồng
+   //   
+   //   // Thông tin công ty/người sử dụng lao động (Bên A)
+   //   tenCongTy: string,                   // Tên công ty đầy đủ
+   //   companyAddress: string,              // Địa chỉ công ty
+   //   companyPhone: string,                // Số điện thoại công ty
+   //   a_representative: string,            // Tên người đại diện công ty
+   //   a_nationality: string,               // Quốc tịch người đại diện
+   //   a_title: string,                     // Chức vụ người đại diện
+   //   soUyQuyen: string,                   // Số ủy quyền (optional)
+   //   ngayUyQuyen: string,                 // Ngày ủy quyền (optional)
+   //   
+   //   // Thông tin người lao động (Bên B)
+   //   b_fullName: string,                  // Họ tên đầy đủ người lao động
+   //   b_gender: string,                    // Giới tính người lao động
+   //   b_nationality: string,               // Quốc tịch người lao động
+   //   b_birthYear: string,                 // Ngày/tháng/năm sinh
+   //   b_address: string,                   // Địa chỉ thường trú
+   //   b_idNo: string,                      // Số CCCD/CMND
+   //   b_idDate: string,                    // Ngày cấp CCCD/CMND
+   //   b_idPlace: string,                   // Nơi cấp CCCD/CMND
+   //   
+   //   // Thông tin hợp đồng và công việc
+   //   tenLoaiHopDong: string,              // Loại hợp đồng (xác định/không xác định thời hạn)
+   //   thoiGianBatDauHopDong: string,       // Thời điểm bắt đầu hợp đồng
+   //   thoiGianKetThucHopDong: string,      // Thời điểm kết thúc hợp đồng
+   //   tenNoiLamViec: string,               // Địa điểm làm việc
+   //   tenViTriCongViec: string,            // Vị trí công việc
+   //   thoiGianLamViec: string,             // Thời gian làm việc (giờ/ngày, giờ/tuần)
+   //   
+   //   // Thông tin lương và phúc lợi
+   //   luongChinh: string,                  // Mức lương cơ bản (số tiền)
+   //   ngayTraLuong: string,                // Ngày trả lương hàng tháng
+   //   
+   //   // Thông tin hiệu lực và thời gian
+   //   ngayHieuLuc: string,                 // Ngày có hiệu lực hợp đồng
+   //   
+   //   // Thông tin chữ ký
+   //   signerA: string,                     // Tên người ký đại diện công ty
+   //   signerB: string,                     // Tên người ký lao động
+   //   signaturePathA: string,              // Đường dẫn ảnh chữ ký người đại diện công ty
+   //   signaturePathB: string               // Đường dẫn ảnh chữ ký người lao động
+   // }
+
   const pdf = new JsPdfService();
   pdf.lineHeight += 2;
   const M = pdf.margins;
