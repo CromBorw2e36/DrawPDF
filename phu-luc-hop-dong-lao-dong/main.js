@@ -237,8 +237,6 @@ async function init(data = {}) {
       note: "(Ký và đóng dấu)",
     }
   );
-  // ===== Footer =====
-  pdf.addFooter("{pageNumber}", { fontSize: 8, color: [151, 151, 151], align: "right" });
   // Generate PDF and display in iframe
   const pdfDataUrl = pdf.generateDataURL();
   console.log(pdfDataUrl);
