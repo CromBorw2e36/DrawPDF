@@ -1,6 +1,57 @@
 async function init(data = {}) {
   const isCpyt = data.isCpyt;
   //các properties cần thiết của biến data
+  // data = {
+  //   // Thông tin chung phụ lục hợp đồng
+  //   soVanBan: string,                    // Số văn bản phụ lục hợp đồng
+  //   ngayHop: string,                     // Ngày họp/ký phụ lục (dd/mm/yyyy)
+  //   isCpyt: boolean,                     // Flag xác định công ty y tế hay TNHH
+  //                                        // true: Công ty y tế - hiển thị mức lương cụ thể, không có header "HD000232"
+  //                                        // false: Công ty TNHH - hiển thị danh sách sửa đổi, có header "HD000232"
+  //   
+  //   // Thông tin công ty/người sử dụng lao động (Bên A)
+  //   companyShortName: string,            // Tên ngắn gọn công ty
+  //   tenCongTy: string,                   // Tên công ty đầy đủ
+  //   companyAddress: string,              // Địa chỉ công ty
+  //   companyPhone: string,                // Số điện thoại công ty
+  //   companyFax: string,                  // Số fax công ty
+  //   a_representative: string,            // Tên người đại diện công ty
+  //   a_nationality: string,               // Quốc tịch người đại diện
+  //   a_title: string,                     // Chức vụ người đại diện
+  //   soUyQuyen: string,                   // Số ủy quyền (optional)
+  //   ngayUyQuyen: string,                 // Ngày ủy quyền (optional)
+  //   
+  //   // Thông tin người lao động (Bên B)
+  //   b_fullName: string,                  // Họ tên đầy đủ người lao động
+  //   b_gender: string,                    // Giới tính người lao động
+  //   b_nationality: string,               // Quốc tịch người lao động
+  //   b_birthYear: string,                 // Ngày/tháng/năm sinh
+  //   b_address: string,                   // Địa chỉ thường trú
+  //   b_idNo: string,                      // Số CCCD/CMND
+  //   b_idDate: string,                    // Ngày cấp CCCD/CMND
+  //   b_idPlace: string,                   // Nơi cấp CCCD/CMND
+  //   
+  //   // Thông tin hợp đồng gốc
+  //   soHopDong: string,                   // Số hợp đồng lao động gốc
+  //   ngayKyHopDong: string,               // Ngày ký hợp đồng gốc (dd/mm/yyyy)
+  //   
+  //   // Nội dung sửa đổi/bổ sung (tùy theo loại công ty)
+  //   // Nếu isCpyt = true (Công ty y tế):
+  //   luong: string,                       // Mức lương chức danh công việc (đồng/tháng)
+  //   
+  //   // Nếu isCpyt = false (Công ty TNHH):
+  //   noiDungSuDoiHopDong: Array<string>,  // Mảng các nội dung sửa đổi/bổ sung
+  //                                        // Mặc định: 3 dòng chấm để điền tay
+  //   
+  //   // Thời gian hiệu lực
+  //   ngayHieuLucPhuLuc: string,           // Ngày có hiệu lực phụ lục (dd/mm/yyyy)
+  //   
+  //   // Thông tin chữ ký
+  //   signerA: string,                     // Tên người ký đại diện công ty
+  //   signerB: string,                     // Tên người ký lao động
+  //   signaturePathA: string,              // Đường dẫn ảnh chữ ký người đại diện công ty
+  //   signaturePathB: string               // Đường dẫn ảnh chữ ký người lao động
+  // }
 
   const pdf = new JsPdfService();
   pdf.lineHeight += 2;
