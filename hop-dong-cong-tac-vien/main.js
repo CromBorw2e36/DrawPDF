@@ -141,7 +141,7 @@ async function init(data = {}) {
       spacing: 1,
     }
   );
-  pdf.addMixedParagraph([`Đại điện bởi Ông/Bà : `, pdf.bold(val(data.a_representative))], {
+  pdf.addMixedParagraph([`Đại điện bởi ông/bà  : `, pdf.bold(val(data.a_representative))], {
     fontSize: fontSizeContent,
     lineHeight: lineHeightPage + 1,
     spacing: 0,
@@ -149,7 +149,7 @@ async function init(data = {}) {
 
   const arrContent1 = [
     `Chức vụ                      : ${val(data.a_title)}`,
-    `CCCD                          : ${val(data.a_cccd)},      Cấp ngày: ${val(data.a_ngayCapCccd)}`,
+    `Số CCCD                    : ${val(data.a_cccd)},      Cấp ngày: ${val(data.a_ngayCapCccd)}`,
     `Quốc tịch                   : ${val(data.a_quocTich)}`,
   ];
   if (data.soUyQuuyen) {
