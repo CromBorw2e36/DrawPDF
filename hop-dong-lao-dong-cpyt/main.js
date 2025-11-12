@@ -1,16 +1,19 @@
 async function init(data = {}) {
+  const isHdldNguoiCaoTuoi = data.isHdldNguoiCaoTuoi;
   //các properties cần thiết của biến data
   // data = {
   //   // Thông tin chung hợp đồng
   //   soVanBan: string,                    // Số văn bản hợp đồng
+  //   isHdldNguoiCaoTuoi: boolean,         // Flag xác định hợp đồng lao động người cao tuổi
+  //                                        // (ảnh hưởng đến Điều 7 - ẩn/hiện điều khoản nghỉ ốm/thai sản)
   //   
   //   // Thông tin công ty/người sử dụng lao động (Bên A)
   //   tenCongTy: string,                   // Tên công ty đầy đủ
   //   companyAddress: string,              // Địa chỉ công ty
   //   companyPhone: string,                // Số điện thoại công ty
-  //   a_representative: string,            // Tên người đại diện công ty (mặc định: PHAN CHÂU MINH TUẤN)
-  //   a_nationality: string,               // Quốc tịch người đại diện (mặc định: Việt Nam)
-  //   a_title: string,                     // Chức vụ người đại diện (mặc định: Tổng Giám Đốc)
+  //   a_representative: string,            // Tên người đại diện công ty
+  //   a_nationality: string,               // Quốc tịch người đại diện
+  //   a_title: string,                     // Chức vụ người đại diện
   //   soUyQuyen: string,                   // Số ủy quyền (optional)
   //   ngayUyQuyen: string,                 // Ngày ủy quyền (optional)
   //   
@@ -30,11 +33,11 @@ async function init(data = {}) {
   //   thoiGianKetThucHopDong: string,      // Thời điểm kết thúc hợp đồng
   //   tenNoiLamViec: string,               // Địa điểm làm việc
   //   tenViTriCongViec: string,            // Vị trí công việc
-  //   thoiGianLamViec: string,             // Thời gian làm việc (mặc định: 8 giờ/ngày, 48 giờ/tuần)
+  //   thoiGianLamViec: string,             // Thời gian làm việc (giờ/ngày, giờ/tuần)
   //   
   //   // Thông tin lương và phúc lợi
   //   luongChinh: string,                  // Mức lương cơ bản (số tiền)
-  //   ngayTraLuong: string,                // Ngày trả lương hàng tháng (mặc định: 06)
+  //   ngayTraLuong: string,                // Ngày trả lương hàng tháng
   //   
   //   // Thông tin hiệu lực
   //   ngayHieuLuc: string,                 // Ngày có hiệu lực hợp đồng
@@ -98,8 +101,8 @@ async function init(data = {}) {
   pdf.addMixedParagraph(
     [
       `Đại điện bởi Bà     : `,
-      pdf.bold(val(data.a_representative || "PHAN CHÂU MINH TUẤN ")),
-      `. Quốc tịch: ${val(data.a_nationality || "Việt Nam")}`,
+      pdf.bold(val(data.a_representative)),
+      `. Quốc tịch: ${val(data.a_nationality)}`,
     ],
     {
       fontSize: fontSizeContent,
@@ -107,17 +110,14 @@ async function init(data = {}) {
       spacing: 1,
     }
   );
-  const arrContent1 = [`Chức vụ                 : ${val(data.a_title || "Tổng Giám Đốc")}`];
+  const arrContent1 = [`Chức vụ                 : ${val(data.a_title)}`];
   if (data.soUyQuuyen) {
     arrContent1.push(`Theo ủy quyền số ${val(data.soUyQuyen)}, ngày ${val(data.ngayUyQuyen)}`);
   }
   arrContent1.push(
     ...[
-      `Địa chỉ                   : ${val(
-        data.companyAddress ||
-          "Số 250 Lý Thường Kiệt, Khu phố 4, P.Long Hoa, Thị Xã Hòa Thành, Tây Ninh."
-      )}`,
-      `Điện thoại             : ${val(data.companyPhone || "0276-3830099")}`,
+      `Địa chỉ                   : ${val(data.companyAddress)}`,
+      `Điện thoại             : ${val(data.companyPhone)}`,
     ]
   );
   pdf.addParagraph(arrContent1.join("\n"), {
@@ -150,7 +150,7 @@ async function init(data = {}) {
   );
   pdf.addMixedParagraph([`Sau đây gọi tắt là`, pdf.bold(" “Người lao động”")], {
     fontSize: fontSizeContent,
-    lineHeight: lineHeightPage ,
+    lineHeight: lineHeightPage,
     spacing: 1,
   });
   pdf.addMixedParagraph(
@@ -179,19 +179,13 @@ async function init(data = {}) {
   });
   pdf.addNumberedList(
     [
-      `Loại HĐLĐ                   : ${val(
-        data.tenLoaiHopDong || "[Xác định thời hạn] /[Không xác định thời hạn]"
-      )}`,
-      `Thời điểm bắt đầu     : ${val(data.thoiGianBatDauHopDong || "[Từ ngày …………]")}`,
+      `Loại HĐLĐ                   : ${val(data.tenLoaiHopDong)}`,
+      `Thời điểm bắt đầu     : ${val(data.thoiGianBatDauHopDong)}`,
       // `Thời điểm kết thúc    : ${val(data.thoiGianKetThucHopDong || "[Đến ngày ………] /[Không xác định]")}`, // Mẫu góc nội dụng
-      `Thời điểm kết thúc    : ${val(data.thoiGianKetThucHopDong || " Không xác định")}`,
-      `Địa điểm làm việc     : ${val(
-        data.tenNoiLamViec ||
-          "[Ghi địa chỉ nơi làm việc chính: trụ sở Công ty/chi nhánh/cơ sở khác của công ty]"
-      )} và những địa điểm khác theo phân công/bố trí của Công ty.`,
-      `Vị trí công việc           : ${val(
-        data.tenViTriCongViec || "[Theo Quyết định phân công nhiệm vụ] / [Theo Quyết định bổ nhiệm]"
-      )}`,
+      `Thời điểm kết thúc    : ${val(data.thoiGianKetThucHopDong)}`,
+      `Địa điểm làm việc     : ${val(data.tenNoiLamViec)} ` +
+        `và những địa điểm khác theo phân công/bố trí của Công ty.`,
+      `Vị trí công việc           : ${val(data.tenViTriCongViec)}`,
       `Nhiệm vụ công việc : Thực hiện công việc theo bản mô tả công việc và hoàn thành những công việc khác theo yêu cầu hoạt động của Công ty.`,
     ],
     {
@@ -215,7 +209,7 @@ async function init(data = {}) {
   pdf.addNumberedList(
     [
       `Thời gian làm việc: ${val(
-        data.thoiGianLamViec || "8 giờ/ngày, 48 giờ/tuần"
+        data.thoiGianLamViec
       )}. Lịch làm việc cụ thể sẽ do Công ty quy định theo tính chất công việc hoặc theo nhu cầu của bộ phận và có thể được thay đổi, điều chỉnh phù hợp với tình hình hoạt động sản xuất kinh doanh của Công ty vào từng thời điểm. `,
       `Các công cụ dụng cụ lao động được cấp phát: phù hợp với yêu cầu cần thiết của công việc và theo chính sách chung của Công ty.`,
       `Điều kiện an toàn và vệ sinh lao động tại nơi làm việc theo quy định của pháp luật hiện hành.`,
@@ -257,11 +251,11 @@ async function init(data = {}) {
       `Phụ cấp lương và các khoản hỗ trợ khác (nếu có): theo chính sách tiền lương hiện hành của Công ty hoặc theo các quyết định cụ thể của Người sử dụng lao động.`,
       `Hình thức trả lương: Tiền mặt/chuyển khoản vào tài khoản cá nhân Người lao động. Người lao động tự chịu mọi chi phí phát sinh liên quan đến việc sử dụng và duy trì tài khoản cá nhân của mình. `,
       `Ngày trả lương: ngày ${val(
-        data.ngayTraLuong ?? "06"
+        data.ngayTraLuong
       )} tây của tháng tiếp theo. Trong trường hợp ngày chuyển lương trùng với ngày nghỉ thì lương sẽ được trả vào ngày sau đó liền kề.`,
       `Người lao động được tham gia Bảo hiểm xã hội, Bảo hiểm y tế, Bảo hiểm tai nạn lao động bệnh nghề nghiệp, Bảo hiểm thất nghiệp với tỷ lệ trích nộp theo quy định của Luật Bảo hiểm tại từng thời điểm.`,
       `Chế độ nghỉ ngơi: Theo nội quy lao động Công ty và quy định của pháp luật lao động.`,
-      `Chế độ nghỉ phép năm: Theo nội quy lao động Công ty. Cứ 05 năm làm việc tại Công ty thì số ngày nghỉ hằng năm được tăng thêm tương ứng 01 ngày.`,
+      `Chế độ nghỉ phép năm: Theo nội quy lao động Công ty. Cứ 05 năm làm việc tại Công ty thì số ngày nghỉ hằng năm được tăng thêm tương ứng 01 ngày.`,
       `Chế độ thưởng và khen thưởng: Theo quy chế của Công ty.  `,
       `Chế độ nâng lương: Theo chính sách tiền lương hiện hành của Công ty.`,
       `Chế độ đào tạo: Theo kế hoạch đào tạo hàng năm của Công ty.`,
@@ -446,15 +440,18 @@ async function init(data = {}) {
     fontSize: fontSizeSubTitle,
     lineHeight: pdf.lineHeight,
   });
-  pdf.addNumberedList(
-    [
-      `Người lao động nghỉ ốm/thai sản/bệnh nghề nghiệp/tai nạn lao động/chế độ khác theo quy định của pháp luật hiện hành. `,
+  const arrContent2 = [
       `Công ty thực hiện các thủ tục nộp thuế thu nhập cá nhân của Người lao động và các khoản chi phí phát sinh khác cho cơ quan nhà nước (nếu có).`,
-    ],
+    ];
+  if (!isHdldNguoiCaoTuoi) arrContent2.unshift(
+    `Người lao động nghỉ ốm/thai sản/bệnh nghề nghiệp/tai nạn lao động/chế độ khác theo quy định của pháp luật hiện hành. `,
+  );
+  pdf.addNumberedList(
+    arrContent2,
     {
       itemOptions: {
         numberStyle: "number",
-        numberFormat: "{number}.",
+        numberFormat: isHdldNguoiCaoTuoi ? "" : "{number}.",
         indent: 4,
         fontSize: fontSizeContent,
         lineHeight: pdf.lineHeight,
