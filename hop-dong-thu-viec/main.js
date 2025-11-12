@@ -1,9 +1,58 @@
 async function init(data = {}) {
+  //các properties cần thiết của biến data
+  // data = {
+  //   // Thông tin chung hợp đồng
+  //   soVanBan: string,                    // Số văn bản hợp đồng thử việc
+  //   
+  //   // Thông tin công ty/người sử dụng lao động (Bên A)
+  //   tenCongTy: string,                   // Tên công ty đầy đủ
+  //   nguoiDaiDien: string,                // Tên người đại diện công ty
+  //   quocTich: string,                    // Quốc tịch người đại diện
+  //   chucVu: string,                      // Chức vụ người đại diện
+  //   diaChiCongTy: string,                // Địa chỉ công ty
+  //   dienThoaiCongTy: string,             // Số điện thoại công ty
+  //   authNo: string,                      // Số ủy quyền (optional)
+  //   authDate: string,                    // Ngày ủy quyền (optional)
+  //   chucVuNguoiUyQuyen: string,          // Chức vụ người ủy quyền (optional)
+  //   
+  //   // Thông tin người lao động (Bên B)
+  //   empName: string,                     // Họ tên đầy đủ người lao động
+  //   empGender: string,                   // Giới tính người lao động
+  //   empNationality: string,              // Quốc tịch người lao động
+  //   empDob: string,                      // Ngày/tháng/năm sinh
+  //   empAddress: string,                  // Địa chỉ thường trú
+  //   empId: string,                       // Số CMND/CCCD
+  //   empIdDate: string,                   // Ngày cấp CMND/CCCD
+  //   empIdPlace: string,                  // Nơi cấp CMND/CCCD
+  //   
+  //   // Thông tin thử việc và công việc
+  //   trialFrom: string,                   // Ngày bắt đầu thử việc
+  //   trialTo: string,                     // Ngày kết thúc thử việc
+  //   workPlace: string,                   // Địa điểm làm việc
+  //   position: string,                    // Vị trí công việc
+  //   thoiGianLamViec: string,             // Thời gian làm việc (giờ/ngày, giờ/tuần)
+  //   
+  //   // Thông tin lương và phúc lợi
+  //   salary: string,                      // Tổng tiền lương thử việc/tháng
+  //   salaryBase: string,                  // Lương vị trí công việc (optional)
+  //   allowance: string,                   // Phụ cấp hiệu quả công việc (optional)
+  //   ngayTraLuong: string,                // Ngày trả lương hàng tháng
+  //   
+  //   // Thông tin hiệu lực
+  //   effectiveDate: string,               // Ngày có hiệu lực hợp đồng
+  //   
+  //   // Thông tin chữ ký
+  //   signerEmployee: string,              // Tên người ký lao động
+  //   signaturePathA: string,              // Đường dẫn ảnh chữ ký người lao động
+  //   signaturePathB: string               // Đường dẫn ảnh chữ ký người đại diện công ty
+  // }
+
   const pdf = new JsPdfService();
   const doc = pdf.doc;
   const M = pdf.margins;
 
-  const val = (v, fallback = "……") => (v && String(v).trim() ? String(v) : fallback);
+  const val = (v, fallback = "...............................") =>
+    v && String(v).trim() ? String(v) : fallback;
 
   // ===== Header =====
   pdf.addText("CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM", null, pdf.getCurrentY(), {
@@ -18,7 +67,7 @@ async function init(data = {}) {
     spacing: 5,
   });
   pdf.addText("---o0o---", null, null, { fontSize: 10.5, align: "center", spacing: 5 });
-  pdf.addText(`Số : ${val(data.soVanBan, "")}`, null, null, {
+  pdf.addText(`Số : ${val(data.soVanBan)}`, null, null, {
     fontSize: 10.5,
     align: "left",
     spacing: 5,
@@ -27,24 +76,37 @@ async function init(data = {}) {
   pdf.addSpace(4);
 
   // ===== Bên NSDLĐ (cứng) =====
-  pdf.addSubTitle("I. Bên Người sử dụng lao động: Công ty TNHH XNK TM CN DV Hùng Duy", {
-    fontSize: 12,
-    lineHeight: 1.5,
-  });
-  pdf.addMixedText(["Đại diện bởi Bà     : ", pdf.bold("LÊ MINH TRÚC"), " - Quốc tịch: Việt Nam"], {
-    fontSize: 10.5,
-    lineHeight: 4,
-    spacing: 1,
-  });
-  pdf.addParagraph(
-    [
-      "Chức vụ                 : Tổng Giám Đốc",
-      `Theo Ủy quyền số ${val(data.authNo, "…..")}, ngày ${val(data.authDate, "….")}`,
-      "Địa chỉ                   : Số 250 Lý Thường Kiệt, Khu phố 4, P.Long Hoa, Thị Xã Hòa Thành, Tây Ninh.",
-      "Điện thoại             : 0276-3830099",
-    ].join("\n"),
-    { fontSize: 10.5, lineHeight: 4, spacing: 1 }
+  pdf.addSubTitle(
+    `I. Bên Người sử dụng lao động: ${val(data.tenCongTy, "Công ty....................")}`,
+    {
+      fontSize: 12,
+      lineHeight: 1.5,
+    }
   );
+  pdf.addMixedText(
+    [
+      "Đại diện bởi Bà     : ",
+      pdf.bold(val(data.nguoiDaiDien)),
+      "              - Quốc tịch: ",
+      val(data.quocTich),
+    ],
+    {
+      fontSize: 10.5,
+      lineHeight: 4,
+      spacing: 1,
+    }
+  );
+  const arrConnent1 = [
+    "Chức vụ                 : " + val(data.chucVu),
+    "Địa chỉ                   : " + val(data.diaChiCongTy),
+    "Điện thoại             : " + val(data.dienThoaiCongTy),
+  ];
+
+  if (data.authNo) {
+    arrConnent1.splice(1, 0, `Theo Ủy quyền số ${val(data.authNo)}, ngày ${val(data.authDate)} của ${val(data.chucVuNguoiUyQuyen)}`);
+  }
+  pdf.addParagraph(arrConnent1.join("\n"), { fontSize: 10.5, lineHeight: 4, spacing: 1 });
+
   pdf.addMixedText(["Sau đây gọi tắt là ", pdf.bold('"Công ty", "Người sử dụng lao động"')], {
     fontSize: 10.5,
     lineHeight: 5,
@@ -54,19 +116,12 @@ async function init(data = {}) {
   pdf.addSubTitle("II. Bên Người lao động:", { fontSize: 12, lineHeight: 1.5 });
   pdf.addParagraph(
     [
-      `Ông/Bà                           : ${val(
-        data.empName,
-        "……………………………………"
-      )}    Giới tính: ${val(data.empGender, "…………..")}  , Quốc tịch: ${val(
-        data.empNationality,
-        "…."
+      `Ông/Bà                           : ${val(data.empName)}    Giới tính: ${val(data.empGender)}  , Quốc tịch: ${val(data.empNationality)}`,
+      `Ngày/tháng/năm sinh : ${val(data.empDob)}`,
+      `Địa chỉ thường trú        : ${val(data.empAddress)}`,
+      `Số CMND/CCCD          : ${val(data.empId)} Cấp ngày: ${val(data.empIdDate)} Tại:  ${val(
+        data.empIdPlace
       )}`,
-      `Ngày/tháng/năm sinh : ${val(data.empDob, "………………………………..")}`,
-      `Địa chỉ thường trú        : ${val(data.empAddress, "………………………………………………………")}`,
-      `Số CMND/CCCD          : ${val(data.empId, "………………………")} Cấp ngày: ${val(
-        data.empIdDate,
-        "…………………….."
-      )} Tại:  ${val(data.empIdPlace, "…………………")}`,
     ].join("\n"),
     { fontSize: 10.5, lineHeight: 4, spacing: 1 }
   );
@@ -93,12 +148,9 @@ async function init(data = {}) {
 
   pdf.addNumberedList(
     [
-      `Thời gian thử việc: [từ ngày ${val(data.trialFrom, "…………………..")}] [đến ngày ${val(
-        data.trialTo,
-        "………………….."
-      )}].`,
-      "Địa điểm làm việc: Trụ sở Công ty/chi nhánh/cơ sở khác của Công ty và theo phân công của Công ty.",
-      `Vị trí công việc: ${val(data.position, "………………………………………………………………………………")}`,
+      `Thời gian thử việc: Từ ngày ${val(data.trialFrom)} đến ngày ${val(data.trialTo)}.`,
+      "Địa điểm làm việc: " + val(data.workPlace),
+      `Vị trí công việc: ${val(data.position)}`,
       "Nhiệm vụ công việc: Thực hiện công việc theo bản mô tả công việc và các công việc khác theo yêu cầu.",
     ],
     {
@@ -117,7 +169,9 @@ async function init(data = {}) {
   pdf.addSpace(2).addSubTitle("Điều 2. Chế độ làm việc", { fontSize: 12, lineHeight: 1.5 });
   pdf.addNumberedList(
     [
-      "Thời gian làm việc: 8 giờ/ngày, 48 giờ/tuần. Lịch làm việc cụ thể sẽ được sắp xếp/điều chỉnh linh hoạt theo yêu cầu công việc và để phù hợp với điều kiện thực tế hoạt động sản xuất kinh doanh của Công ty vào từng thời điểm.",
+      `Thời gian làm việc: ${val(
+        data.thoiGianLamViec
+      )}. Lịch làm việc cụ thể sẽ được sắp xếp/điều chỉnh linh hoạt theo yêu cầu công việc và để phù hợp với điều kiện thực tế hoạt động sản xuất kinh doanh của Công ty vào từng thời điểm.`,
       "Các công cụ dụng cụ lao động được cấp phát: phù hợp với yêu cầu cần thiết của công việc và chính sách chung của Công ty.",
       "Điều kiện an toàn và vệ sinh lao động tại nơi làm việc theo quy định của pháp luật hiện hành.",
     ],
@@ -142,71 +196,71 @@ async function init(data = {}) {
   });
 
   // — Quyền lợi —
-  [
-    "Trong thời gian thử việc, đối với thu nhập phát sinh hàng tháng từ 2.000.000 VNĐ trở lên, Người sử dụng lao động sẽ thực hiện tạm khấu trừ 10% thuế",
-    "thu nhập cá nhân đối với người lao động theo quy định pháp luật (trừ trường hợp người lao động có cam kết theo mẫu để không tạm khấu trừ). Người",
-    "lao động tự chịu trách nhiệm về việc kê khai quyết toán thuế với Cơ quan thuế và chịu trách nhiệm về cam kết của mình.",
-  ].forEach((line) => pdf.addParagraph(line, { fontSize: 10.5, lineHeight: 4, spacing: 0.5 }));
-
+  pdf.addParagraph(["1. Quyền lợi"], {
+    fontSize: 10.5,
+    fontStyle: "normal",
+    spacing: 3,
+    lineHeight: pdf.lineHeight,
+  });
   pdf.margins.left += 5;
-  pdf.addNumberedList(
-    [`Tiền lương thử việc: ${val(data.salary, "…………….")} đồng/tháng, trong đó:`],
-    {
-      itemOptions: {
-        numberStyle: "number",
-        numberFormat: "-",
-        indent: 4,
-        fontSize: 10.5,
-        lineHeight: pdf.lineHeight,
-        spacing: 1,
-        align: "justify",
-      },
-      resetNumbers: true,
-    }
-  );
-  pdf.margins.left += 5;
-  pdf.addNumberedList(
-    [
-      `Lương vị trí công việc ${val(data.salaryBase, "……………………….")} đồng/tháng.`,
-      `Phụ cấp hiệu quả công việc : ${val(
-        data.allowance,
-        "………………………….."
-      )} đồng/tháng. Tiền phụ cấp thực tế căn cứ theo kết quả đánh giá hiệu quả công việc hàng tháng theo quy định của Công ty`,
-    ],
-    {
-      itemOptions: {
-        numberStyle: "number",
-        numberFormat: "•",
-        indent: 4,
-        fontSize: 10.5,
-        lineHeight: pdf.lineHeight,
-        spacing: 1,
-        align: "justify",
-      },
-      resetNumbers: true,
-    }
-  );
-  pdf
-    .addMixedText(
+  pdf.addNumberedList([`Tiền lương thử việc: ${val(data.salary)} đồng/tháng, trong đó:`], {
+    itemOptions: {
+      numberStyle: "number",
+      numberFormat: "-",
+      indent: 4,
+      fontSize: 10.5,
+      lineHeight: pdf.lineHeight,
+      spacing: 1,
+      align: "justify",
+    },
+    resetNumbers: true,
+  });
+  if (data.salaryBase && data.allowance) {
+    pdf.margins.left += 5;
+    pdf.addNumberedList(
       [
-        pdf.bold("Hoặc: "),
-        `Lương theo doanh số ngành: được chi trả căn cứ chỉ tiêu được giao và kết quả doanh số thực đạt.`,
+        `Lương vị trí công việc ${val(data.salaryBase)} đồng/tháng.`,
+        `Phụ cấp hiệu quả công việc : ${val(
+          data.allowance
+        )} đồng/tháng. Tiền phụ cấp thực tế căn cứ theo kết quả đánh giá hiệu quả công việc hàng tháng theo quy định của Công ty`,
       ],
       {
-        fontSize: 10.5,
-        fontStyle: "normal",
-        spacing: 3,
-        lineHeight: pdf.lineHeight + 2.5,
+        itemOptions: {
+          numberStyle: "number",
+          numberFormat: "•",
+          indent: 4,
+          fontSize: 10.5,
+          lineHeight: pdf.lineHeight,
+          spacing: 1,
+          align: "justify",
+        },
+        resetNumbers: true,
       }
-    )
-    .addSpace(1);
-  pdf.margins.left -= 5;
+    );
+    pdf
+      .addMixedText(
+        [
+          pdf.bold("Hoặc: "),
+          `Lương theo doanh số ngành: được chi trả căn cứ chỉ tiêu được giao và kết quả doanh số thực đạt.`,
+        ],
+        {
+          fontSize: 10.5,
+          fontStyle: "normal",
+          spacing: 3,
+          lineHeight: pdf.lineHeight + 2.5,
+        }
+      )
+      .addSpace(1);
+    pdf.margins.left -= 5;
+  }
   pdf.addNumberedList(
     [
-      "Hình thức trả lương: chi trả tiền mặt/chuyển khoản vào tài khoản cá nhân Người lao động.",
-      "Người lao động tự chịu các chi phí và rủi ro (nếu có) liên quan đến việc sử dụng và duy trì tài khoản cá nhân của mình.",
-      "Ngày trả lương: ngày 8 tây của tháng tiếp theo. Trong trường hợp ngày lương theo quy định nêu trên trùng với ngày nghỉ thì tiền lương sẽ được chi vào ngày trước đó.",
-      "Chế độ nghỉ ngơi: Theo nội quy lao động Công ty và quy định pháp luật lao động.",
+      `Hình thức trả lương: chi trả tiền mặt/chuyển khoản vào tài khoản cá nhân Người lao động.`,
+      `Người lao động tự chịu các chi phí và rủi ro (nếu có) liên quan đến việc sử dụng và duy trì tài khoản cá nhân của mình.`,
+      `Ngày trả lương: ngày ${val(
+        data.ngayTraLuong
+      )} tây của tháng tiếp theo. Trong trường hợp ngày lương theo quy định nêu trên trùng với ngày nghỉ thì tiền lương sẽ được chi vào ngày trước đó.`,
+      `Chế độ nghỉ ngơi: Theo nội quy lao động Công ty và quy định pháp luật lao động.`,
     ],
     {
       itemOptions: {
@@ -232,13 +286,13 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addNumberedList(
     [
-      "Làm việc cho Công ty theo địa điểm/nơi làm việc được Công ty bố trí/phân công căn cứ theo tình hình thực tế của Công ty.",
-      "Hoàn thành công việc được giao theo hợp đồng này một cách trung thực, nghiêm túc, tận tâm và khẩn trương, hiệu quả best effort, tuân thủ theo sự điều hành/phân công/điều động của cấp trên khi có yêu cầu.",
-      "Tuân thủ nội quy lao động, các quy định nội bộ, các chủ trương, chính sách của Công ty và các quy định tại nơi làm việc, các quy định/quy chế/quy trình nghiệp vụ/phối hợp trong quá trình làm việc; đồng thời tuân thủ các quy định tại nơi mà Người lao động được Công ty bố trí làm việc.",
-      "Thực hiện đúng các cam kết khác về bảo mật thông tin đã ký (nếu có).",
-      "Trong mọi trường hợp và dưới bất kỳ tình huống trực tiếp hay gián tiếp nào, Người lao động tuyệt đối không được tiết lộ, chia sẻ, sử dụng trái phép hoặc gây thiệt hại đến lợi ích trực tiếp hay gián tiếp của Công ty.",
-      "Bồi thường thiệt hại đã gây ra cho Công ty do vi phạm và trách nhiệm theo hợp đồng, theo thỏa thuận khác (nếu có), theo nội quy, quy chế của Công ty và theo quy định của pháp luật.",
-      "Thực hiện đúng cam kết trong hợp đồng này và các thoả thuận bằng văn bản khác với Công ty (nếu có).",
+      `Làm việc cho Công ty theo địa điểm/nơi làm việc được Công ty bố trí/phân công căn cứ theo tình hình thực tế của Công ty.`,
+      `Hoàn thành công việc được giao theo hợp đồng này một cách trung thực, cẩn trọng, tốt nhất đảm bảo lợi ích hợp pháp tối đa của Công ty và tuân thủ theo sự điều hành/phân công/điều động của cấp trên khi có yêu cầu.`,
+      `Tuân thủ nội quy lao động, các quy định nội bộ, các chủ trương, chính sách của Công ty và các nội quy/quy định tại nơi mà Người lao động được Công ty bố trí làm việc.`,
+      `Thực hiện đúng các cam kết khác về bảo mật thông tin đã ký (nếu có).`,
+      `Trong mọi trường hợp và dưới bất kỳ tình huống trực tiếp hay gián tiếp nào, Người lao động không được nhận tiền, tài sản và/hoặc bất kỳ lợi ích nào từ bất kỳ cá nhân, tổ chức hoặc bên thứ ba nào khác (sau đây gọi chung là “Bên thứ ba”), dưới bất kỳ lý do gì, liên quan đến giao dịch của Công ty, vi phạm các quy định của Công ty có liên quan đến xung đột lợi ích, cạnh tranh, thông đồng, móc ngoặc, cho và nhận hối lộ, quà biếu/tiền hoặc tài sản khác gây thiệt hại đến lợi ích trực tiếp hay gián tiếp của Công ty.`,
+      `Bồi thường thiệt hại đã gây ra cho Công ty do vi phạm và trách nhiệm vật chất theo nội quy, quy chế của Công ty và theo quy định của pháp luật.`,
+      `Thực hiện đúng cam kết trong hợp đồng này và các thoả thuận bằng văn bản khác với Công ty (nếu có).`,
     ],
     {
       itemOptions: {
@@ -323,10 +377,13 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addNumberedList(
     [
-      "“Thông tin mật” của Công ty TNHH XNK TM CN DV Hùng Duy và các Đơn vị thành viên trực thuộc là bao gồm nhưng không giới hạn những nội dung sau đây: bí mật công nghệ, bí mật kinh doanh, thông tin khách hàng, kế hoạch tài chính, chiến lược công ty,... và các thông tin, tài liệu, ý tưởng thể hiện hoặc lưu trữ dưới dạng văn bản, dữ liệu máy tính, thư điện tử, hình ảnh, mã code, phần mềm tin học,...",
-      "Người lao động đồng ý và cam kết vô điều kiện rằng tuyệt đối bảo vệ và bảo mật thông tin mật (không được tiết lộ, sử dụng, cung cấp thông tin mật) cho bất kỳ cá nhân, tổ chức, bên thứ ba dưới bất kỳ cách thức và bất kỳ lý do nào (nếu chưa nhận được sự đồng ý bằng văn bản của Người sử dụng lao động) mà Người lao động có được trong quá trình làm việc, có liên quan đến công việc và/hoặc thuộc quyền sở hữu hợp pháp của mình nhưng chưa được bộc lộ. Trừ trường hợp buộc phải thực hiện tiết lộ theo quy định của pháp luật và/hoặc yêu cầu của Cơ quan Nhà nước có thẩm quyền, Người lao động phải thông báo cho người sử dụng lao động biết trước để Người sử dụng lao động áp dụng những biện pháp cần thiết nhằm bảo vệ quyền và lợi ích hợp pháp của công ty trước những thông tin mật sắp bị bộc lộ.",
-      "Người lao động đồng ý và cam kết vô điều kiện rằng sẽ không tiến hành bất kỳ hoạt động giao dịch (ví dụ: liên hệ, cung cấp thông tin, trao đổi, mua bán,...) với bất kỳ cá nhân, tổ chức, bên thứ ba về thông tin mật làm ảnh hưởng trực tiếp/gián tiếp đến quyền và lợi ích hợp pháp của công ty. Đồng thời chấp nhận mọi hình thức kỷ luật hoặc yêu cầu bồi thường từ công ty do những thiệt hại/tổn thất/mất mát phát sinh do vi phạm nghĩa vụ bảo mật theo hợp đồng này.",
-      "Người lao động đồng ý và cam kết vô điều kiện rằng: đối với tất cả lời tuyên thệ tại Điều 5 của hợp đồng này có giá trị hiệu lực 02 năm sau khi chấm dứt Hợp đồng thử việc tại công ty và/hoặc có giá trị hiệu lực đến khi thông tin mật đã được công ty bộc lộ, công khai rộng rãi trên các phương tiện truyền thông đại chúng.",
+      `“Thông tin mật” của ${val(
+        data.tenCongTy,
+        "Công ty...................."
+      )} và các Đơn vị thành viên trực thuộc là bao gồm nhưng không giới hạn những nội dung sau đây: bí mật công nghệ, bí mật kinh doanh, thông tin khách hàng, kế hoạch tài chính, chiến lược công ty,... và các thông tin, tài liệu, ý tưởng thể hiện hoặc lưu trữ dưới dạng văn bản, dữ liệu máy tính, thư điện tử, hình ảnh, mã code, phần mềm tin học,...`,
+      `Người lao động đồng ý và cam kết vô điều kiện rằng tuyệt đối bảo vệ và bảo mật thông tin mật (không được tiết lộ, sử dụng, cung cấp thông tin mật) cho bất kỳ cá nhân, tổ chức, bên thứ ba dưới bất kỳ cách thức và bất kỳ lý do nào (nếu chưa nhận được sự đồng ý bằng văn bản của Người sử dụng lao động) mà Người lao động có được trong quá trình làm việc, có liên quan đến công việc và/hoặc thuộc quyền sở hữu hợp pháp của mình nhưng chưa được bộc lộ. Trừ trường hợp buộc phải thực hiện tiết lộ theo quy định của pháp luật và/hoặc yêu cầu của Cơ quan Nhà nước có thẩm quyền, Người lao động phải thông báo cho người sử dụng lao động biết trước để Người sử dụng lao động áp dụng những biện pháp cần thiết nhằm bảo vệ quyền và lợi ích hợp pháp của công ty trước những thông tin mật sắp bị bộc lộ.`,
+      `Người lao động đồng ý và cam kết vô điều kiện rằng sẽ không tiến hành bất kỳ hoạt động giao dịch (ví dụ: liên hệ, cung cấp thông tin, trao đổi, mua bán,...) với bất kỳ cá nhân, tổ chức, bên thứ ba về thông tin mật làm ảnh hưởng trực tiếp/gián tiếp đến quyền và lợi ích hợp pháp của công ty. Đồng thời chấp nhận mọi hình thức kỷ luật hoặc yêu cầu bồi thường từ công ty do những thiệt hại/tổn thất/mất mát phát sinh do vi phạm nghĩa vụ bảo mật theo hợp đồng này.`,
+      `Người lao động đồng ý và cam kết vô điều kiện rằng: đối với tất cả lời tuyên thệ tại Điều 5 của hợp đồng này có giá trị hiệu lực 02 năm sau khi chấm dứt Hợp đồng thử việc tại công ty và/hoặc có giá trị hiệu lực đến khi thông tin mật đã được công ty bộc lộ, công khai rộng rãi trên các phương tiện truyền thông đại chúng.`,
     ],
     {
       itemOptions: {
@@ -399,7 +456,7 @@ async function init(data = {}) {
         data.effectiveDate,
         "………………….."
       )}.`,
-      "Hợp đồng này được lập tại Công ty TNHH XNK TM CN DV Hùng Duy.",
+      `Hợp đồng này được lập tại ${val(data.tenCongTy, "Công ty....................")}.`,
     ],
     {
       itemOptions: {
@@ -429,9 +486,9 @@ async function init(data = {}) {
     {
       date: "",
       title: "NGƯỜI SỬ DỤNG LAO ĐỘNG",
-      name: "LÊ MINH TRÚC",
-      signaturePath: data.signaturePathA || null,
-      nameTag: "signaturePathA",
+      name: data.nguoiDaiDien || "",
+      signaturePath: data.signaturePathB || null,
+      nameTag: "signaturePathB",
     }
   );
 
