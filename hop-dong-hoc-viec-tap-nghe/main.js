@@ -1,5 +1,4 @@
 async function init(data = {}) {
-
   //các properties cần thiết của biến data
   // data = {
   //   // Thông tin chung hợp đồng
@@ -8,7 +7,7 @@ async function init(data = {}) {
   //   ngayBatDauHopDong: string,           // Ngày bắt đầu hợp đồng (dd/mm/yyyy)
   //   ngayKetThucHopDong: string,          // Ngày kết thúc hợp đồng (dd/mm/yyyy)
   //   ngayHieuLucHopDong: string,          // Ngày có hiệu lực hợp đồng (dd/mm/yyyy)
-  //   
+  //
   //   // Thông tin công ty (Bên A)
   //   companyFullName: string,             // Tên đầy đủ công ty
   //   companyShortName: string,            // Tên viết tắt công ty
@@ -17,7 +16,7 @@ async function init(data = {}) {
   //   a_representative: string,            // Tên người đại diện Bên A
   //   a_nationality: string,               // Quốc tịch người đại diện Bên A
   //   a_title: string,                     // Chức vụ người đại diện Bên A
-  //   
+  //
   //   // Thông tin người học việc (Bên B)
   //   b_fullName: string,                  // Họ tên đầy đủ người học việc
   //   b_nationality: string,               // Quốc tịch người học việc
@@ -27,22 +26,21 @@ async function init(data = {}) {
   //   b_idNo: string,                      // Số CCCD/CMND người học việc
   //   b_idDate: string,                    // Ngày cấp CCCD/CMND (dd/mm/yyyy)
   //   b_idPlace: string,                   // Nơi cấp CCCD/CMND
-  //   
+  //
   //   // Thông tin công việc và địa điểm
   //   noiLamViec: string,                  // Nơi làm việc/học việc
   //   huongDanCongViec: string,            // Nội dung hướng dẫn công việc cụ thể
-  //   
+  //
   //   // Thông tin lương và thanh toán
   //   luong: string,                       // Mức lương (số tiền)
   //   ngayNhanLuong: string,               // Ngày nhận lương hàng tháng
-  //   
+  //
   //   // Thông tin chữ ký
   //   signerA: string,                     // Tên người ký đại diện Bên A
   //   signerB: string                      // Tên người ký Bên B
   //   signaturePathA: string,             // Đường dẫn file chữ ký Bên A (nếu có)
   //   signaturePathB: string              // Đường dẫn file chữ ký Bên B (nếu có)
   // }
-
 
   const pdf = new JsPdfService();
   pdf.lineHeight += 1;
@@ -170,7 +168,7 @@ async function init(data = {}) {
     return nextY;
   }
   renderTwoColumnHeader(pdf, {
-    TenCongTy: "CÔNG TY TNHH XNK TM CN DV Hùng Duy",
+    TenCongTy: data.companyFullName,
   });
   pdf.addText(`Số: ${val(data.soVanBan)}`, null, null, {
     fontSize: fontSizeContent,
@@ -185,7 +183,10 @@ async function init(data = {}) {
   // ===== Căn cứ =====
   pdf.addParagraph(
     "Căn cứ Bộ luật lao động 2019;\n" +
-      `Căn cứ cơ cấu tổ chức và quy chế ${val(data.companyShortName, "Công ty ........................")}.`,
+      `Căn cứ cơ cấu tổ chức và quy chế ${val(
+        data.companyShortName,
+        "Công ty ........................"
+      )}.`,
     { fontSize: fontSizeContent, lineHeight: lineHeightPage, spacing: 1, align: "left" }
   );
 
@@ -205,7 +206,9 @@ async function init(data = {}) {
   });
   pdf.addParagraph(
     [
-      `Ông (Bà)          : ${val(data.a_representative)}                                  Quốc tịch: ${val(data.a_nationality)}`,
+      `Ông (Bà)          : ${val(
+        data.a_representative
+      )}                                  Quốc tịch: ${val(data.a_nationality)}`,
       `Chức vụ           : ${val(data.a_title)}`,
       `Đại diện cho   : ${val(data.companyFullName, "Công ty ........................")}`,
       `Địa chỉ             : ${val(data.companyAddress)}`,
@@ -629,7 +632,7 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addNumberedList(
     [
-      "“Thông tin mật” của Công ty TNHH XNK TM CN DV Hùng Duy và các Đơn vị thành viên trực thuộc là bao gồm nhưng không giới hạn những nội dung sau đây: bí mật công nghệ, bí mật kinh doanh, thông tin khách hàng, kế hoạch tài chính, chiến lược công ty,... và các thông tin, tài liệu, ý tưởng thể hiện hoặc lưu trữ dưới dạng văn bản, dữ liệu máy tính, thư điện tử, hình ảnh, mã code, phần mềm tin học,...",
+      `“Thông tin mật” của ${val(data.companyFullName)} và các Đơn vị thành viên trực thuộc là bao gồm nhưng không giới hạn những nội dung sau đây: bí mật công nghệ, bí mật kinh doanh, thông tin khách hàng, kế hoạch tài chính, chiến lược công ty,... và các thông tin, tài liệu, ý tưởng thể hiện hoặc lưu trữ dưới dạng văn bản, dữ liệu máy tính, thư điện tử, hình ảnh, mã code, phần mềm tin học,...`,
       "Bên B đồng ý và cam kết vô điều kiện rằng tuyệt đối bảo vệ và bảo mật thông tin mật (không được tiết lộ, sử dụng, cung cấp thông tin mật) cho bất kỳ cá nhân, tổ chức, bên thứ ba dưới bất kỳ cách thức và bất kỳ lý do nào (nếu chưa nhận được sự đồng ý bằng văn bản của Bên A) mà Bên B có được trong quá trình làm việc, có liên quan đến công việc và/hoặc thuộc quyền sở hữu hợp pháp của mình nhưng chưa được bộc lộ. Trừ trường hợp buộc phải thực hiện tiết lộ theo quy định của pháp luật và/hoặc yêu cầu của Cơ quan Nhà nước có thẩm quyền, Bên B phải thông báo cho Bên A biết trước để Bên A áp dụng những biện pháp cần thiết nhằm bảo vệ quyền và lợi ích hợp pháp của công ty trước những thông tin mật sắp bị bộc lộ.",
       "Bên B đồng ý và cam kết vô điều kiện rằng sẽ không tiến hành bất kỳ hoạt động giao dịch (ví dụ: liên hệ, cung cấp thông tin, trao đổi, mua bán,...) với bất kỳ cá nhân, tổ chức, bên thứ ba về thông tin mật làm ảnh hưởng trực tiếp/gián tiếp đến quyền và lợi ích hợp pháp của công ty. Đồng thời chấp nhận mọi hình thức kỷ luật hoặc yêu cầu bồi thường từ công ty do những thiệt hại/tổn thất/mất mát phát sinh do vi phạm nghĩa vụ bảo mật theo hợp đồng này.",
       "Bên B đồng ý và cam kết vô điều kiện rằng: đối với tất cả lời tuyên thệ tại Điều 7 của hợp đồng này có giá trị hiệu lực 02 năm sau khi chấm dứt Hợp đồng học việc/tập nghề tại công ty và/hoặc có giá trị hiệu lực đến khi thông tin mật đã được công ty bộc lộ, công khai rộng rãi trên các phương tiện truyền thông đại chúng.",
@@ -710,7 +713,9 @@ async function init(data = {}) {
     [
       "Các nội dung khác liên quan đến việc học việc/tập nghề không được quy định trong hợp đồng này sẽ được áp dụng theo Nội quy lao động, Thỏa ước lao động tập thể và theo quy định của pháp luật. ",
       "Hợp đồng này được lập thành hai (02) bản có giá trị pháp lý như nhau, mỗi bên giữ một (01) bản. ",
-      `Hợp đồng được lập tại ${val(data.ngayBatDauHopDong ?? "Công ty ........................")}, và có hiệu lực kể từ ngày ${val(data.ngayHieuLucHopDong)}`,
+      `Hợp đồng được lập tại ${val(
+        data.companyFullName ?? "Công ty ........................"
+      )}, và có hiệu lực kể từ ngày ${val(data.ngayHieuLucHopDong)}`,
     ],
     {
       itemOptions: {
@@ -732,14 +737,14 @@ async function init(data = {}) {
     {
       date: "", // trống theo mẫu
       title: "BÊN B",
-      name: val(data.signerB, "Nguyễn Văn A"), // để trống cho ký tay
-      signaturePath: data.signaturePathB || null ,
+      name: val(data.signerB), // để trống cho ký tay
+      signaturePath: data.signaturePathB || null,
       nameTag: "signaturePathB",
     },
     {
       date: "",
       title: "ĐẠI DIỆN BÊN A",
-      name: val(data.signerA, ""),
+      name: val(data.signerA),
       signaturePath: data.signaturePathA || null,
       nameTag: "signaturePathA",
     }
