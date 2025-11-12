@@ -24,7 +24,7 @@ async function init(data = {}) {
   };
 
   // ===== Header =====
-  pdf.addHeader("HD000232", { fontSize: 8, color: [119, 119, 119], align: "right" });
+  if (!isCpyt) pdf.addHeader("HD000232", { fontSize: 8, color: [119, 119, 119], align: "right" });
   pdf.addText("CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM", null, pdf.getCurrentY(), {
     fontSize: 12,
     fontStyle: "bold",
