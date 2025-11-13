@@ -17,26 +17,26 @@ async function init(data = {}) {
   //   a_title: string,                     // Chức vụ người đại diện
   //   a_cccd: string,                      // Số CCCD người đại diện
   //   a_ngayCapCccd: string,               // Ngày cấp CCCD người đại diện
-  //   a_quocTich: string,                  // Quốc tịch người đại diện
+  //   a_nationality: string,               // Quốc tịch người đại diện
   //   soUyQuyen: string,                   // Số ủy quyền (optional)
   //   ngayUyQuyen: string,                 // Ngày ủy quyền (optional)
   //   
   //   // Thông tin cộng tác viên (Bên B)
-  //   tenCongTacVien: string,              // Họ tên cộng tác viên
-  //   ngaySinhCongTacVien: string,         // Ngày/tháng/năm sinh cộng tác viên
-  //   gioiTinhCongTacVien: string,         // Giới tính cộng tác viên
+  //   b_fullName: string,                  // Họ tên cộng tác viên
+  //   b_birthYear: string,                 // Ngày/tháng/năm sinh cộng tác viên
+  //   b_gender: string,                    // Giới tính cộng tác viên
   //   queQuanCongTacVien: string,          // Quê quán cộng tác viên
-  //   diaChiCongTacVien: string,           // Địa chỉ thường trú cộng tác viên
-  //   cccdCongTacVien: string,             // Số CCCD cộng tác viên
-  //   ngayCapCccdCongTacVien: string,      // Ngày cấp CCCD cộng tác viên
+  //   b_address: string,                   // Địa chỉ thường trú cộng tác viên
+  //   b_idNo: string,                      // Số CCCD cộng tác viên
+  //   b_idDate: string,                    // Ngày cấp CCCD cộng tác viên
   //   
   //   // Nội dung công việc và hợp đồng
   //   noiDungSuDoiHopDong: Array<string>,  // Mảng nội dung công việc và thời gian (optional)
   //                                        // Mặc định: [nội dung CTV, thời hạn, địa điểm, thời gian làm việc]
   //   
   //   // Thông tin thù lao
-  //   luong: string,                       // Thù lao cộng tác viên (đồng/ngày)
-  //   ngayNhanLuong: string,               // Ngày thanh toán thù lao hàng tháng
+  //   luongChinh: string,                  // Thù lao cộng tác viên (đồng/ngày)
+  //   ngayTraLuong: string,                // Ngày thanh toán thù lao hàng tháng
   //   
   //   // Thông tin chữ ký
   //   signerA: string,                     // Tên người ký đại diện Bên A
@@ -171,14 +171,14 @@ async function init(data = {}) {
   });
   pdf.addParagraph(
     [
-      `Họ và tên cộng tác viên : ${val(data.tenCongTacVien)}`,
-      `Ngày tháng năm sinh    : ${val(data.tenCongTacVien)}. Giới tính: ${val(
-        data.tenCongTacVien
+      `Họ và tên cộng tác viên : ${val(data.b_fullName)}`,
+      `Ngày tháng năm sinh    : ${val(data.b_birthYear)}. Giới tính: ${val(
+        data.b_gender
       )}`,
-      `Quê quán                         : ${val(data.tenCongTacVien)} `,
-      `Địa chỉ thường trú          : ${val(data.tenCongTacVien)}`,
-      `Số CCCD                          : ${val(data.tenCongTacVien)}. Ngày cấp: ${val(
-        data.tenCongTacVien
+      `Quê quán                         : ${val(data.queQuanCongTacVien)} `,
+      `Địa chỉ thường trú          : ${val(data.b_address)}`,
+      `Số CCCD                          : ${val(data.b_idNo)}. Ngày cấp: ${val(
+        data.b_idDate
       )}.`,
     ].join("\n"),
     { fontSize: fontSizeContent, lineHeight: lineHeightPage + 1, spacing: 1 }
@@ -240,12 +240,12 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addNumberedList(
     [
-      `Thù lao: ${val(data.luong)}. đồng/ngày`,
+      `Thù lao: ${val(data.luongChinh)}. đồng/ngày`,
       `Phương thức thanh toán: Tiền mặt/chuyển khoản vào tài khoản cá nhân của bên B.`,
       `Ngày thanh toán: ngày ${val(
-        data.ngayNhanLuong
+        data.ngayTraLuong
       )} tây của tháng tiếp theo. Trong trường hợp ngày ${val(
-        data.ngayNhanLuong
+        data.ngayTraLuong
       )} tây trùng với ngày nghỉ thì sẽ được thanh toán vào ngày sau đó liền kề.`,
       `Yêu cầu bên A cung cấp thông tin, tài liệu và phương tiện để thực hiện công việc.`,
       `Yêu cầu bên A thanh toán đầy đủ và đúng hạn.`,

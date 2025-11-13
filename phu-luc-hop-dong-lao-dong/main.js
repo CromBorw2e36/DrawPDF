@@ -37,14 +37,14 @@ async function init(data = {}) {
   //   
   //   // Nội dung sửa đổi/bổ sung (tùy theo loại công ty)
   //   // Nếu isCpyt = true (Công ty y tế):
-  //   luong: string,                       // Mức lương chức danh công việc (đồng/tháng)
+  //   luongChinh: string,                  // Mức lương chức danh công việc (đồng/tháng)
   //   
   //   // Nếu isCpyt = false (Công ty TNHH):
   //   noiDungSuDoiHopDong: Array<string>,  // Mảng các nội dung sửa đổi/bổ sung
   //                                        // Mặc định: 3 dòng chấm để điền tay
   //   
   //   // Thời gian hiệu lực
-  //   ngayHieuLucPhuLuc: string,           // Ngày có hiệu lực phụ lục (dd/mm/yyyy)
+  //   ngayHieuLuc: string,                 // Ngày có hiệu lực phụ lục (dd/mm/yyyy)
   //   
   //   // Thông tin chữ ký
   //   signerA: string,                     // Tên người ký đại diện công ty
@@ -184,7 +184,7 @@ async function init(data = {}) {
     pdf.addParagraph(
       [
         `Sửa đổi, bổ sung điểm a khoản 1 điều 3 của Hợp đồng lao động thành:`,
-        `Mức lương chức danh công việc: ${val(data.luong)}.đồng/tháng.`,
+        `Mức lương chức danh công việc: ${val(data.luongChinh)}.đồng/tháng.`,
       ],
       { fontSize: fontSizeContent, lineHeight: lineHeightPage, spacing: 1, align: "left" }
     );
@@ -216,7 +216,7 @@ async function init(data = {}) {
   pdf.addMixedParagraph(
     [
       `Những điều khoản thay đổi được ghi tại Điều 1 của Phụ lục hợp đồng này có hiệu lực kể từ ngày`,
-      pdf.bold(val(data.ngayHieuLucPhuLuc || "..../..../....")),
+      pdf.bold(val(data.ngayHieuLuc || "..../..../....")),
       ` cho đến khi có Phụ lục hợp đồng mới thay thế/bổ sung.`,
     ],
     { fontSize: fontSizeContent, lineHeight: lineHeightPage, spacing: 1, align: "justify" }

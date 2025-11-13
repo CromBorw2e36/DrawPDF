@@ -28,12 +28,12 @@ async function init(data = {}) {
   //   b_idPlace: string,                   // Nơi cấp CCCD/CMND
   //
   //   // Thông tin công việc và địa điểm
-  //   noiLamViec: string,                  // Nơi làm việc/học việc
+  //   tenNoiLamViec: string,               // Nơi làm việc/học việc
   //   huongDanCongViec: string,            // Nội dung hướng dẫn công việc cụ thể
   //
   //   // Thông tin lương và thanh toán
-  //   luong: string,                       // Mức lương (số tiền)
-  //   ngayNhanLuong: string,               // Ngày nhận lương hàng tháng
+  //   luongChinh: string,                  // Mức lương (số tiền)
+  //   ngayTraLuong: string,                // Ngày nhận lương hàng tháng
   //
   //   // Thông tin chữ ký
   //   signerA: string,                     // Tên người ký đại diện Bên A
@@ -272,7 +272,7 @@ async function init(data = {}) {
       "Vị trí công việc được hướng dẫn học việc/tập nghề:",
       `Thời gian: từ ngày  ${val(data.ngayBatDauHopDong)} đến ngày ${val(data.ngayKetThucHopDong)}`,
       `Địa điểm: ${val(
-        data.noiLamViec ??
+        data.tenNoiLamViec ??
           "[Ghi địa chỉ nơi học việc/tập nghề chính: trụ sở Công ty/chi nhánh/cơ sở khác của công ty]"
       )}  và những địa điểm khác theo bố trí của Công ty.`,
     ],
@@ -382,8 +382,8 @@ async function init(data = {}) {
   pdf.margins.left += 5;
   pdf.addNumberedList(
     [
-      `Mức lương: ${val(data.luong)} đồng/tháng. (Được tính chi trả theo số ngày thực tế mà Bên B trực tiếp tham gia lao động trong thời gian học việc/tập nghề tại địa điểm của Bên A).`,
-      `Ngày chi trả: vào ngày ${val(data.ngayNhanLuong)} tây hàng tháng.`,
+      `Mức lương: ${val(data.luongChinh)} đồng/tháng. (Được tính chi trả theo số ngày thực tế mà Bên B trực tiếp tham gia lao động trong thời gian học việc/tập nghề tại địa điểm của Bên A).`,
+      `Ngày chi trả: vào ngày ${val(data.ngayTraLuong)} tây hàng tháng.`,
       "Hình thức chi trả: tiền mặt/chuyển khoản.",
       "Trong thời gian học việc/tập nghề, nếu Bên B tham gia lao động ngoài giờ làm việc bình thường được nêu tại Điều 2 của hợp đồng này thì được Bên A trả lương làm thêm giờ theo quy định của Công ty.",
       "Bên B được hưởng chế độ phúc lợi theo quy chế của Công ty (nếu có).",

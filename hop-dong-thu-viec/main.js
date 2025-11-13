@@ -6,45 +6,45 @@ async function init(data = {}) {
   //   
   //   // Thông tin công ty/người sử dụng lao động (Bên A)
   //   tenCongTy: string,                   // Tên công ty đầy đủ
-  //   nguoiDaiDien: string,                // Tên người đại diện công ty
-  //   quocTich: string,                    // Quốc tịch người đại diện
-  //   chucVu: string,                      // Chức vụ người đại diện
-  //   diaChiCongTy: string,                // Địa chỉ công ty
-  //   dienThoaiCongTy: string,             // Số điện thoại công ty
-  //   authNo: string,                      // Số ủy quyền (optional)
-  //   authDate: string,                    // Ngày ủy quyền (optional)
-  //   chucVuNguoiUyQuyen: string,          // Chức vụ người ủy quyền (optional)
+  //   a_representative: string,            // Tên người đại diện công ty
+  //   a_nationality: string,               // Quốc tịch người đại diện
+  //   a_title: string,                     // Chức vụ người đại diện
+  //   companyAddress: string,              // Địa chỉ công ty
+  //   companyPhone: string,                // Số điện thoại công ty
+  //   soUyQuyen: string,                   // Số ủy quyền (optional)
+  //   ngayUyQuyen: string,                 // Ngày ủy quyền (optional)
   //   
   //   // Thông tin người lao động (Bên B)
-  //   empName: string,                     // Họ tên đầy đủ người lao động
-  //   empGender: string,                   // Giới tính người lao động
-  //   empNationality: string,              // Quốc tịch người lao động
-  //   empDob: string,                      // Ngày/tháng/năm sinh
-  //   empAddress: string,                  // Địa chỉ thường trú
-  //   empId: string,                       // Số CMND/CCCD
-  //   empIdDate: string,                   // Ngày cấp CMND/CCCD
-  //   empIdPlace: string,                  // Nơi cấp CMND/CCCD
+  //   b_fullName: string,                  // Họ tên đầy đủ người lao động
+  //   b_gender: string,                    // Giới tính người lao động
+  //   b_nationality: string,               // Quốc tịch người lao động
+  //   b_birthYear: string,                 // Ngày/tháng/năm sinh
+  //   b_address: string,                   // Địa chỉ thường trú
+  //   b_idNo: string,                      // Số CMND/CCCD
+  //   b_idDate: string,                    // Ngày cấp CMND/CCCD
+  //   b_idPlace: string,                   // Nơi cấp CMND/CCCD
   //   
   //   // Thông tin thử việc và công việc
-  //   trialFrom: string,                   // Ngày bắt đầu thử việc
-  //   trialTo: string,                     // Ngày kết thúc thử việc
-  //   workPlace: string,                   // Địa điểm làm việc
-  //   position: string,                    // Vị trí công việc
+  //   thoiGianBatDauHopDong: string,       // Ngày bắt đầu thử việc
+  //   thoiGianKetThucHopDong: string,      // Ngày kết thúc thử việc
+  //   tenNoiLamViec: string,               // Địa điểm làm việc
+  //   tenViTriCongViec: string,            // Vị trí công việc
   //   thoiGianLamViec: string,             // Thời gian làm việc (giờ/ngày, giờ/tuần)
   //   
   //   // Thông tin lương và phúc lợi
-  //   salary: string,                      // Tổng tiền lương thử việc/tháng
-  //   salaryBase: string,                  // Lương vị trí công việc (optional)
-  //   allowance: string,                   // Phụ cấp hiệu quả công việc (optional)
+  //   luongChinh: string,                  // Tổng tiền lương thử việc/tháng
+  //   luongCoSo: string,                   // Lương vị trí công việc (optional)
+  //   phuCapHieuQua: string,               // Phụ cấp hiệu quả công việc (optional)
   //   ngayTraLuong: string,                // Ngày trả lương hàng tháng
   //   
   //   // Thông tin hiệu lực
-  //   effectiveDate: string,               // Ngày có hiệu lực hợp đồng
+  //   ngayHieuLuc: string,                 // Ngày có hiệu lực hợp đồng
   //   
   //   // Thông tin chữ ký
-  //   signerEmployee: string,              // Tên người ký lao động
-  //   signaturePathA: string,              // Đường dẫn ảnh chữ ký người lao động
-  //   signaturePathB: string               // Đường dẫn ảnh chữ ký người đại diện công ty
+  //   signerA: string,                     // Tên người ký đại diện công ty
+  //   signerB: string,                     // Tên người ký lao động
+  //   signaturePathA: string,              // Đường dẫn ảnh chữ ký người đại diện công ty
+  //   signaturePathB: string               // Đường dẫn ảnh chữ ký người lao động
   // }
 
   const pdf = new JsPdfService();
@@ -86,9 +86,9 @@ async function init(data = {}) {
   pdf.addMixedText(
     [
       "Đại diện bởi Bà     : ",
-      pdf.bold(val(data.nguoiDaiDien)),
+      pdf.bold(val(data.a_representative)),
       "              - Quốc tịch: ",
-      val(data.quocTich),
+      val(data.a_nationality),
     ],
     {
       fontSize: 10.5,
@@ -97,13 +97,13 @@ async function init(data = {}) {
     }
   );
   const arrConnent1 = [
-    "Chức vụ                 : " + val(data.chucVu),
-    "Địa chỉ                   : " + val(data.diaChiCongTy),
-    "Điện thoại             : " + val(data.dienThoaiCongTy),
+    "Chức vụ                 : " + val(data.a_title),
+    "Địa chỉ                   : " + val(data.companyAddress),
+    "Điện thoại             : " + val(data.companyPhone),
   ];
 
-  if (data.authNo) {
-    arrConnent1.splice(1, 0, `Theo Ủy quyền số ${val(data.authNo)}, ngày ${val(data.authDate)} của ${val(data.chucVuNguoiUyQuyen)}`);
+  if (data.soUyQuyen) {
+    arrConnent1.splice(1, 0, `Theo Ủy quyền số ${val(data.soUyQuyen)}, ngày ${val(data.ngayUyQuyen)} của người được ủy quyền`);
   }
   pdf.addParagraph(arrConnent1.join("\n"), { fontSize: 10.5, lineHeight: 4, spacing: 1 });
 
@@ -116,11 +116,11 @@ async function init(data = {}) {
   pdf.addSubTitle("II. Bên Người lao động:", { fontSize: 12, lineHeight: 1.5 });
   pdf.addParagraph(
     [
-      `Ông/Bà                           : ${val(data.empName)}    Giới tính: ${val(data.empGender)}  , Quốc tịch: ${val(data.empNationality)}`,
-      `Ngày/tháng/năm sinh : ${val(data.empDob)}`,
-      `Địa chỉ thường trú        : ${val(data.empAddress)}`,
-      `Số CMND/CCCD          : ${val(data.empId)} Cấp ngày: ${val(data.empIdDate)} Tại:  ${val(
-        data.empIdPlace
+      `Ông/Bà                           : ${val(data.b_fullName)}    Giới tính: ${val(data.b_gender)}  , Quốc tịch: ${val(data.b_nationality)}`,
+      `Ngày/tháng/năm sinh : ${val(data.b_birthYear)}`,
+      `Địa chỉ thường trú        : ${val(data.b_address)}`,
+      `Số CMND/CCCD          : ${val(data.b_idNo)} Cấp ngày: ${val(data.b_idDate)} Tại:  ${val(
+        data.b_idPlace
       )}`,
     ].join("\n"),
     { fontSize: 10.5, lineHeight: 4, spacing: 1 }
@@ -148,9 +148,9 @@ async function init(data = {}) {
 
   pdf.addNumberedList(
     [
-      `Thời gian thử việc: Từ ngày ${val(data.trialFrom)} đến ngày ${val(data.trialTo)}.`,
-      "Địa điểm làm việc: " + val(data.workPlace),
-      `Vị trí công việc: ${val(data.position)}`,
+      `Thời gian thử việc: Từ ngày ${val(data.thoiGianBatDauHopDong)} đến ngày ${val(data.thoiGianKetThucHopDong)}.`,
+      "Địa điểm làm việc: " + val(data.tenNoiLamViec),
+      `Vị trí công việc: ${val(data.tenViTriCongViec)}`,
       "Nhiệm vụ công việc: Thực hiện công việc theo bản mô tả công việc và các công việc khác theo yêu cầu.",
     ],
     {
@@ -203,7 +203,7 @@ async function init(data = {}) {
     lineHeight: pdf.lineHeight,
   });
   pdf.margins.left += 5;
-  pdf.addNumberedList([`Tiền lương thử việc: ${val(data.salary)} đồng/tháng, trong đó:`], {
+  pdf.addNumberedList([`Tiền lương thử việc: ${val(data.luongChinh)} đồng/tháng, trong đó:`], {
     itemOptions: {
       numberStyle: "number",
       numberFormat: "-",
@@ -215,13 +215,13 @@ async function init(data = {}) {
     },
     resetNumbers: true,
   });
-  if (data.salaryBase && data.allowance) {
+  if (data.luongCoSo && data.phuCapHieuQua) {
     pdf.margins.left += 5;
     pdf.addNumberedList(
       [
-        `Lương vị trí công việc ${val(data.salaryBase)} đồng/tháng.`,
+        `Lương vị trí công việc ${val(data.luongCoSo)} đồng/tháng.`,
         `Phụ cấp hiệu quả công việc : ${val(
-          data.allowance
+          data.phuCapHieuQua
         )} đồng/tháng. Tiền phụ cấp thực tế căn cứ theo kết quả đánh giá hiệu quả công việc hàng tháng theo quy định của Công ty`,
       ],
       {
@@ -453,7 +453,7 @@ async function init(data = {}) {
     [
       "Những vấn đề về lao động không ghi trong hợp đồng này thì áp dụng theo Nội quy lao động,  Thoả ước lao động tập thể và theo quy định của pháp luật. ",
       `Hợp đồng thử việc này được lập thành 02 bản có giá trị như nhau, mỗi bên giữ 01 bản và có hiệu lực kể từ ngày ${val(
-        data.effectiveDate,
+        data.ngayHieuLuc,
         "………………….."
       )}.`,
       `Hợp đồng này được lập tại ${val(data.tenCongTy, "Công ty....................")}.`,
@@ -479,16 +479,16 @@ async function init(data = {}) {
     {
       date: "", // trống theo mẫu
       title: "NGƯỜI LAO ĐỘNG",
-      name: val(data.signerEmployee, ""), // để trống cho ký tay
-      signaturePath: data.signaturePathA || null,
-      nameTag: "signaturePathA",
+      name: val(data.signerB, ""), // để trống cho ký tay
+      signaturePath: data.signaturePathB || null,
+      nameTag: "signaturePathB",
     },
     {
       date: "",
       title: "NGƯỜI SỬ DỤNG LAO ĐỘNG",
-      name: data.nguoiDaiDien || "",
-      signaturePath: data.signaturePathB || null,
-      nameTag: "signaturePathB",
+      name: data.a_representative || "",
+      signaturePath: data.signaturePathA || null,
+      nameTag: "signaturePathA",
     }
   );
 
