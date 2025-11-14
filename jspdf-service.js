@@ -869,8 +869,27 @@ class JsPdfService {
           format: "JPEG",
         }
       );
+    } else if (signatureOptions.nameTag && signatureOptions.nameTag.trim()) {
+      // Không có đường dẫn chữ ký - ghi chìm nameTag màu trắng
+      const originalTextColor = this.doc.internal.getCurrentPageInfo().color || [0, 0, 0];
+      this.doc.setTextColor(255, 255, 255); // Màu trắng (chìm)
+      this.doc.setFontSize(9);
+      try {
+        this.doc.setFont("Roboto", "italic");
+      } catch {
+        this.doc.setFont("helvetica", "italic");
+      }
+      const nameTagWidth = this.doc.getTextWidth(signatureOptions.nameTag);
+      const nameTagX = centerX - nameTagWidth / 2;
+      this.doc.text(signatureOptions.nameTag, nameTagX, this.currentY + signatureOptions.imageHeight / 2);
+      this.doc.setTextColor(
+        originalTextColor[0] || 0,
+        originalTextColor[1] || 0,
+        originalTextColor[2] || 0
+      ); // Khôi phục màu gốc
+      this.addSpace(signatureOptions.imageHeight + 10);
     } else {
-      // Nếu không có hình, tạo vùng trống
+      // Nếu không có hình và không có nameTag, tạo vùng trống
       this.addSpace(signatureOptions.imageHeight + 10);
     }
 

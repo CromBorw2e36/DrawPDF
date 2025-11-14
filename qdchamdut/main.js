@@ -139,13 +139,14 @@ async function init() {
   await pdf.addSignatureFromFile(
     obj.TenNguoiDaiDien,
     "NGƯỜI ĐƯỢC ỦY QUYỀN]",
-    "../image/chu-ki-mau.jpg",
+    "",
     "[CHỨC DANH CỦA NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT/",
     {
       noteText: "(Ký và ghi rõ họ tên)",
       spacing: pdf.lineHeight * 5,
       dateFontSize: 10,
       titleFontSize: 10,
+      nameTag: "signaturePath",
     }
   );
 
