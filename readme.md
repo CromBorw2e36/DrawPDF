@@ -422,7 +422,8 @@ Thêm chữ ký nháy (chữ ký phụ) hiển thị ở góc trang - tự độ
   width: 15,                          // Chiều rộng (mm)
   height: 15,                         // Chiều cao (mm)
   margin: 5,                          // Khoảng cách từ mép trang (mm)
-  fontSize: 8                         // Font size cho nameTag
+  fontSize: 8,                        // Font size cho nameTag
+  showPageNumber: false               // Hiển thị số trang sau nameTag (VD: "Nguoi duyet 1", "Nguoi duyet 2")
 }
 ```
 
@@ -435,6 +436,13 @@ pdf.addSecondarySignature({
   width: 15,
   height: 15,
   margin: 5
+});
+
+// Chữ ký nháy với số trang ⭐
+pdf.addSecondarySignature({
+  nameTag: "Trang",
+  positions: ["top-right"],
+  showPageNumber: true  // Hiển thị "Trang 1", "Trang 2", "Trang 3"...
 });
 
 // Chữ ký nháy với hình ảnh
@@ -458,7 +466,8 @@ pdf.addSecondarySignature({
   nameTag: "Ke toan",
   positions: ["bottom-right"],
   width: 15,
-  height: 15
+  height: 15,
+  showPageNumber: true  // "Ke toan 1", "Ke toan 2"...
 });
 
 // Thêm nội dung - chữ ký nháy tự động xuất hiện trên mọi trang
@@ -472,6 +481,7 @@ pdf.addParagraph("Nội dung...");
 - Chữ ký nháy sẽ tự động thêm vào khi gọi `addNewPage()` hoặc `checkPageBreak()`
 - Có thể thêm nhiều chữ ký nháy với cấu hình khác nhau
 - Kích thước nhỏ gọn, không chiếm nhiều diện tích trang
+- `showPageNumber: true` rất hữu ích để đánh số trang tự động
 
 ## 📋 Fill-in Forms và Lines
 

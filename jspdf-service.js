@@ -958,6 +958,7 @@ class JsPdfService {
    * @param {number} options.height - Chiều cao chữ ký (mm) - mặc định 15
    * @param {number} options.margin - Khoảng cách từ mép trang (mm) - mặc định 5
    * @param {number} options.fontSize - Font size cho nameTag - mặc định 8
+   * @param {boolean} options.showPageNumber - Hiển thị số trang sau nameTag - mặc định false
    * @returns {this}
    */
   addSecondarySignature(options = {}) {
@@ -969,6 +970,7 @@ class JsPdfService {
       height: 15,
       margin: 5,
       fontSize: 8,
+      showPageNumber: false,
     };
 
     const config = { ...defaultOptions, ...options };
@@ -996,13 +998,14 @@ class JsPdfService {
       height: config.height,
       margin: config.margin,
       fontSize: config.fontSize,
+      showPageNumber: config.showPageNumber,
     });
 
     // Áp dụng chữ ký nháy cho tất cả các trang hiện có
     const totalPages = this.doc.internal.getNumberOfPages();
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
       this.doc.setPage(pageNum);
-      this._renderSecondarySignature(config);
+      this._renderSecondarySignature(config, pageNum);
     }
 
     return this;
@@ -1012,9 +1015,14 @@ class JsPdfService {
    * Render chữ ký nháy ở các vị trí đã chọn (internal method)
    * @private
    */
-  _renderSecondarySignature(config) {
+  _renderSecondarySignature(config, pageNum = null) {
     const pageWidth = this.doc.internal.pageSize.width;
     const pageHeight = this.doc.internal.pageSize.height;
+    
+    // Lấy số trang hiện tại nếu không được truyền vào
+    if (pageNum === null) {
+      pageNum = this.doc.internal.getCurrentPageInfo().pageNumber;
+    }
 
     for (const position of config.positions) {
       let x, y;
@@ -1056,11 +1064,11 @@ class JsPdfService {
         } catch (error) {
           console.warn("Failed to add secondary signature image:", error);
           // Fallback to nameTag if image fails
-          this._renderSecondarySignatureNameTag(x, y, config);
+          this._renderSecondarySignatureNameTag(x, y, config, pageNum);
         }
       } else {
         // Không có hình - hiển thị nameTag dạng watermark
-        this._renderSecondarySignatureNameTag(x, y, config);
+        this._renderSecondarySignatureNameTag(x, y, config, pageNum);
       }
     }
   }
@@ -1069,14 +1077,14 @@ class JsPdfService {
    * Render nameTag dạng watermark cho chữ ký nháy (internal method)
    * @private
    */
-  _renderSecondarySignatureNameTag(x, y, config) {
+  _renderSecondarySignatureNameTag(x, y, config, pageNum) {
     // Lưu trạng thái hiện tại
     const originalColor = this.doc.getTextColor();
     const originalFontSize = this.doc.internal.getFontSize();
     const originalFont = this.doc.getFont();
 
     // Set style cho watermark
-    // this.doc.setTextColor(255, 255, 255); // Màu trắng
+    this.doc.setTextColor(154, 166, 178); // Màu trắng
     this.doc.setFontSize(config.fontSize);
     
     try {
@@ -1085,13 +1093,19 @@ class JsPdfService {
       this.doc.setFont("helvetica", "italic");
     }
 
+    // Tạo text với hoặc không có số trang
+    let displayText = config.nameTag;
+    if (config.showPageNumber && pageNum) {
+      displayText = `${config.nameTag}_${pageNum}`;
+    }
+
     // Tính toán vị trí text (căn giữa trong vùng chữ ký)
-    const textWidth = this.doc.getTextWidth(config.nameTag);
+    const textWidth = this.doc.getTextWidth(displayText);
     const textX = x + (config.width - textWidth) / 2;
     const textY = y + config.height / 2 + config.fontSize / 3; // Căn giữa theo chiều dọc
 
     // Vẽ text
-    this.doc.text(config.nameTag, textX, textY);
+    this.doc.text(displayText, textX, textY);
 
     // Khôi phục trạng thái
     this.doc.setTextColor(originalColor);

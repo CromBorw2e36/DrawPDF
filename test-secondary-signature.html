@@ -179,6 +179,25 @@
         <button onclick="test4()">📚 Tạo PDF nhiều trang</button>
       </div>
 
+      <!-- Test 5: Chữ ký nháy với số trang -->
+      <div class="test-section">
+        <h3>Test 5: Chữ ký nháy với số trang ⭐ MỚI</h3>
+        <p>Hiển thị số trang sau nameTag (VD: "Nguoi duyet 1", "Nguoi duyet 2"...)</p>
+        
+        <label>NameTag (chữ không dấu):</label>
+        <input type="text" id="nameTag5" value="Trang" placeholder="Trang" />
+        
+        <div class="checkbox-group">
+          <strong>Chọn vị trí:</strong><br />
+          <label><input type="checkbox" id="pos5_tl" /> Top-Left</label>
+          <label><input type="checkbox" id="pos5_tr" checked /> Top-Right</label>
+          <label><input type="checkbox" id="pos5_bl" /> Bottom-Left</label>
+          <label><input type="checkbox" id="pos5_br" /> Bottom-Right</label>
+        </div>
+        
+        <button onclick="test5()">🔢 Tạo PDF với số trang</button>
+      </div>
+
       <div class="warning">
         <strong>⚠️ Lưu ý:</strong><br />
         - NameTag nên dùng chữ không dấu để hiển thị tốt<br />
@@ -231,6 +250,7 @@
             height: 15,
             margin: 5,
             fontSize: 8,
+            showPageNumber: true // Hiển thị số trang ở sau nameTag
           });
 
           // Thêm nội dung
@@ -414,6 +434,83 @@
           // Xuất PDF
           pdfService.savePDF("test-secondary-signature-multi-page.pdf");
           alert("✅ Tạo PDF nhiều trang thành công! Chữ ký nháy hiển thị trên TẤT CẢ các trang.");
+        } catch (error) {
+          console.error("Lỗi:", error);
+          alert("❌ Có lỗi xảy ra: " + error.message);
+        }
+      }
+
+      // Test 5: Chữ ký nháy với số trang
+      function test5() {
+        try {
+          const pdfService = new JsPdfService();
+          const nameTag = document.getElementById("nameTag5").value || "Trang";
+          
+          // Lấy vị trí đã chọn
+          const positions = [];
+          if (document.getElementById("pos5_tl").checked) positions.push("top-left");
+          if (document.getElementById("pos5_tr").checked) positions.push("top-right");
+          if (document.getElementById("pos5_bl").checked) positions.push("bottom-left");
+          if (document.getElementById("pos5_br").checked) positions.push("bottom-right");
+          
+          if (positions.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 vị trí!");
+            return;
+          }
+
+          // Thêm chữ ký nháy với showPageNumber = true
+          pdfService.addSecondarySignature({
+            nameTag: nameTag,
+            positions: positions,
+            width: 20,
+            height: 15,
+            margin: 5,
+            fontSize: 8,
+            showPageNumber: true  // ⭐ Hiển thị số trang
+          });
+
+          // Trang 1
+          pdfService.addTitle("TEST CHỮ KÝ NHÁY VỚI SỐ TRANG", { fontSize: 18 });
+          pdfService.addSpace(10);
+          pdfService.addText("Chữ ký nháy sẽ hiển thị số trang sau nameTag.");
+          pdfService.addSpace(10);
+          pdfService.addText(`NameTag: "${nameTag}"`);
+          pdfService.addText(`Hiển thị: "${nameTag} 1", "${nameTag} 2", "${nameTag} 3"...`);
+          pdfService.addText(`Vị trí: ${positions.join(", ")}`);
+          pdfService.addSpace(10);
+          pdfService.addText("Kiểm tra góc trang để thấy số trang!");
+          
+          // Thêm nhiều nội dung để tạo nhiều trang
+          for (let i = 0; i < 35; i++) {
+            pdfService.addSpace(10);
+            pdfService.addText(`Dòng ${i + 1} - Mỗi trang sẽ có số trang riêng.`);
+          }
+
+          // Trang 2 (tự động)
+          pdfService.addSpace(20);
+          pdfService.addTitle("TRANG 2", { fontSize: 16 });
+          pdfService.addText("Chữ ký nháy ở trang này sẽ có số 2.");
+          
+          for (let i = 0; i < 25; i++) {
+            pdfService.addSpace(10);
+            pdfService.addText(`Nội dung trang 2 - dòng ${i + 1}`);
+          }
+
+          // Trang 3
+          pdfService.addNewPage();
+          pdfService.addTitle("TRANG 3", { fontSize: 16 });
+          pdfService.addText("Chữ ký nháy ở trang này sẽ có số 3.");
+          pdfService.addSpace(10);
+          pdfService.addText("Tính năng này rất hữu ích để đánh dấu số trang ở góc tài liệu!");
+
+          // Trang 4
+          pdfService.addNewPage();
+          pdfService.addTitle("TRANG 4", { fontSize: 16 });
+          pdfService.addText("Và tiếp tục với số 4...");
+
+          // Xuất PDF
+          pdfService.savePDF("test-secondary-signature-with-page-number.pdf");
+          alert("✅ Tạo PDF thành công! Kiểm tra góc trang để thấy số trang tự động!");
         } catch (error) {
           console.error("Lỗi:", error);
           alert("❌ Có lỗi xảy ra: " + error.message);
