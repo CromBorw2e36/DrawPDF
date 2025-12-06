@@ -402,6 +402,77 @@ pdf.addDualSignature(
 );
 ```
 
+### 5. addSecondarySignature(options)
+Thêm chữ ký nháy (chữ ký phụ) hiển thị ở góc trang - tự động xuất hiện trên **TẤT CẢ các trang**.
+
+**Đặc điểm:**
+- Chữ ký nhỏ gọn (15x15mm mặc định)
+- Hiển thị ở các góc trang (top-left, top-right, bottom-left, bottom-right)
+- Có thể chọn nhiều vị trí cùng lúc
+- Tự động xuất hiện khi tạo trang mới
+- Nếu có hình: hiển thị hình ảnh
+- Nếu không có hình: hiển thị nameTag dạng watermark màu trắng
+
+**Options:**
+```javascript
+{
+  imageData: null,                    // Base64 image data (optional)
+  nameTag: "Secondary Signature",     // Text watermark (chữ không dấu)
+  positions: ["top-right"],           // Array: "top-left", "top-right", "bottom-left", "bottom-right"
+  width: 15,                          // Chiều rộng (mm)
+  height: 15,                         // Chiều cao (mm)
+  margin: 5,                          // Khoảng cách từ mép trang (mm)
+  fontSize: 8                         // Font size cho nameTag
+}
+```
+
+**Ví dụ:**
+```javascript
+// Chữ ký nháy với nameTag (watermark)
+pdf.addSecondarySignature({
+  nameTag: "Nguoi duyet",
+  positions: ["top-right"],
+  width: 15,
+  height: 15,
+  margin: 5
+});
+
+// Chữ ký nháy với hình ảnh
+pdf.addSecondarySignature({
+  imageData: "data:image/png;base64,...",
+  positions: ["top-right", "bottom-left"],
+  width: 20,
+  height: 20
+});
+
+// Nhiều chữ ký nháy khác nhau
+pdf.addSecondarySignature({
+  nameTag: "Nguoi lap",
+  positions: ["top-left"],
+  width: 12,
+  height: 12,
+  fontSize: 7
+});
+
+pdf.addSecondarySignature({
+  nameTag: "Ke toan",
+  positions: ["bottom-right"],
+  width: 15,
+  height: 15
+});
+
+// Thêm nội dung - chữ ký nháy tự động xuất hiện trên mọi trang
+pdf.addTitle("TÀI LIỆU");
+pdf.addParagraph("Nội dung...");
+// ... khi tạo trang mới, chữ ký nháy tự động xuất hiện
+```
+
+**Lưu ý:**
+- NameTag nên dùng chữ không dấu để hiển thị đẹp
+- Chữ ký nháy sẽ tự động thêm vào khi gọi `addNewPage()` hoặc `checkPageBreak()`
+- Có thể thêm nhiều chữ ký nháy với cấu hình khác nhau
+- Kích thước nhỏ gọn, không chiếm nhiều diện tích trang
+
 ## 📋 Fill-in Forms và Lines
 
 ### 1. addFillInLine(label, options)
@@ -780,5 +851,6 @@ try {
 
 ---
 
-*Tài liệu được cập nhật lần cuối: November 2024*
-*Phiên bản JsPdfService: 2.0*
+*Tài liệu được cập nhật lần cuối: December 6, 2025*
+*Phiên bản JsPdfService: 2.1*
+*Tính năng mới: addSecondarySignature() - Chữ ký nháy tự động trên mọi trang*
