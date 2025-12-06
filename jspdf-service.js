@@ -385,6 +385,10 @@ class JsPdfService {
   addNewPage() {
     this.doc.addPage();
     this.currentY = this.margins.top;
+    
+    // Tự động thêm chữ ký nháy vào trang mới
+    this._addSecondarySignaturesToNewPage();
+    
     return this;
   }
 
@@ -942,6 +946,168 @@ class JsPdfService {
     }
 
     return await this.addSignatureWithImage(name, title, finalImageData, date, options);
+  }
+
+  /**
+   * Thêm chữ ký nháy (chữ ký phụ) - hiển thị trên tất cả các trang
+   * @param {Object} options - Tùy chọn cho chữ ký nháy
+   * @param {string} options.imageData - Base64 image data của chữ ký (optional)
+   * @param {string} options.nameTag - Text hiển thị dạng watermark khi không có hình (chữ không dấu)
+   * @param {string[]} options.positions - Mảng vị trí: 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+   * @param {number} options.width - Chiều rộng chữ ký (mm) - mặc định 15
+   * @param {number} options.height - Chiều cao chữ ký (mm) - mặc định 15
+   * @param {number} options.margin - Khoảng cách từ mép trang (mm) - mặc định 5
+   * @param {number} options.fontSize - Font size cho nameTag - mặc định 8
+   * @returns {this}
+   */
+  addSecondarySignature(options = {}) {
+    const defaultOptions = {
+      imageData: null,
+      nameTag: "Secondary Signature",
+      positions: ["top-right"],
+      width: 15,
+      height: 15,
+      margin: 5,
+      fontSize: 8,
+    };
+
+    const config = { ...defaultOptions, ...options };
+
+    // Validate positions
+    const validPositions = ["top-left", "top-right", "bottom-left", "bottom-right"];
+    const positions = Array.isArray(config.positions) ? config.positions : [config.positions];
+    const filteredPositions = positions.filter((pos) => validPositions.includes(pos));
+
+    if (filteredPositions.length === 0) {
+      console.warn("No valid positions provided for secondary signature");
+      return this;
+    }
+
+    // Lưu cấu hình để áp dụng cho tất cả các trang
+    if (!this.secondarySignatures) {
+      this.secondarySignatures = [];
+    }
+
+    this.secondarySignatures.push({
+      imageData: config.imageData,
+      nameTag: config.nameTag,
+      positions: filteredPositions,
+      width: config.width,
+      height: config.height,
+      margin: config.margin,
+      fontSize: config.fontSize,
+    });
+
+    // Áp dụng chữ ký nháy cho tất cả các trang hiện có
+    const totalPages = this.doc.internal.getNumberOfPages();
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      this.doc.setPage(pageNum);
+      this._renderSecondarySignature(config);
+    }
+
+    return this;
+  }
+
+  /**
+   * Render chữ ký nháy ở các vị trí đã chọn (internal method)
+   * @private
+   */
+  _renderSecondarySignature(config) {
+    const pageWidth = this.doc.internal.pageSize.width;
+    const pageHeight = this.doc.internal.pageSize.height;
+
+    for (const position of config.positions) {
+      let x, y;
+
+      // Tính toán vị trí dựa trên position
+      switch (position) {
+        case "top-left":
+          x = config.margin;
+          y = config.margin;
+          break;
+        case "top-right":
+          x = pageWidth - config.width - config.margin;
+          y = config.margin;
+          break;
+        case "bottom-left":
+          x = config.margin;
+          y = pageHeight - config.height - config.margin;
+          break;
+        case "bottom-right":
+          x = pageWidth - config.width - config.margin;
+          y = pageHeight - config.height - config.margin;
+          break;
+        default:
+          continue;
+      }
+
+      // Render hình ảnh hoặc nameTag
+      if (config.imageData) {
+        // Có hình - hiển thị hình ảnh
+        try {
+          this.doc.addImage(
+            config.imageData,
+            "PNG",
+            x,
+            y,
+            config.width,
+            config.height
+          );
+        } catch (error) {
+          console.warn("Failed to add secondary signature image:", error);
+          // Fallback to nameTag if image fails
+          this._renderSecondarySignatureNameTag(x, y, config);
+        }
+      } else {
+        // Không có hình - hiển thị nameTag dạng watermark
+        this._renderSecondarySignatureNameTag(x, y, config);
+      }
+    }
+  }
+
+  /**
+   * Render nameTag dạng watermark cho chữ ký nháy (internal method)
+   * @private
+   */
+  _renderSecondarySignatureNameTag(x, y, config) {
+    // Lưu trạng thái hiện tại
+    const originalColor = this.doc.getTextColor();
+    const originalFontSize = this.doc.internal.getFontSize();
+    const originalFont = this.doc.getFont();
+
+    // Set style cho watermark
+    // this.doc.setTextColor(255, 255, 255); // Màu trắng
+    this.doc.setFontSize(config.fontSize);
+    
+    try {
+      this.doc.setFont("Roboto", "italic");
+    } catch {
+      this.doc.setFont("helvetica", "italic");
+    }
+
+    // Tính toán vị trí text (căn giữa trong vùng chữ ký)
+    const textWidth = this.doc.getTextWidth(config.nameTag);
+    const textX = x + (config.width - textWidth) / 2;
+    const textY = y + config.height / 2 + config.fontSize / 3; // Căn giữa theo chiều dọc
+
+    // Vẽ text
+    this.doc.text(config.nameTag, textX, textY);
+
+    // Khôi phục trạng thái
+    this.doc.setTextColor(originalColor);
+    this.doc.setFontSize(originalFontSize);
+    this.doc.setFont(originalFont.fontName, originalFont.fontStyle);
+  }
+
+  /**
+   * Override addPage để tự động thêm chữ ký nháy vào trang mới
+   */
+  _addSecondarySignaturesToNewPage() {
+    if (this.secondarySignatures && this.secondarySignatures.length > 0) {
+      for (const config of this.secondarySignatures) {
+        this._renderSecondarySignature(config);
+      }
+    }
   }
 
   // Tạo chữ ký text đơn giản

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Secondary Signature (Chữ ký nháy)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="fonts/Roboto-Regular-normal.js"></script>
+    <script src="fonts/Roboto-Bold-normal.js"></script>
+    <script src="fonts/Roboto-Italic-normal.js"></script>
+    <script src="fonts/Roboto-BoldItalic-normal.js"></script>
+    <script src="jspdf-service.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        border-left: 4px solid #4caf50;
+      }
+      .test-section h3 {
+        margin-top: 0;
+        color: #4caf50;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      .info {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2196f3;
+      }
+      .warning {
+        background: #fff3e0;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border-left: 4px solid #ff9800;
+      }
+      label {
+        display: block;
+        margin: 10px 0 5px 0;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .checkbox-group {
+        margin: 15px 0;
+      }
+      .checkbox-group label {
+        display: inline-block;
+        margin-right: 20px;
+        font-weight: normal;
+      }
+      .checkbox-group input[type="checkbox"] {
+        margin-right: 5px;
+      }
+      #imagePreview {
+        max-width: 200px;
+        max-height: 100px;
+        margin-top: 10px;
+        display: none;
+        border: 1px solid #ddd;
+        padding: 5px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🖊️ Test Secondary Signature (Chữ ký nháy)</h1>
+      <p class="subtitle">
+        Kiểm tra chức năng thêm chữ ký nháy vào góc trang PDF
+      </p>
+
+      <div class="info">
+        <strong>📌 Chữ ký nháy là gì?</strong><br />
+        - Chữ ký nhỏ hiển thị ở góc trang (top-left, top-right, bottom-left, bottom-right)<br />
+        - Có thể chọn nhiều vị trí cùng lúc<br />
+        - Hiển thị trên TẤT CẢ các trang<br />
+        - Nếu có hình: hiển thị hình ảnh chữ ký<br />
+        - Nếu không có hình: hiển thị nameTag dạng watermark màu trắng
+      </div>
+
+      <!-- Test 1: Chữ ký nháy với nameTag -->
+      <div class="test-section">
+        <h3>Test 1: Chữ ký nháy với nameTag (không có hình)</h3>
+        <p>Hiển thị text watermark màu trắng ở góc trang</p>
+        
+        <label>NameTag (chữ không dấu):</label>
+        <input type="text" id="nameTag1" value="Nguoi duyet" placeholder="Nguoi duyet" />
+        
+        <div class="checkbox-group">
+          <strong>Chọn vị trí:</strong><br />
+          <label><input type="checkbox" id="pos1_tl" checked /> Top-Left</label>
+          <label><input type="checkbox" id="pos1_tr" /> Top-Right</label>
+          <label><input type="checkbox" id="pos1_bl" /> Bottom-Left</label>
+          <label><input type="checkbox" id="pos1_br" /> Bottom-Right</label>
+        </div>
+        
+        <button onclick="test1()">📄 Tạo PDF với NameTag</button>
+      </div>
+
+      <!-- Test 2: Chữ ký nháy với hình ảnh -->
+      <div class="test-section">
+        <h3>Test 2: Chữ ký nháy với hình ảnh</h3>
+        <p>Upload hình ảnh chữ ký để hiển thị ở góc trang</p>
+        
+        <label>Chọn file ảnh chữ ký:</label>
+        <input type="file" id="signatureImage" accept="image/*" onchange="previewImage()" />
+        <img id="imagePreview" />
+        
+        <div class="checkbox-group">
+          <strong>Chọn vị trí:</strong><br />
+          <label><input type="checkbox" id="pos2_tl" /> Top-Left</label>
+          <label><input type="checkbox" id="pos2_tr" checked /> Top-Right</label>
+          <label><input type="checkbox" id="pos2_bl" /> Bottom-Left</label>
+          <label><input type="checkbox" id="pos2_br" checked /> Bottom-Right</label>
+        </div>
+        
+        <button onclick="test2()">🖼️ Tạo PDF với Hình ảnh</button>
+      </div>
+
+      <!-- Test 3: Nhiều chữ ký nháy -->
+      <div class="test-section">
+        <h3>Test 3: Nhiều chữ ký nháy cùng lúc</h3>
+        <p>Thêm nhiều chữ ký nháy khác nhau vào cùng một PDF</p>
+        <button onclick="test3()">✨ Tạo PDF với nhiều chữ ký nháy</button>
+      </div>
+
+      <!-- Test 4: Tài liệu nhiều trang -->
+      <div class="test-section">
+        <h3>Test 4: Tài liệu nhiều trang</h3>
+        <p>Kiểm tra chữ ký nháy hiển thị trên tất cả các trang</p>
+        <button onclick="test4()">📚 Tạo PDF nhiều trang</button>
+      </div>
+
+      <div class="warning">
+        <strong>⚠️ Lưu ý:</strong><br />
+        - NameTag nên dùng chữ không dấu để hiển thị tốt<br />
+        - Kích thước mặc định: 15x15mm (nhỏ gọn)<br />
+        - Chữ ký nháy sẽ tự động xuất hiện khi tạo trang mới
+      </div>
+    </div>
+
+    <script>
+      // Preview ảnh khi upload
+      function previewImage() {
+        const file = document.getElementById("signatureImage").files[0];
+        const preview = document.getElementById("imagePreview");
+        
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.style.display = "none";
+        }
+      }
+
+      // Test 1: NameTag watermark
+      function test1() {
+        try {
+          const pdfService = new JsPdfService();
+          const nameTag = document.getElementById("nameTag1").value || "Nguoi duyet";
+          
+          // Lấy vị trí đã chọn
+          const positions = [];
+          if (document.getElementById("pos1_tl").checked) positions.push("top-left");
+          if (document.getElementById("pos1_tr").checked) positions.push("top-right");
+          if (document.getElementById("pos1_bl").checked) positions.push("bottom-left");
+          if (document.getElementById("pos1_br").checked) positions.push("bottom-right");
+          
+          if (positions.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 vị trí!");
+            return;
+          }
+
+          // Thêm chữ ký nháy
+          pdfService.addSecondarySignature({
+            nameTag: nameTag,
+            positions: positions,
+            width: 15,
+            height: 15,
+            margin: 5,
+            fontSize: 8,
+          });
+
+          // Thêm nội dung
+          pdfService.addTitle("TEST CHỮ KÝ NHÁY VỚI NAMETAG", { fontSize: 18 });
+          pdfService.addSpace(10);
+          pdfService.addText("Đây là tài liệu test chữ ký nháy với nameTag watermark.");
+          pdfService.addSpace(10);
+          pdfService.addText(`NameTag: "${nameTag}"`);
+          pdfService.addText(`Vị trí: ${positions.join(", ")}`);
+          pdfService.addSpace(10);
+          pdfService.addText("Chữ ký nháy hiển thị dạng watermark màu trắng ở góc trang.");
+          pdfService.addText("Bạn có thể thấy text mờ ở các góc đã chọn.");
+
+          // Xuất PDF
+          pdfService.savePDF("test-secondary-signature-nametag.pdf");
+          alert("✅ Tạo PDF thành công! Kiểm tra góc trang để thấy nameTag watermark.");
+        } catch (error) {
+          console.error("Lỗi:", error);
+          alert("❌ Có lỗi xảy ra: " + error.message);
+        }
+      }
+
+      // Test 2: Hình ảnh chữ ký
+      async function test2() {
+        try {
+          const file = document.getElementById("signatureImage").files[0];
+          if (!file) {
+            alert("Vui lòng chọn file ảnh!");
+            return;
+          }
+
+          // Lấy vị trí đã chọn
+          const positions = [];
+          if (document.getElementById("pos2_tl").checked) positions.push("top-left");
+          if (document.getElementById("pos2_tr").checked) positions.push("top-right");
+          if (document.getElementById("pos2_bl").checked) positions.push("bottom-left");
+          if (document.getElementById("pos2_br").checked) positions.push("bottom-right");
+          
+          if (positions.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 vị trí!");
+            return;
+          }
+
+          // Đọc ảnh
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const imageData = e.target.result;
+
+            const pdfService = new JsPdfService();
+
+            // Thêm chữ ký nháy với hình ảnh
+            pdfService.addSecondarySignature({
+              imageData: imageData,
+              nameTag: "Fallback",
+              positions: positions,
+              width: 20,
+              height: 20,
+              margin: 5,
+            });
+
+            // Thêm nội dung
+            pdfService.addTitle("TEST CHỮ KÝ NHÁY VỚI HÌNH ẢNH", { fontSize: 18 });
+            pdfService.addSpace(10);
+            pdfService.addText("Đây là tài liệu test chữ ký nháy với hình ảnh.");
+            pdfService.addSpace(10);
+            pdfService.addText(`Vị trí: ${positions.join(", ")}`);
+            pdfService.addText(`Kích thước: 20x20mm`);
+            pdfService.addSpace(10);
+            pdfService.addText("Hình ảnh chữ ký hiển thị ở các góc đã chọn.");
+            pdfService.addText("Chữ ký này sẽ xuất hiện trên mọi trang.");
+
+            // Xuất PDF
+            pdfService.savePDF("test-secondary-signature-image.pdf");
+            alert("✅ Tạo PDF thành công! Kiểm tra góc trang để thấy hình ảnh chữ ký.");
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          console.error("Lỗi:", error);
+          alert("❌ Có lỗi xảy ra: " + error.message);
+        }
+      }
+
+      // Test 3: Nhiều chữ ký nháy
+      function test3() {
+        try {
+          const pdfService = new JsPdfService();
+
+          // Thêm chữ ký nháy 1 - góc trên trái
+          pdfService.addSecondarySignature({
+            nameTag: "Nguoi lap",
+            positions: ["top-left"],
+            width: 12,
+            height: 12,
+            margin: 5,
+            fontSize: 7,
+          });
+
+          // Thêm chữ ký nháy 2 - góc trên phải
+          pdfService.addSecondarySignature({
+            nameTag: "Nguoi duyet",
+            positions: ["top-right"],
+            width: 15,
+            height: 15,
+            margin: 5,
+            fontSize: 8,
+          });
+
+          // Thêm chữ ký nháy 3 - góc dưới trái
+          pdfService.addSecondarySignature({
+            nameTag: "Ke toan",
+            positions: ["bottom-left"],
+            width: 13,
+            height: 13,
+            margin: 5,
+            fontSize: 7,
+          });
+
+          // Thêm nội dung
+          pdfService.addTitle("TEST NHIỀU CHỮ KÝ NHÁY", { fontSize: 18 });
+          pdfService.addSpace(10);
+          pdfService.addText("Tài liệu này có 3 chữ ký nháy ở các góc khác nhau:");
+          pdfService.addSpace(5);
+          pdfService.addText("• Góc trên trái: Nguoi lap (12x12mm)");
+          pdfService.addText("• Góc trên phải: Nguoi duyet (15x15mm)");
+          pdfService.addText("• Góc dưới trái: Ke toan (13x13mm)");
+          pdfService.addSpace(10);
+          pdfService.addText("Mỗi chữ ký có kích thước và vị trí khác nhau.");
+
+          // Xuất PDF
+          pdfService.savePDF("test-multiple-secondary-signatures.pdf");
+          alert("✅ Tạo PDF thành công! Kiểm tra 3 góc trang để thấy các chữ ký nháy.");
+        } catch (error) {
+          console.error("Lỗi:", error);
+          alert("❌ Có lỗi xảy ra: " + error.message);
+        }
+      }
+
+      // Test 4: Nhiều trang
+      function test4() {
+        try {
+          const pdfService = new JsPdfService();
+
+          // Thêm chữ ký nháy
+          pdfService.addSecondarySignature({
+            nameTag: "Duyet",
+            positions: ["top-right", "bottom-left"],
+            width: 15,
+            height: 15,
+            margin: 5,
+            fontSize: 8,
+          });
+
+          // Trang 1
+          pdfService.addTitle("TRANG 1", { fontSize: 18 });
+          pdfService.addSpace(10);
+          pdfService.addText("Đây là trang đầu tiên của tài liệu.");
+          pdfService.addText("Chữ ký nháy hiển thị ở góc trên phải và góc dưới trái.");
+          
+          // Thêm nhiều nội dung để tạo nhiều trang
+          for (let i = 0; i < 30; i++) {
+            pdfService.addSpace(10);
+            pdfService.addText(`Dòng nội dung thứ ${i + 1} - Lorem ipsum dolor sit amet, consectetur adipiscing elit.`);
+          }
+
+          // Trang 2 (tự động tạo bởi checkPageBreak)
+          pdfService.addSpace(20);
+          pdfService.addTitle("TRANG 2", { fontSize: 18 });
+          pdfService.addText("Chữ ký nháy vẫn hiển thị trên trang này.");
+          
+          for (let i = 0; i < 20; i++) {
+            pdfService.addSpace(10);
+            pdfService.addText(`Dòng ${i + 1} của trang 2.`);
+          }
+
+          // Trang 3
+          pdfService.addNewPage();
+          pdfService.addTitle("TRANG 3", { fontSize: 18 });
+          pdfService.addText("Trang được tạo bằng addNewPage().");
+          pdfService.addText("Chữ ký nháy vẫn hiển thị ở đây.");
+
+          // Xuất PDF
+          pdfService.savePDF("test-secondary-signature-multi-page.pdf");
+          alert("✅ Tạo PDF nhiều trang thành công! Chữ ký nháy hiển thị trên TẤT CẢ các trang.");
+        } catch (error) {
+          console.error("Lỗi:", error);
+          alert("❌ Có lỗi xảy ra: " + error.message);
+        }
+      }
+    </script>
+  </body>
+</html>
