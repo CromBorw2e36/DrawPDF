@@ -1101,8 +1101,8 @@ class JsPdfService {
 
     // Tính toán vị trí text (căn giữa trong vùng chữ ký)
     const textWidth = this.doc.getTextWidth(displayText);
-    const textX = x + (config.width - textWidth) / 2;
-    const textY = y + config.height / 2 + config.fontSize / 3; // Căn giữa theo chiều dọc
+    const textX = x + (config.width - textWidth);
+    const textY = y + config.height / 2 + config.fontSize / 2 + 3; // Căn giữa theo chiều dọc
 
     // Vẽ text
     this.doc.text(displayText, textX, textY);
