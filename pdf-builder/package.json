@@ -1,0 +1,17 @@
+{
+  "name": "pdf-template-builder",
+  "version": "2.0.0",
+  "description": "Word-like PDF template builder with variable binding",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "quill": "^2.0.2"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}
